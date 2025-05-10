@@ -12,7 +12,7 @@ import AuthForm from "./components/AuthForm";
 import ChatWidget from "./components/ChatWidget";
 import "./styles/page.css";
 // import { connectWebSocket } from "./websocket/ws.js";
-import { websocket } from "./websocket/ws.js"
+// import { websocket } from "./websocket/ws.js"
 
 export default function Home() {
   const [error, setError] = useState(null);

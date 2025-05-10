@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	Clients  = make(map[int64]*websocket.Conn)
+	Clients  = make(map[int64][]*websocket.Conn)
 	Mutex    sync.Mutex
 	upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
@@ -39,25 +39,27 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Mutex.Lock()
-	Clients[user.ID] = conn
+	Clients[user.ID] = append(Clients[user.ID], conn)
 	Mutex.Unlock()
 
-	connections, err := database.GetConnections(user.ID)
-	if err != nil {
-		fmt.Println(err)
-		response := map[string]string{"error": "Failed to retrieve connections"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+	// connections, err := database.GetConnections(user.ID)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	response := map[string]string{"error": "Failed to retrieve connections"}
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	json.NewEncoder(w).Encode(response)
+	// 	return
+	// }
 
-	Mutex.Lock()
-	for _, connection := range connections {
-		if _, exist := Clients[connection.ID]; exist {
-			SendWsMessage(connection.ID, map[string]interface{}{"type": "users", "users": connections})
-		}
-	}
-	Mutex.Unlock()
+	// Mutex.Lock()
+	// for _, connection := range connections {
+	// 	if _, exist := Clients[connection.ID]; exist {
+	// 		fmt.Println("User already connected:", connection.ID)
+	// 		fmt.Println(Clients)
+	// 		SendWsMessage(connection.ID, map[string]interface{}{"type": "users", "users": connections})
+	// 	}
+	// }
+	// Mutex.Unlock()
 
 	fmt.Println(Clients)
 	fmt.Println("Connected to user:", user.Username)
@@ -67,8 +69,8 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 
 func ListenForMessages(conn *websocket.Conn, user_id int64) {
 	defer func() {
-		// RemoveClient(conn, user_id)
-		delete(Clients, user_id)
+		RemoveClient(conn, user_id)
+		// delete(Clients, user_id)
 		conn.Close()
 	}()
 
@@ -132,30 +134,30 @@ func SendWsMessage(user_id int64, message map[string]interface{}) {
 	Mutex.Lock()
 	defer Mutex.Unlock()
 	fmt.Println("Sending message to user:", user_id)
-	if _, ok := Clients[user_id]; ok {
-		fmt.Println("Clients found for user:", user_id)
-		// for _, client := range clients {
-		err := Clients[user_id].WriteJSON(message)
-		if err != nil {
-			fmt.Println("Error sending message:", err)
-			return
-			// }
+	if clients, ok := Clients[user_id]; ok {
+		fmt.Println(ok, user_id, Clients)
+		for _, client := range clients {
+			err := client.WriteJSON(message)
+			if err != nil {
+				fmt.Println("Error sending message:", err)
+				return
+			}
 		}
 	}
 }
 
-// func RemoveClient(conn *websocket.Conn, user_id int64) {
-// 	Mutex.Lock()
-// 	defer Mutex.Unlock()
-// 	if clients, ok := Clients[user_id]; ok {
-// 		for i, client := range clients {
-// 			if client == conn {
-// 				Clients[user_id] = append(clients[:i], clients[i+1:]...)
-// 				break
-// 			}
-// 		}
-// 		if len(Clients[user_id]) == 0 {
-// 			delete(Clients, user_id)
-// 		}
-// 	}
-// }
+func RemoveClient(conn *websocket.Conn, user_id int64) {
+	Mutex.Lock()
+	defer Mutex.Unlock()
+	if clients, ok := Clients[user_id]; ok {
+		for i, client := range clients {
+			if client == conn {
+				Clients[user_id] = append(clients[:i], clients[i+1:]...)
+				break
+			}
+		}
+		if len(Clients[user_id]) == 0 {
+			delete(Clients, user_id)
+		}
+	}
+}

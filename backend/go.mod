@@ -2,7 +2,7 @@ module social-network
 
 go 1.23
 
-toolchain go1.23.7
+// toolchain go1.23.7
 
 require (
 	github.com/gofrs/uuid v4.4.0+incompatible

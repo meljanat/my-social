@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 // import Navbar from "../components/NavBar";
 import "../../styles/MessagesPage.css";
+import { subscribe, unsubscribe } from "../websocket/ws.js";
 import { websocket } from "../websocket/ws.js"
 
 const Message = ({ message, isSent }) => {
@@ -24,12 +25,20 @@ const Message = ({ message, isSent }) => {
 };
 
 const UserCard = ({ user, isActive, onClick }) => {
-  websocket.onmessage = (event) => {
-    const msg = JSON.parse(event.data)
-    if (msg.type === "message") {
-      user.total_messages++
-    }
-  }
+  useEffect(() => {
+    const handleMessage = (msg) => {
+      if ((user.total_messages || user.total_messages === 0) && msg.type === "message" && msg.username === user.username) {
+        user.total_messages++;
+      }
+    };
+
+    subscribe("message", handleMessage);
+
+    return () => {
+      unsubscribe("message", handleMessage);
+    };
+  }, [user]);
+
   return (
     <li
       className={`user-item ${isActive ? "active-user" : ""}`}
@@ -133,14 +142,31 @@ export default function MessagesPage() {
         console.error("Error fetching messages:", error);
         setMessages([]);
       });
-
-    websocket.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      console.log(msg);
-
-      if (msg.type === 'message') setMessages([...messages, { id: Date.now(), content: msg.content, username: msg.username, created_at: 'Just now' }]);
-    };
   };
+
+  useEffect(() => {
+    const handleMessage = (msg) => {
+      console.log(selectedUser);
+
+      if (msg.type === 'message') {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: Date.now(),
+            content: msg.content,
+            username: msg.username,
+            created_at: 'Just now',
+          },
+        ]);
+      }
+    };
+
+    subscribe('message', handleMessage);
+
+    return () => {
+      unsubscribe('message', handleMessage);
+    };
+  }, []);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -150,7 +176,6 @@ export default function MessagesPage() {
       content: newMessage,
       username: "me",
       created_at: 'Just now',
-      avatar: "./avatars/torfin.jpg",
     };
 
     setMessages(messages ? [...messages, message] : [message]);
@@ -244,7 +269,11 @@ export default function MessagesPage() {
                     key={user.id}
                     user={user}
                     isActive={selectedUser && selectedUser.id === user.id}
-                    onClick={() => handleUserSelect(user, "user")}
+                    onClick={() => {
+                      handleUserSelect(user, "user")
+                      user.total_messages = 0;
+                    }
+                    }
                   />
                 )) : ''
                 : groups ? groups.map((group) => (
@@ -308,7 +337,7 @@ export default function MessagesPage() {
                   <Message
                     key={message.id}
                     message={message}
-                    isSent={message.username === "me"}
+                    isSent={message.username !== selectedUser.username}
                   />
                 )) : ''}
                 <div ref={messagesEndRef} />

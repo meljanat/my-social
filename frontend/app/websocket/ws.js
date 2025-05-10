@@ -1,20 +1,44 @@
-// "use client";
 export let websocket;
+
+const listeners = {};
 
 export const connectWebSocket = function () {
     websocket = new WebSocket('ws://localhost:8404/ws');
-    websocket.onopen = () => {
-        console.log("Websocket connection open.");
-    }
 
-    websocket.console = () => {
-        console.log("Websocket connection closed.");
-    }
+    websocket.onopen = () => {
+        console.log("WebSocket connection open.");
+    };
+
+    websocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("Received message:", data);
+
+        if (listeners['message']) {
+            listeners['message'].forEach((callback) => callback(data));
+        }
+    };
+
+    websocket.onclose = () => {
+        console.log("WebSocket connection closed.");
+    };
 
     websocket.onerror = (error) => {
-        console.error("Websocket encountered an error:", error);
+        console.error("WebSocket encountered an error:", error);
+    };
+};
+
+export const subscribe = (event, callback) => {
+    if (!listeners[event]) {
+        listeners[event] = [];
     }
-}
+    listeners[event].push(callback);
+};
+
+export const unsubscribe = (event, callback) => {
+    if (listeners[event]) {
+        listeners[event] = listeners[event].filter((cb) => cb !== callback);
+    }
+};
 
 let isLoggedIn = false;
 

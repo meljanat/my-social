@@ -263,6 +263,7 @@ import "../styles/ChatWidget.css";
 import UserCard from "./UserCard";
 import Message from "./Message";
 import { websocket } from "../websocket/ws";
+import { subscribe, unsubscribe } from "../websocket/ws";
 
 export default function ChatWidget({ users, groups, myData }) {
   const [activeTab, setActiveTab] = useState("friends");
@@ -274,17 +275,17 @@ export default function ChatWidget({ users, groups, myData }) {
   const [openWidget, setOpenWidget] = useState(true);
   const [openChatWidget, setOpenChatWidget] = useState(true);
   const [messageSending, setMessageSending] = useState("");
+  const messagesEndRef = useRef(null);
 
   const listToRender = activeTab === "friends" ? users : groups;
 
-  async function handleMessagesSend(id) {
+  async function handleMessagesSend() {
     if (!messageSending.trim() || !selectedUser) return;
     const message = {
       id: Date.now(),
       content: messageSending,
       username: "me",
       created_at: 'just now',
-      avatar: "./avatars/torfin.jpg",
     };
 
     setMessages(messages ? [...messages, message] : [message]);
@@ -293,29 +294,29 @@ export default function ChatWidget({ users, groups, myData }) {
     setMessageSending("")
   }
 
-  async function handleMessagesSending(id) {
-    const formData = new FormData();
-    formData.append("receiver_id", id);
-    formData.append("content", messageSending);
+  // async function handleMessagesSending(id) {
+  //   const formData = new FormData();
+  //   formData.append("receiver_id", id);
+  //   formData.append("content", messageSending);
 
-    // console.log(messageSending);
-    try {
-      const response = await fetch("http://localhost:8404/message", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-      console.log(id);
+  //   // console.log(messageSending);
+  //   try {
+  //     const response = await fetch("http://localhost:8404/message", {
+  //       method: "POST",
+  //       credentials: "include",
+  //       body: formData,
+  //     });
+  //     console.log(id);
 
-      const data = await response.json();
-      if (!response.ok) {
-        console.log(data);
-      }
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  //     const data = await response.json();
+  //     if (!response.ok) {
+  //       console.log(data);
+  //     }
+  //     console.log(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
   async function showUserTab(user) {
     setSelectedUser(user);
@@ -345,22 +346,44 @@ export default function ChatWidget({ users, groups, myData }) {
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
-
-    websocket.onmessage = (event) => {
-      console.log('got new message');
-      
-      const msg = JSON.parse(event.data);
-      console.log(msg);
-
-      if (msg.type === 'message') setMessages([...messages, msg.content]);
-    };
   }
+
+
+  useEffect(() => {
+    const handleMessage = (msg) => {
+      if (msg.type === 'message') {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            id: Date.now(),
+            content: msg.content,
+            username: msg.username,
+            created_at: 'Just now',
+          },
+        ]);
+      }
+    };
+
+    subscribe('message', handleMessage);
+
+    return () => {
+      unsubscribe('message', handleMessage);
+    };
+  }, []);
+
   const toggleWidget = () => {
     setOpenWidget(!openWidget);
   };
   const toggleChatWidget = () => {
     setOpenChatWidget(!openChatWidget);
   };
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
 
   return (
     <div className="chat-wrapper-fixed">
@@ -397,6 +420,7 @@ export default function ChatWidget({ users, groups, myData }) {
                     isSent={msg.username !== selectedUser.username}
                   />
                 ))}
+                <div ref={messagesEndRef} />
               </div>
             </div>
           )}
@@ -422,6 +446,7 @@ export default function ChatWidget({ users, groups, myData }) {
                 }}
                 className="message-input-input"
                 placeholder="your message..."
+                value={messageSending}
               ></input>
               <div
                 className="send-message-container"

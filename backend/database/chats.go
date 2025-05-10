@@ -115,6 +115,6 @@ func ReadMessages(sender_id, reciever_id, group_id int64) error {
 		_, err = DB.Exec("UPDATE group_status_messages SET messages_not_read = 0 WHERE user_id = ? AND group_id = ?", reciever_id, group_id)
 		return err
 	}
-	_, err := DB.Exec("UPDATE messages SET status = ? WHERE receiver_id = ? AND sender_id = ?", "read", reciever_id, reciever_id)
+	_, err := DB.Exec("UPDATE messages SET status = ? WHERE receiver_id = ? AND sender_id = ?", "read", sender_id, reciever_id)
 	return err
 }

@@ -1,0 +1,7 @@
+-- +migrate Up
+CREATE TABLE IF NOT EXISTS categories (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	name TEXT UNIQUE NOT NULL,
+	color TEXT NOT NULL,
+	background TEXT NOT NULL
+);

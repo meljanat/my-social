@@ -1,0 +1,75 @@
+/home
+
+    /home/users
+
+        users fach ykouno 5awyin
+        id follow body
+        see all
+        7yd search
+
+    /home/categories
+
+        categories fach ykouno 5awyin
+        see all
+
+    /home/post
+
+        affiche l post lfo9 fach ytcreea
+        comment ytcreea l post
+        save l post
+
+    /home/profile
+    
+        create group
+        create event
+
+    /home/group
+
+        group fach ykouno 5awyin
+        id follow body
+
+    /home/message
+
+        group conversation der smya dial l group feha
+        9ad total messagges
+        der f kola cnv total messagges
+        der dik l3ibba fach nft7ha heya li tfetche data fach nclicke 3la frends w lgroup tfetcha kol haja mnhom
+
+    /home/events
+
+        derlha l fetch w lpage dialha
+        9sem lpage l jouj 7wayj
+        l events li mchark fehom w li mamcharkch fehom
+
+/register
+
+    about 7ydlha required
+
+/group
+
+    /group/invitation
+
+        acceept invitation
+        refuse invitation
+
+    /group/group
+
+        join group
+        leave group
+        delete invitation
+        delete group
+        view group
+
+    /group/create
+
+        cover image
+        9ad popup
+        chi error wa93 dial (setGroups is not defined)
+
+/post
+
+    der nav bar
+    9ad l comments
+    tl3 create comment fo l comments
+    9ad like
+    w der comments li 7da like ytbdel feha number mli tcree comment

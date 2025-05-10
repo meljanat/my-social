@@ -1,0 +1,121 @@
+package handlers
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	structs "social-network/data"
+	"social-network/database"
+)
+
+func Home(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		fmt.Println("Method not allowed")
+		response := map[string]string{"error": "Method not allowed"}
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	user, err := GetUserFromSession(r)
+	if err != nil || user == nil {
+		fmt.Println("Failed to retrieve user")
+		response := map[string]string{"error": "Failed to retrieve user"}
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	user_info, err := database.GetProfileInfo(user.ID)
+	if err != nil {
+		fmt.Println("Failed to retrieve user")
+		response := map[string]string{"error": "Failed to retrieve user"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	following, err := database.GetFollowing(user.ID)
+	if err != nil {
+		fmt.Println("Failed to retrieve followings")
+		response := map[string]string{"error": "Failed to retrieve followings"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	suggested_users, err := database.GetNotFollowing(user.ID)
+	if err != nil {
+		fmt.Println("Failed to retrieve not following")
+		response := map[string]string{"error": "Failed to retrieve not following"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	posts, err := database.GetPosts(user.ID, following)
+	if err != nil {
+		fmt.Println("Failed to retrieve posts")
+		response := map[string]string{"error": "Failed to retrieve posts"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	best_categories, err := database.GetBestCategories()
+	if err != nil {
+		fmt.Println("Failed to retrieve best categories")
+		response := map[string]string{"error": "Failed to retrieve best categories"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	my_groups, err := database.GetGroups(user.ID)
+	if err != nil {
+		fmt.Println("Failed to retrieve my groups")
+		response := map[string]string{"error": "Failed to retrieve my groups"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	suggested_groups, err := database.GetSuggestedGroups(user.ID)
+	if err != nil {
+		fmt.Println("Failed to retrieve suggested groups")
+		response := map[string]string{"error": "Failed to retrieve suggested groups"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	connections, err := database.GetConnections(user.ID)
+	if err != nil {
+		fmt.Println("Failed to retrieve connections")
+		response := map[string]string{"error": "Failed to retrieve connections"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	var home = struct {
+		User           structs.User       `json:"user"`
+		Posts          []structs.Post     `json:"posts"`
+		BestCategories []structs.Category `json:"best_categories"`
+		MyGroups       []structs.Group    `json:"my_groups"`
+		DiscoverGroups []structs.Group    `json:"discover_groups"`
+		SuggestedUsers []structs.User     `json:"suggested_users"`
+		Connections    []structs.User     `json:"connections"`
+	}{
+		User:           user_info,
+		Posts:          posts,
+		BestCategories: best_categories,
+		MyGroups:       my_groups,
+		DiscoverGroups: suggested_groups,
+		SuggestedUsers: suggested_users,
+		Connections:    connections,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(home)
+}

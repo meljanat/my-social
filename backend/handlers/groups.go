@@ -1,0 +1,383 @@
+package handlers
+
+import (
+	"encoding/json"
+	"fmt"
+	"html"
+	"net/http"
+	structs "social-network/data"
+	"social-network/database"
+	"strconv"
+	"strings"
+)
+
+func CreateGrpoupHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Println("Method not allowed")
+		response := map[string]string{"error": "Method not allowed"}
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	user, err := GetUserFromSession(r)
+	if err != nil || user == nil {
+		fmt.Println("Failed to retrieve user")
+		response := map[string]string{"error": "Failed to retrieve user"}
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	var group structs.Group
+	group.Name = r.FormValue("name")
+	group.Description = r.FormValue("description")
+	group.Privacy = r.FormValue("privacy")
+
+	errors, valid := ValidateGroup(group.Name, group.Description, group.Privacy)
+	if !valid {
+		fmt.Println("Validation error", errors)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error":  "Validation error",
+			"fields": errors,
+		})
+		return
+	}
+
+	var imagePath string
+	image, header, err := r.FormFile("groupImage")
+	if err != nil && err.Error() != "http: no such file" {
+		fmt.Println("Error retrieving image:", err)
+		response := map[string]string{"error": "Failed to retrieve image"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	} else if image != nil {
+		imagePath, err = SaveImage(image, header, "../frontend/public/groups/")
+		if err != nil {
+			fmt.Println("Error saving image:", err)
+			response := map[string]string{"error": err.Error()}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		newpath := strings.Split(imagePath, "/public")
+		imagePath = newpath[1]
+	} else {
+		imagePath = "/inconnu/group.jpeg"
+	}
+
+	var coverPath string
+	cover, header, err := r.FormFile("cover")
+	if err != nil && err.Error() != "http: no such file" {
+		fmt.Println("Error retrieving cover:", err)
+		response := map[string]string{"error": "Failed to retrieve cover"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	} else if cover != nil {
+		coverPath, err = SaveImage(cover, header, "../frontend/public/covers/")
+		if err != nil {
+			fmt.Println("Error saving cover:", err)
+			response := map[string]string{"error": err.Error()}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		newpath := strings.Split(coverPath, "/public")
+		coverPath = newpath[1]
+	} else {
+		coverPath = "/inconnu/cover.jpg"
+	}
+
+	id_group, err := database.CreateGroup(user.ID, group.Name, group.Description, imagePath, coverPath, group.Privacy)
+	if err != nil {
+		fmt.Println("Failed to create group:", err)
+		response := map[string]string{"error": "Failed to create group"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if err := database.JoinGroup(user.ID, id_group); err != nil {
+		fmt.Println("Failed to add user to group:", err)
+		response := map[string]string{"error": "Failed to add user to group"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	newGroup := structs.Group{
+		ID:          id_group,
+		Name:        html.EscapeString(group.Name),
+		Description: html.EscapeString(group.Description),
+		Image:       group.Image,
+		Cover:       group.Cover,
+		Privacy:     group.Privacy,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(newGroup)
+}
+
+func GetGroupsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		fmt.Println("Method not allowed")
+		response := map[string]string{"error": "Method not allowed"}
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	user, err := GetUserFromSession(r)
+	if err != nil || user == nil {
+		fmt.Println("Failed to retrieve user")
+		response := map[string]string{"error": "Failed to retrieve user"}
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	Type := r.URL.Query().Get("type")
+	var groups []structs.Group
+
+	if Type == "suggested" {
+		groups, err = database.GetSuggestedGroups(user.ID)
+	} else if Type == "pending" {
+		groups, err = database.GetPendingGroups(user.ID)
+	} else if Type == "joined" {
+		groups, err = database.GetGroups(user.ID)
+	} else {
+		fmt.Println("Invalid type groups")
+		response := map[string]string{"error": "Invalid type groups"}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+	}
+
+	if err != nil {
+		fmt.Println("Failed to retrieve groups:", err)
+		response := map[string]string{"error": "Failed to retrieve groups"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(groups)
+}
+
+func GroupHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		fmt.Println("Method not allowed")
+		response := map[string]string{"error": "Method not allowed"}
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	user, err := GetUserFromSession(r)
+	if err != nil || user == nil {
+		fmt.Println("Failed to retrieve user")
+		response := map[string]string{"error": "Failed to retrieve user"}
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	group_id, err := strconv.ParseInt(r.URL.Query().Get("group_id"), 10, 64)
+	if err != nil {
+		fmt.Println("Invalid group ID")
+		response := map[string]string{"error": "Invalid group ID"}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	group, err := database.GetGroupById(group_id)
+	if err != nil {
+		fmt.Println("Failed to retrieve group")
+		response := map[string]string{"error": "Failed to retrieve group"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	member, err := database.IsMemberGroup(user.ID, group_id)
+	if err != nil {
+		fmt.Println("Failed to check if user is a member")
+		response := map[string]string{"error": "Failed to check if user is a member"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if group.Admin == user.Username {
+		group.Role = "admin"
+	} else if member {
+		group.Role = "member"
+	} else {
+		group.Role = "guest"
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(group)
+}
+
+func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		fmt.Println("Method not allowed")
+		response := map[string]string{"error": "Method not allowed"}
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	user, err := GetUserFromSession(r)
+	if err != nil || user == nil {
+		fmt.Println("Failed to retrieve user")
+		response := map[string]string{"error": "Failed to retrieve user"}
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	group_id, err := strconv.ParseInt(r.URL.Query().Get("group_id"), 10, 64)
+	if err != nil {
+		fmt.Println("Invalid group ID")
+		response := map[string]string{"error": "Invalid group ID"}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	group, err := database.GetGroupById(group_id)
+	if err != nil {
+		fmt.Println("Failed to retrieve group")
+		response := map[string]string{"error": "Failed to retrieve group"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	member, err := database.IsMemberGroup(group_id, user.ID)
+	if err != nil {
+		fmt.Println("Failed to check if user is a member")
+		response := map[string]string{"error": "Failed to check if user is a member"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	Type := r.URL.Query().Get("type")
+
+	if Type == "members" {
+		if member || group.Privacy == "public" {
+			members, err := database.GetGroupMembers(group_id)
+			if err != nil {
+				fmt.Println("Failed to retrieve members")
+				response := map[string]string{"error": "Failed to retrieve members"}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(members)
+		} else {
+			response := map[string]string{"error": "You are not a member of this group"}
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(response)
+		}
+		return
+	} else if Type == "invitations" {
+		if group.Admin == user.Username {
+			invitations, err := database.GetInvitationsGroup(group_id)
+			if err != nil {
+				fmt.Println("Failed to retrieve invitations")
+				response := map[string]string{"error": "Failed to retrieve invitations"}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(invitations)
+		} else {
+			response := map[string]string{"error": "You are not the admin of this group"}
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(response)
+		}
+		return
+	} else if Type == "posts" {
+		if member || group.Privacy == "public" {
+			posts, err := database.GetPostsGroup(group_id, user.ID, group.Privacy)
+			if err != nil {
+				fmt.Println("Failed to retrieve posts")
+				response := map[string]string{"error": "Failed to retrieve posts"}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(posts)
+		} else {
+			response := map[string]string{"error": "You are not a member of this group"}
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(response)
+		}
+		return
+	} else if Type == "events" {
+		if member {
+			events, err := database.GetEventGroup(group_id)
+			if err != nil {
+				fmt.Println("Failed to retrieve events")
+				response := map[string]string{"error": "Failed to retrieve events"}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(events)
+		} else {
+			response := map[string]string{"error": "You are not a member of this group"}
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(response)
+		}
+		return
+	} else {
+		fmt.Println("Invalid type")
+		response := map[string]string{"error": "Invalid type"}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+}
+
+func ValidateGroup(title, content, privacy string) (map[string]string, bool) {
+	errors := make(map[string]string)
+	const maxTitle = 20
+	const maxContent = 300
+
+	if title == "" {
+		errors["title"] = "Title is required"
+	} else if len(title) > maxTitle {
+		errors["title"] = "Title must be less than " + strconv.Itoa(maxTitle) + " characters"
+	}
+
+	if content == "" {
+		errors["content"] = "Content is required"
+	} else if len(content) > maxContent {
+		errors["content"] = "Content must be less than " + strconv.Itoa(maxContent) + " characters"
+	}
+
+	if privacy == "" {
+		errors["privacy"] = "Privacy is required"
+	} else if privacy != "public" && privacy != "private" {
+		errors["privacy"] = "Privacy must be public or private"
+	}
+
+	if len(errors) > 0 {
+		return errors, false
+	}
+
+	return nil, true
+}

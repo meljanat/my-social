@@ -1,0 +1,13 @@
+-- +migrate Up
+CREATE TABLE IF NOT EXISTS groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    admin INTEGER NOT NULL,
+    name TEXT UNIQUE NOT NULL,
+    description TEXT NOT NULL,
+    image TEXT NOT NULL,
+    cover TEXT NOT NULL,
+    members INTEGER NOT NULL DEFAULT 1,
+    privacy TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (admin) REFERENCES users (id) ON DELETE CASCADE
+);

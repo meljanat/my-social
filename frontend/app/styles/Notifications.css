@@ -1,0 +1,151 @@
+.notification-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .notification-icon {
+    cursor: pointer;
+    font-size: 24px;
+    position: relative;
+  }
+  
+  .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 50%;
+  }
+  
+  .notification-dropdown {
+    position: absolute;
+    top: 30px;
+    right: 0;
+    width: 250px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    z-index: 1000;
+  }
+  
+  .notification-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .notification-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  .notification-list li {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+  }
+  
+  .notification-list li.unread {
+    background-color: #f9f9f9;
+    font-weight: bold;
+  }
+  
+  .notification-list li.read {
+    color: #777;
+  }
+  
+  .notification-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .notification-icon {
+    cursor: pointer;
+    position: relative;
+    font-size: 24px;
+  }
+  
+  .notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+  }
+  
+  .notification-dropdown {
+    position: absolute;
+    top: 30px;
+    right: 0;
+    background: white;
+    width: 300px;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 100;
+  }
+  
+  .notification-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .notification-type-toggle {
+    display: flex;
+    justify-content: space-around;
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .notification-type-toggle button {
+    background: none;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .notification-type-toggle .active {
+    border-bottom: 2px solid #007bff;
+    color: #007bff;
+  }
+  
+  .notification-list {
+    max-height: 200px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .notification-list li {
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  .notification-list li.unread {
+    font-weight: bold;
+    background-color: #f9f9f9;
+  }
+  
+  .notification-list li.read {
+    color: #777;
+  }
+  
+  .no-notifications {
+    padding: 10px;
+    text-align: center;
+    color: #aaa;
+  }
+  

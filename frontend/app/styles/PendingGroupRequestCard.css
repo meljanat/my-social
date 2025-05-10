@@ -1,0 +1,173 @@
+.pending-group-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 1.5rem;
+  }
+  
+  .pending-group-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  }
+  
+  .pending-group-content {
+    padding: 1.5rem;
+  }
+  
+  .pending-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .pending-group-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .pending-group-avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50px;
+    object-fit: cover;
+    border: 2px solid #F1F4FD;
+    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); */
+  }
+  
+  .pending-group-name {
+    margin-left: 1rem;
+  }
+  
+  .pending-group-name h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #303850;
+    margin: 0 0 0.25rem 0;
+  }
+  
+  .pending-group-status {
+    display: flex;
+    align-items: center;
+  }
+  
+  .pending-group-status span {
+    background-color: #FFF8E6;
+    color: #F59E0B;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .pending-group-status span::before {
+    content: "";
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: #F59E0B;
+    border-radius: 50%;
+    margin-right: 0.375rem;
+  }
+  
+  .pending-group-cancel-btn {
+    background-color: #F3F4F8;
+    color: #606B85;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  
+  .pending-group-cancel-btn:hover {
+    background-color: #FFE5E5;
+    color: #E53E3E;
+  }
+  
+  .pending-group-description {
+    color: #606B85;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0.75rem 0 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #F1F4FD;
+  }
+  
+  .pending-group-stats {
+    display: flex;
+    margin: 0.75rem 0 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #F1F4FD;
+  }
+  
+  .stat-item {
+    display: flex;
+    align-items: center;
+    margin-right: 1.5rem;
+  }
+  
+  .stat-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+    background-color: #EFF3FF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+  }
+  
+  .stat-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #303850;
+    margin-right: 0.25rem;
+  }
+  
+  .stat-text {
+    font-size: 0.75rem;
+    color: #606B85;
+  }
+  
+  .pending-group-request-date {
+    font-size: 0.75rem;
+    color: #A0A9C0;
+    display: flex;
+    align-items: center;
+  }
+  
+  .pending-group-request-date::before {
+    content: "";
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    background-color: #A0A9C0;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+  }
+  
+  @media (max-width: 640px) {
+    .pending-group-content {
+      padding: 1.25rem;
+    }
+    
+    .pending-group-avatar {
+      width: 3rem;
+      height: 3rem;
+    }
+    
+    .pending-group-name h3 {
+      font-size: 1rem;
+    }
+    
+    .stat-item {
+      margin-right: 1rem;
+    }
+  }

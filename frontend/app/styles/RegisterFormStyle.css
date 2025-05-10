@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+*{
+
+    font-family: 'Poppins', Helvetica, sans-serif;
+}
+body {
+    /* height: 100vh; */
+    background-color: #EEEEEE;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* background-color: #A5A5A5; */
+}
+
+.registerDiv {
+    padding: 30px;
+    height: 500px;
+    width: 60%;
+    color: #A5A5A5;
+    background-color: #272930;  
+    border-radius: 20px;
+    /* border: 2px solid #A5A5A5;  */
+}
+.register-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+.inputs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 16px;
+    justify-items: center;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+input {
+    padding: 12px;
+    height: 32px;
+    width: 100%;
+    color: #A5A5A5;
+    /* background-color: #1A1C26; */
+    border-radius: 30px;
+    border: none;
+}
+textarea {
+    padding: 12px;
+    height: 44px;
+    width: 100%;
+    color: #A5A5A5;
+    background-color: #1A1C26;
+    border-radius: 30px;
+    border: none;
+
+}
+
+input:focus {
+border:2px solid rgb(174, 0, 255);
+outline: none;
+}
+
+.email, .username, .first-name, .last-name, .password, .about-me, .date-of-birth {
+    gap: 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+}
+.register-btn {
+    cursor: pointer;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    height: 44px;
+    width: 300px;
+    border: none;
+    /* border: 2px solid rgb(221, 156, 252); */
+    background-color: rgb(174, 0, 255);
+    border-radius: 24px;
+}
+.register-btn:hover {
+    background-color: rgb(149, 0, 218);
+
+
+}
+
+@media (max-width: 768px) {
+    .register-form {
+        grid-template-columns: 1fr; 
+    }
+
+    .registerDiv {
+        width: 90%; 
+    }
+}

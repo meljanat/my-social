@@ -1,0 +1,41 @@
+.suggested-communities {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .suggested-communities h3 {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1F2937;
+    margin-bottom: 0.75rem;
+  }
+  
+  .community-list {
+    list-style: none;
+  }
+  
+  .community-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    object-fit: cover;
+  }
+  
+  .community-name {
+    margin-left: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .view-more-btn {
+    color: #3B82F6;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }

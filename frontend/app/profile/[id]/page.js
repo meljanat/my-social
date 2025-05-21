@@ -374,9 +374,6 @@ export default function ProfilePage() {
         <p className="error-message">
           We couldn't find your profile information.
         </p>
-        <button onClick={goToHome} className="retry-button">
-          Go to Home
-        </button>
       </div>
     );
   }
@@ -384,9 +381,6 @@ export default function ProfilePage() {
   return (
     <div className="app-container">
       <div className="profile-container">
-        <button onClick={goToHome} className="back-button">
-          <span className="back-arrow">←</span> Back to Home
-        </button>
 
         <div className="profile-header">
           {picturePreview && (

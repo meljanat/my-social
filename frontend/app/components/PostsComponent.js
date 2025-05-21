@@ -1,7 +1,7 @@
 import "../styles/ProfilePage.css";
+import { handleLike } from "../functions/post";
 
-export default function PostsComponent({ post, groupId = 0 }) {
-  console.log("Groupd id: ", groupId);
+export default function PostsComponent({ post}) {
 
   return (
     <div key={post.id} className="post-card-modern">
@@ -53,7 +53,7 @@ export default function PostsComponent({ post, groupId = 0 }) {
 
       <div className="post-card-footer">
         <div className="post-engagement">
-          <div className="post-stat" onClick={() => handleLike(post.id)}>
+          <div className="post-stat" onClick={() => handleLike(post.post_id)}>
             <img src="/icons/like.svg" alt="Like" />
             <span>{post.total_likes}</span>
           </div>
@@ -65,7 +65,7 @@ export default function PostsComponent({ post, groupId = 0 }) {
         <button
           className="post-view-button"
           onClick={() => {
-            window.location.href = `/post/${post.post_id}/${groupId}`;
+            window.location.href = `/post/${post.post_id}`;
           }}
         >
           View Post

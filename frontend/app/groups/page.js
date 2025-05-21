@@ -243,7 +243,6 @@ export default function GroupsPage() {
 
   const [eventDate, setEventDate] = useState("");
   const [posts, setPosts] = useState([]);
-  const [homeData, setHomeData] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // const [showPostForm, setShowPostForm] = useState(false);
@@ -287,35 +286,6 @@ export default function GroupsPage() {
     checkLoginStatus();
   }, []);
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchHomeData();
-    }
-  }, [isLoggedIn]);
-
-  const fetchHomeData = async () => {
-    try {
-      const response = await fetch("http://localhost:8404/home", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setHomeData(data);
-        setPosts(data.posts);
-        console.log("Data received: ", data);
-      }
-    } catch (error) {
-      setError(true);
-
-      console.error("Error fetching posts:", error);
-    }
-  };
-
   const addNewPost = (newPost) => {
     setPosts((prevPosts) => [newPost, ...prevPosts]);
   };
@@ -349,7 +319,7 @@ export default function GroupsPage() {
     }
   }
 
-   async function fetchGroupData(endpoint) {
+  async function fetchGroupData(endpoint) {
     try {
       setIsLoading(true);
       const response = await fetch(
@@ -385,7 +355,7 @@ export default function GroupsPage() {
     } else if (tab === "pending-groups") {
       fetchGroupData("pending");
     } else if (tab === "invitations") {
-      fetchGroupData("invitations");
+      fetchUserInvitationsData("invitations");
     }
   };
 
@@ -394,7 +364,33 @@ export default function GroupsPage() {
     console.log("Test");
   };
 
-  const handleAcceptInvitation = async (invitationId) => {
+  const fetchUserInvitationsData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `http://localhost:8404/invitations_groups?offset=0`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      if (!response.ok) {
+        setIsLoading(false);
+        throw new Error("Failed to fetch invitations data");
+      }
+      const data = await response.json();
+      console.log("Invitations Data:", data);
+      setInvitationsGroups(data);
+      setIsLoading(false);
+
+    } catch (error) {
+      console.error("Error fetching invitations data:", error);
+      setInvitationsGroups([]);
+      setIsLoading(false);
+    }
+  };
+
+  const handleAcceptInvitation = async () => {
     try {
       setIsLoading(true);
       const response = await fetch(`http://localhost:8404/accept_invitation`, {
@@ -402,7 +398,7 @@ export default function GroupsPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ invitation_id: invitationId }),
+        body: JSON.stringify({ invitation_id: invitation_id }),
         credentials: "include",
       });
 
@@ -632,11 +628,6 @@ export default function GroupsPage() {
 
   return (
     <div className="groups-page-container">
-      {homeData && <Navbar user={homeData.user} />}
-      {/* <button onClick={goToHome} className="retry-button">
-        Go to Home
-      </button> */}
-
       <div className="groups-page-content">
         {showRemoveGroupModal && (
           <div className="modal-overlay">
@@ -720,8 +711,8 @@ export default function GroupsPage() {
               {isLoading ? (
                 <div className="loading-message">Loading...</div>
               ) : activeTab === "invitations" ? (
-                (groupData || []).length > 0 ? (
-                  (groupData || []).map((invitation) => (
+                (invitationsGroups || []).length > 0 ? (
+                  (invitationsGroups || []).map((invitation) => (
                     <InvitationCard
                       key={invitation.invitation_id}
                       invitation={invitation}
@@ -1083,11 +1074,12 @@ export default function GroupsPage() {
                       </button>
                     </div>
                   ) : (
-                    <button className="leave-group-btn"
-                      onClick= {() => {
+                    <button
+                      className="leave-group-btn"
+                      onClick={() => {
                         leaveGroup(selectedGroup.group_id);
                       }}
-                      >
+                    >
                       <svg
                         width="16"
                         height="16"

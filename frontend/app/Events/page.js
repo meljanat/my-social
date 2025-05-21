@@ -12,8 +12,6 @@ export default function EventsPage() {
   const [showEventForm, setShowEventForm] = useState(false);
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [homeData, setHomeData] = useState(null);
   // const [filteredEvents, setFilteredEvents] = useState([]);
 
 
@@ -63,40 +61,7 @@ export default function EventsPage() {
       console.error("Error fetching events:", error);
     }
   };
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchEvents("my-events");
-      fetchHomeData();
-    }
-  }, [isLoggedIn]);
-
-  //useEffect(() => {
-  //if (isLoggedIn) {
-  //fetchHomeData();
-
-  //setEvents(sampleEvents);
-  //setFilteredEvents(sampleEvents);
-  // }
-  //}, [isLoggedIn]);
-
-  const fetchHomeData = async () => {
-    try {
-      const response = await fetch("http://localhost:8404/home", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setHomeData(data);
-      }
-    } catch (error) {
-      console.error("Error fetching home data:", error);
-    }
-  };
+  
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -163,8 +128,6 @@ export default function EventsPage() {
 
   return (
     <div className="events-page-container">
-      {homeData && <Navbar user={homeData.user} />}
-
       <div className="events-page-content">
         <div className="events-header">
           <h1>Events</h1>

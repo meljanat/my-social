@@ -31,7 +31,7 @@ func UpdateSession(Email string, sessionToken uuid.UUID) error {
 
 func GetUserConnected(token string) (structs.User, error) {
 	var user structs.User
-	err := DB.QueryRow("SELECT id, username, session_token FROM users WHERE session_token = ?", token).Scan(&user.ID, &user.Username, &user.SessionToken)
+	err := DB.QueryRow("SELECT id, username, avatar, session_token FROM users WHERE session_token = ?", token).Scan(&user.ID, &user.Username, &user.Avatar, &user.SessionToken)
 	return user, err
 }
 

@@ -392,16 +392,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	group_id, err := strconv.ParseInt(r.URL.Query().Get("group_id"), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid group ID", err)
-		response := map[string]string{"error": "Invalid group ID"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
-	post, err := database.GetPost(user.ID, post_id, group_id)
+	post, err := database.GetPost(user.ID, post_id)
 	if err != nil {
 		fmt.Println("Failed to retrieve post", err)
 		response := map[string]string{"error": "Failed to retrieve post"}
@@ -411,7 +402,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if post.GroupID != 0 {
-		group, err := database.GetGroupById(group_id)
+		group, err := database.GetGroupById(post.GroupID)
 		if err != nil {
 			fmt.Println("Failed to retrieve group", err)
 			response := map[string]string{"error": "Failed to retrieve groups"}
@@ -448,7 +439,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	post.TotalSaves, err = database.CountSaves(post_id, group_id)
+	post.TotalSaves, err = database.CountSaves(post_id, post.GroupID)
 	if err != nil {
 		fmt.Println("Failed to count saves", err)
 		response := map[string]string{"error": "Failed to count saves"}
@@ -466,7 +457,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post.Comments, err = database.GetPostComments(post_id, post.GroupID, offset)
+	post.Comments, err = database.GetPostComments(post_id, offset)
 	if err != nil {
 		fmt.Println("Failed to retrieve comments", err)
 		response := map[string]string{"error": "Failed to retrieve comments"}

@@ -99,7 +99,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	my_groups, err := database.GetGroups(user.ID, count)
+	my_groups, err := database.GetGroups(*user, count)
 	if err != nil {
 		fmt.Println("Failed to retrieve my groups", err)
 		response := map[string]string{"error": "Failed to retrieve my groups"}

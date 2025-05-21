@@ -20,8 +20,8 @@ func CreateComment(content string, user_id int64, post structs.Post, image strin
 	return lastID, err
 }
 
-func GetPostComments(post_id, group_id, offset int64) ([]structs.Comment, error) {
-	rows, err := DB.Query("SELECT c.id, c.content, u.id, u.username, u.avatar, c.created_at, c.image FROM comments c JOIN users u ON u.id = c.user_id WHERE c.post_id = ? AND c.group_id = ? ORDER BY c.created_at DESC LIMIT ? OFFSET ?", post_id, group_id, 10, offset)
+func GetPostComments(post_id, offset int64) ([]structs.Comment, error) {
+	rows, err := DB.Query("SELECT c.id, c.content, u.id, u.username, u.avatar, c.created_at, c.image FROM comments c JOIN users u ON u.id = c.user_id WHERE c.post_id = ? ORDER BY c.created_at DESC LIMIT ? OFFSET ?", post_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}

@@ -3,33 +3,6 @@ import "../../styles/GroupsPage.css";
 import { joinGroup, deleteGroup } from "../functions/group";
 
 export default function GroupCard({ group, onClick, isJoined }) {
-  // async function fetchGroupData(endpoint) {
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await fetch(
-  //       `http://localhost:8404/groups?type=${endpoint}&offset=0`,
-  //       {
-  //         method: "GET",
-  //         credentials: "include",
-  //       }
-  //     );
-  //     if (!response.ok) {
-  //       throw new Error("Failed to fetch group data");
-  //     }
-  //     const data = await response.json();
-  //     if (endpoint === "joined") {
-  //       setMyGroups(data);
-  //     }
-  //     setGroupData(data);
-  //     console.log(`Data:`, data);
-  //     setIsLoading(false);
-  //   } catch (error) {
-  //     console.error("Error fetching group data:", error);
-  //     setGroupData([]);
-  //     setIsLoading(false);
-  //   }
-  // }
-
   async function leaveGroup(group_id) {
     try {
       const response = await fetch(`http://localhost:8404/join`, {
@@ -78,7 +51,7 @@ export default function GroupCard({ group, onClick, isJoined }) {
               }
             }}
           >
-            {group.role === "admine"
+            {group.role === "admin"
               ? "Delete Group"
               : isJoined
               ? "Leave"

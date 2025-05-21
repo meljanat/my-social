@@ -44,14 +44,6 @@ func JoinGroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if group.AdminID == user.ID {
-		fmt.Println("User is the admin of the group", err)
-		response := map[string]string{"error": "User is the admin of the group"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
 	isMember, err := database.IsMemberGroup(group.ID, user.ID)
 	if err != nil {
 		fmt.Println("Failed to check if user is a member", err)
@@ -112,7 +104,7 @@ func JoinGroupHandler(w http.ResponseWriter, r *http.Request) {
 			response := map[string]string{"message": "User sent invitation to join group"}
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(response)
-		} else {
+		} else if user.ID != group.AdminID {
 			if err := database.DeleteInvitationGroup(user.ID, group.ID); err != nil {
 				fmt.Println("Failed to delete invitation", err)
 				response := map[string]string{"error": "Failed to delete invitation"}

@@ -37,7 +37,8 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err = database.GetPost(user.ID, post.ID, post.GroupID)
+	post, err = database.GetPost(user.ID, post.ID)
+	fmt.Println("Post:", post.ID)
 	if err != nil {
 		fmt.Println("Error retrieving post:", err)
 		response := map[string]string{"error": "Post not found"}

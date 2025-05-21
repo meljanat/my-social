@@ -2,13 +2,9 @@
 import React, { useState, useEffect } from "react";
 import "../styles/NotificationPage.css";
 import NotificationCard from "../components/NotificationCard";
-import Navbar from "../components/NavBar";
 
 export default function NotificationPage() {
   const [activeTab, setActiveTab] = useState("all");
-  const [posts, setPosts] = useState([]);
-  const [homeData, setHomeData] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const notificationse = [
     {
@@ -123,39 +119,9 @@ export default function NotificationPage() {
     }
   };
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchHomeData();
-    }
-  }, [isLoggedIn]);
-
-  const fetchHomeData = async () => {
-    try {
-      const response = await fetch("http://localhost:8404/home", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setHomeData(data);
-        setPosts(data.posts);
-        //console.log("Data received: ", data);
-      }
-    } catch (error) {
-      setError(true);
-
-      console.error("Error fetching posts:", error);
-    }
-  };
-
   return (
     <div className="notification-container">
       <div className="notification-card">
-        {homeData && <Navbar user={homeData.user} />}
         <div className="notification-header">
           <h1 className="notification-title">Notifications</h1>
           <button className="mark-read-button" onClick={markAllAsRead}>

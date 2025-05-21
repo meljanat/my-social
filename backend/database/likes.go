@@ -7,7 +7,7 @@ import (
 func LikePost(user_id int64, post structs.Post) (int64, error) {
 	var err error
 	if !post.IsLiked {
-		_, err = DB.Exec("INSERT INTO post_likes (user_id, post_id) VALUES (?, ?, ?)", user_id, post.ID)
+		_, err = DB.Exec("INSERT INTO post_likes (user_id, post_id) VALUES (?, ?)", user_id, post.ID)
 	} else {
 		_, err = DB.Exec("DELETE FROM post_likes WHERE user_id = ? AND post_id = ?", user_id, post.ID)
 	}

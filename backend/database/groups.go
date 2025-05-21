@@ -19,9 +19,9 @@ func DeleteGroup(group_id int64) error {
 	return err
 }
 
-func GetGroups(user_id, offset int64) ([]structs.Group, error) {
+func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
 	var groups []structs.Group
-	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
+	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user.ID, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -33,16 +33,21 @@ func GetGroups(user_id, offset int64) ([]structs.Group, error) {
 		if err != nil {
 			return nil, err
 		}
-		group.TotalMessages, err = GetCountConversationMessages(group.ID, user_id)
+		group.TotalMessages, err = GetCountConversationMessages(group.ID, user.ID)
 		if err != nil {
 			return nil, err
 		}
 		group.CreatedAt = date.Format("2006-01-02 15:04:05")
-		groups = append(groups, group)
-		group.TotalPosts, err = GetCountUserPosts(group.AdminID, group.ID)
+		group.TotalPosts, err = GetCountGroupPosts(group.ID)
 		if err != nil {
 			return nil, err
 		}
+		if user.Username == group.Admin {
+			group.Role = "admin"
+		} else {
+			group.Role = "member"
+		}
+		groups = append(groups, group)
 	}
 	return groups, nil
 }

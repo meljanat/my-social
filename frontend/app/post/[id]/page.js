@@ -3,10 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-
-// import { useRouter } from "next/router";
-import Navbar from "../../../components/NavBar";
-import "../../../styles/PostPage.css";
+import "../../styles/PostPage.css";
 
 export default function PostPage() {
   //   const router = useRouter();
@@ -38,7 +35,7 @@ export default function PostPage() {
   const params = useParams();
   const postId = params.id;
 
-  async function handleSave(postId) {
+  async function handleSave() {
     try {
       const response = await fetch(`http://localhost:8404/save`, {
         method: "POST",
@@ -46,7 +43,7 @@ export default function PostPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ id: postId, group_id: 0 }),
+        body: JSON.stringify({post_id: post_id}),
       });
 
       if (!response.ok) {
@@ -54,18 +51,11 @@ export default function PostPage() {
         console.log(error);
       } else {
         const updatedPost = await response.json();
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.id === postId
-              ? {
-                  ...post,
-                  saved: updatedPost.saved,
+        setPost({
+          ...post,
+          saved: updatedPost.saved,
                   total_saves: updatedPost.total_saves,
-                }
-              : post
-          )
-        );
-        console.log(updatedPost);
+        });
       }
     } catch (error) {
       console.log(error);
@@ -78,7 +68,7 @@ export default function PostPage() {
       setIsLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:8404/post?post_id=${id}&group_id=${group_id}&offset=0`,
+          `http://localhost:8404/post?post_id=${id}&offset=0`,
           {
             method: "GET",
             credentials: "include",
@@ -114,7 +104,6 @@ export default function PostPage() {
 
     const formData = new FormData();
     formData.append("post_id", postId);
-    formData.append("group_id", group_id);
 
     formData.append("content", newComment);
     if (groupImage) {
@@ -133,15 +122,15 @@ export default function PostPage() {
 
       const data = await response.json();
 
-      // setComments([...comments, data]);
       setComments([data, ...comments]);
 
       setPost({
         ...post,
-        TotalComments: post.TotalComments + 1,
+        total_comments: post.total_comments + 1,
       });
 
       setNewComment("");
+      setGroupImage(null);
     } catch (err) {
       console.error("Error adding comment:", err);
       alert("Failed to add comment. Please try again.");
@@ -149,8 +138,6 @@ export default function PostPage() {
   };
 
   const handleLike = async () => {
-    console.log("Post id: ", post_id);
-
     try {
       const response = await fetch(`http://localhost:8404/like`, {
         method: "POST",
@@ -158,7 +145,7 @@ export default function PostPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ post_id: post_id, group_id }),
+        body: JSON.stringify({ post_id: post_id}),
       });
 
       if (!response.ok) {
@@ -168,8 +155,6 @@ export default function PostPage() {
       if (response.ok) {
         const updatedPost = await response.json();
         setPost({
-          // ...post,
-          // TotalLikes: post.TotalLikes + 1,
           ...post,
           total_likes: updatedPost.total_likes,
           is_liked: updatedPost.is_liked,
@@ -178,65 +163,6 @@ export default function PostPage() {
     } catch (err) {
       console.error("Error liking post:", err);
       alert("Failed to like post. Please try again.");
-    }
-  };
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data === true) {
-            setIsLoggedIn(true);
-          } else {
-            setIsLoggedIn(false);
-          }
-        }
-      } catch (error) {
-        setError(true);
-        console.error("Error checking login status:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLoginStatus();
-  }, []);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchHomeData();
-    }
-  }, [isLoggedIn]);
-
-  const fetchHomeData = async () => {
-    try {
-      const response = await fetch("http://localhost:8404/home", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setHomeData(data);
-        setPosts(data.posts);
-        console.log("Data received: ", data);
-      }
-    } catch (error) {
-      setError(true);
-
-      console.error("Error fetching posts:", error);
     }
   };
 
@@ -254,7 +180,6 @@ export default function PostPage() {
   if (error) {
     return (
       <div className="post-page-container">
-        {/* <Navbar /> */}
         <div className="post-page-content">
           <img
             src="/icons/no-post-state.svg"
@@ -262,9 +187,6 @@ export default function PostPage() {
             className="error-icon"
           />
           <div className="error-message">{error}</div>
-          {/* <button className="back-button" onClick={() => router.push("/")}>
-            Back to Home
-          </button> */}
         </div>
       </div>
     );
@@ -286,11 +208,6 @@ export default function PostPage() {
 
   return (
     <div className="post-page-container">
-      {homeData && <Navbar user={homeData.user} />}
-      <button onClick={goToHome} className="back-button">
-        Go to Home
-      </button>
-      {/* <Navbar /> */}
       <div className="post-page-content">
         <div className="post-page-card">
           <div className="post-page-header">
@@ -456,7 +373,6 @@ export default function PostPage() {
             <div className="comments-list">
               {comments.length > 0 ? (
                 comments.map((comment) => {
-                  console.log(comment);
                   const key = `${comment.comment_id || "defaultID"}-${
                     comment.created_at || "defaultCreatedAt"
                   }`;
@@ -465,12 +381,12 @@ export default function PostPage() {
                     <div key={key} className="comment-item">
                       <div className="comment-header">
                         <img
-                          src={comment.avatar}
-                          alt={comment.author}
+                          src={comment.user.avatar}
+                          alt={comment.user.username}
                           className="comment-avatar"
                         />
                         <div className="comment-author-info">
-                          <h4 className="comment-author">{comment.author}</h4>
+                          <h4 className="comment-author">{comment.user.username}</h4>
                           <p className="comment-time">{comment.created_at}</p>
                         </div>
                       </div>

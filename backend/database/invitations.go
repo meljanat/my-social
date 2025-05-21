@@ -58,14 +58,14 @@ func GetInvitationsFriends(user_id, offset int64) ([]structs.Invitation, error) 
 
 func GetInvitationsGroups(user_id, offset int64) ([]structs.Invitation, error) {
 	var invitations []structs.Invitation
-	rows, err := DB.Query("SELECT i.id, u.id, u.username, u.avatar, g.name FROM invitations i JOIN users u ON u.id = i.invited_id JOIN groups g ON i.group_id = g.id WHERE i.recipient_id = ? ORDER BY i.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
+	rows, err := DB.Query("SELECT i.id, u.id, u.username, u.avatar, g.name, g.members FROM invitations i JOIN users u ON u.id = i.invited_id JOIN groups g ON i.group_id = g.id WHERE i.recipient_id = ? ORDER BY i.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var invitation structs.Invitation
-		err = rows.Scan(&invitation.ID, &invitation.User.ID, &invitation.User.Username, &invitation.User.Avatar, &invitation.Group.Name)
+		err = rows.Scan(&invitation.ID, &invitation.User.ID, &invitation.User.Username, &invitation.User.Avatar, &invitation.Group.Name, &invitation.Group.TotalMembers)
 		if err != nil {
 			return nil, err
 		}

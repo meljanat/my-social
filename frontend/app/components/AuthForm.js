@@ -122,7 +122,7 @@ export default function AuthForm({ onLoginSuccess }) {
       const data = await response.json();
 
       if (response.ok) {
-        onLoginSuccess();
+        window.location.reload();
       } else {
         setErrors({
           form: data.error || "Login failed. Please check your credentials.",

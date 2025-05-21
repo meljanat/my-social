@@ -44,9 +44,9 @@ func GetSavedPosts(user_id, group_id, offset int64) ([]structs.Post, error) {
 	return posts, nil
 }
 
-func IsSaved(user_id, post_id, group_id int64) (bool, error) {
+func IsSaved(user_id, post_id int64) (bool, error) {
 	var count int
-	err := DB.QueryRow("SELECT COUNT(*) FROM saves WHERE user_id = ? AND post_id = ? AND group_id = ?", user_id, post_id, group_id).Scan(&count)
+	err := DB.QueryRow("SELECT COUNT(*) FROM saves WHERE user_id = ? AND post_id = ?", user_id, post_id).Scan(&count)
 	return count > 0, err
 }
 

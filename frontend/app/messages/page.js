@@ -236,7 +236,6 @@ export default function MessagesPage() {
 
   return (
     <div className="messages-page-container">
-      <Navbar />
       <div className="messages-page-content">
         <div className="messages-sidebar">
           <div className="messages-header">

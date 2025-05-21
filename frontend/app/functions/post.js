@@ -6,7 +6,7 @@ async function handleLike(postId) {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ post_id: postId, group_id: 0 }),
+      body: JSON.stringify({ post_id: postId}),
     });
 
     if (!response.ok) {

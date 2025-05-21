@@ -15,10 +15,10 @@ export default function InvitationCard({ invitation, onAccept, onDecline }) {
       <div className="invitation-card-content">
         <div className="invitation-header">
           <div className="invitation-avatar">
-            <img src={invitation.avatar} alt={invitation.sender} />
+            <img src={invitation.user.avatar} alt={invitation.user.username} />
           </div>
           <div className="invitation-requester">
-            <h4 className="invitation-sender">@{invitation.sender}</h4>
+            <h4 className="invitation-sender">@{invitation.user.username}</h4>
             <span className="invitation-label">
               {invitation.created_at || "2 hours ago"}
             </span>
@@ -26,11 +26,9 @@ export default function InvitationCard({ invitation, onAccept, onDecline }) {
         </div>
 
         <div className="invitation-group-info">
-          <h3 className="invitation-title">{invitation.name}</h3>
-
-          <p className="invitation-group">{`${invitation.group} (${
-            invitation.total_members || 2
-          } members)`}</p>
+          <h3 className="invitation-title">{invitation.group.name} ({
+            invitation.group.total_members || 0
+          } members)</h3>
         </div>
 
         <div className="invitation-actions">

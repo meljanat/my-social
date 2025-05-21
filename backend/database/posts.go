@@ -83,7 +83,7 @@ func GetPosts(user_id, offset int64, followers []structs.User) ([]structs.Post, 
 		if err != nil {
 			return nil, err
 		}
-		post.IsSaved, err = IsSaved(user_id, post.ID, 0)
+		post.IsSaved, err = IsSaved(user_id, post.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -151,6 +151,7 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 
 func GetPostsGroup(group_id, user_id, offset int64, privacy string) ([]structs.Post, error) {
 	var posts []structs.Post
+	fmt.Println(group_id)
 	rows, err := DB.Query("SELECT p.id, p.title, p.content, categories.name, categories.color, categories.background, users.username, users.avatar, p.created_at, p.total_likes, p.total_comments, p.image FROM posts p JOIN categories ON categories.id = p.category_id JOIN users ON p.user_id = users.id WHERE p.group_id = ? ORDER BY p.created_at DESC LIMIT ? OFFSET ? ", group_id, 10, offset)
 	if err != nil {
 		return nil, err
@@ -206,7 +207,7 @@ func GetPostsByCategory(category_id, user_id, offset int64) ([]structs.Post, err
 	return posts, nil
 }
 
-func GetPost(user_id, post_id, group_id int64) (structs.Post, error) {
+func GetPost(user_id, post_id int64) (structs.Post, error) {
 	var post structs.Post
 	var date time.Time
 	err := DB.QueryRow("SELECT posts.id, posts.title, posts.content, categories.name, categories.color, categories.background, users.id, users.username, users.avatar, posts.created_at, posts.total_likes, posts.total_comments, posts.privacy, posts.image FROM posts JOIN users ON posts.user_id = users.id JOIN categories ON categories.id = posts.category_id WHERE posts.id = ?", post_id).Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.CategoryColor, &post.CategoryBackground, &post.UserID, &post.Author, &post.Avatar, &date, &post.TotalLikes, &post.TotalComments, &post.Privacy, &post.Image)
@@ -218,8 +219,7 @@ func GetPost(user_id, post_id, group_id int64) (structs.Post, error) {
 	if err != nil {
 		return structs.Post{}, err
 	}
-	post.GroupID = group_id
-	post.IsSaved, err = IsSaved(user_id, post.ID, group_id)
+	post.IsSaved, err = IsSaved(user_id, post.ID)
 	if err != nil {
 		return structs.Post{}, err
 	}
@@ -235,6 +235,12 @@ func GetCountUserPosts(user_id, group_id int64) (int64, error) {
 	} else {
 		err = DB.QueryRow("SELECT COUNT(*) FROM posts WHERE user_id = ? AND group_id = ?", user_id, 0).Scan(&count)
 	}
+	return count, err
+}
+
+func GetCountGroupPosts(group_id int64) (int64, error) {
+	var count int64
+	err := DB.QueryRow("SELECT COUNT(*) FROM posts WHERE group_id = ?", group_id).Scan(&count)
 	return count, err
 }
 

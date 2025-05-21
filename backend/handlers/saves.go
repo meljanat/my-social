@@ -49,7 +49,7 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	post, err = database.GetPost(user.ID, post.ID, post.GroupID)
+	post, err = database.GetPost(user.ID, post.ID)
 	if err != nil {
 		fmt.Println("Failed to retrieve post", err)
 		response := map[string]string{"error": "Failed to retrieve post"}
@@ -87,7 +87,7 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	isSaved, err := database.IsSaved(user.ID, post.ID, post.GroupID)
+	isSaved, err := database.IsSaved(user.ID, post.ID)
 	if err != nil {
 		fmt.Println("Failed to check if post is saved", err)
 		response := map[string]string{"error": "Failed to check if post is saved"}
@@ -129,7 +129,7 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	
+
 	post.IsSaved = !isSaved
 	post.TotalSaves, err = database.CountSaves(post.ID, post.GroupID)
 	if err != nil {

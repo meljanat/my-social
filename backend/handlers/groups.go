@@ -241,7 +241,7 @@ func GetGroupsHandler(w http.ResponseWriter, r *http.Request) {
 	} else if Type == "pending" {
 		groups, err = database.GetPendingGroups(user.ID, offset)
 	} else if Type == "joined" {
-		groups, err = database.GetGroups(user.ID, offset)
+		groups, err = database.GetGroups(*user, offset)
 	} else {
 		fmt.Println("Invalid type groups")
 		response := map[string]string{"error": "Invalid type groups"}
@@ -256,7 +256,6 @@ func GetGroupsHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(groups)
 }

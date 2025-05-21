@@ -18,7 +18,7 @@ export default function Home() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isLogin, setIsLogin] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [homeData, setHomeData] = useState(null);
   const [posts, setPosts] = useState([]);
 
@@ -50,7 +50,7 @@ export default function Home() {
     };
 
     checkLoginStatus();
-  }, []);
+  }, [isLoggedIn !== null]);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -130,8 +130,6 @@ export default function Home() {
   if (isLoggedIn && homeData) {
     return (
       <div className="app-container">
-        <Navbar />
-
         <div className="main-content">
           <div className="grid-layout">
             <div className="left-column">
@@ -142,11 +140,9 @@ export default function Home() {
             </div>
 
             <div className="center-column">
-              {/* <div className="stories-section">
-                <StoriesComponent
-                 stories={homeData.stories}  
-                />
-              </div> */}
+              <div className="stories-section">
+                <StoriesComponent/>
+              </div>
               <PostComponent posts={posts} />
             </div>
 

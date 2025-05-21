@@ -40,15 +40,6 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comment.GroupID, err = strconv.ParseInt(r.FormValue("group_id"), 10, 64)
-	if err != nil {
-		fmt.Println("Error parsing group ID:", err)
-		response := map[string]string{"error": "Invalid post ID"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
 	var imagePath string
 	image, header, err := r.FormFile("commentImage")
 	if err != nil && err.Error() != "http: no such file" {
@@ -80,7 +71,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post, err := database.GetPost(user.ID, comment.PostID, comment.GroupID)
+	post, err := database.GetPost(user.ID, comment.PostID)
 	if err != nil {
 		fmt.Println("Failed to retrieve post", err)
 		response := map[string]string{"error": "Failed to retrieve post"}
@@ -117,7 +108,6 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	newComment := structs.Comment{
 		ID:        id,
 		PostID:    comment.PostID,
-		GroupID:   comment.GroupID,
 		Content:   html.EscapeString(comment.Content),
 		User:      *user,
 		CreatedAt: "Just Now",

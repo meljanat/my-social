@@ -1,8 +1,7 @@
 export let websocket;
-
 const listeners = {};
 
-export const connectWebSocket = function () {
+const connectWebSocket = function () {
     websocket = new WebSocket('ws://localhost:8404/ws');
 
     websocket.onopen = () => {
@@ -15,6 +14,12 @@ export const connectWebSocket = function () {
 
         if (listeners['message']) {
             listeners['message'].forEach((callback) => callback(data));
+        } else if (listeners['notifications']) {
+            listeners['notifications'].forEach((callback) => callback(data));
+        } else if (listeners['new_connection']) {
+            listeners['new_connection'].forEach((callback) => callback(data));
+        } else if (listeners['disconnection']) {
+            listeners['disconnection'].forEach((callback) => callback(data));
         }
     };
 
@@ -27,14 +32,14 @@ export const connectWebSocket = function () {
     };
 };
 
-export const subscribe = (event, callback) => {
+export const addToListeners = (event, callback) => {
     if (!listeners[event]) {
         listeners[event] = [];
     }
     listeners[event].push(callback);
 };
 
-export const unsubscribe = (event, callback) => {
+export const removeFromListeners = (event, callback) => {
     if (listeners[event]) {
         listeners[event] = listeners[event].filter((cb) => cb !== callback);
     }
@@ -52,10 +57,11 @@ const response = await fetch("http://localhost:8404/", {
 
 if (response.ok) {
     const data = await response.json();
-    console.log('dkhel');
-
     connectWebSocket();
     isLoggedIn = data;
 }
 
-isLoggedIn ? console.log("User is logged in") : console.log("User is not logged in");
+if (!isLoggedIn && window.location.pathname !== '/') {
+    window.location.href = 'http://localhost:3000/';
+    console.log("User is not logged in, redirecting to login page.");
+}

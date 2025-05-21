@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-// import Navbar from "../components/NavBar";
+import Navbar from "../components/NavBar";
 import "../../styles/MessagesPage.css";
-import { subscribe, unsubscribe } from "../websocket/ws.js";
+import { addToListeners, removeFromListeners } from "../websocket/ws.js";
 import { websocket } from "../websocket/ws.js"
 
 const Message = ({ message, isSent }) => {
@@ -32,10 +32,10 @@ const UserCard = ({ user, isActive, onClick }) => {
       }
     };
 
-    subscribe("message", handleMessage);
+    addToListeners("message", handleMessage);
 
     return () => {
-      unsubscribe("message", handleMessage);
+      removeFromListeners("message", handleMessage);
     };
   }, [user]);
 
@@ -45,7 +45,7 @@ const UserCard = ({ user, isActive, onClick }) => {
       onClick={onClick}
     >
       <img
-        src={user.avatar || user.image}
+        src={user.avatar}
         className="user-avatar"
         alt={user.username || user.name}
       />
@@ -64,8 +64,8 @@ const UserCard = ({ user, isActive, onClick }) => {
                 : ""}
           </p>
         </div>
-        {user.total_messages > 0 && (
-          <div className="unread-badge">{user.total_messages}</div>
+        {user.unread_count > 0 && (
+          <div className="unread-badge">{user.unread_count}</div>
         )}
       </div>
     </li>
@@ -79,6 +79,7 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
   const [users, setUsers] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState(null);
   const [groups, setGroups] = useState([]);
 
   useEffect(() => {
@@ -89,7 +90,19 @@ export default function MessagesPage() {
           credentials: "include",
         });
         const data = await response.json();
+        console.log(data);
+        
+
         setUsers(data);
+
+        const onlineUsers = data
+          .filter(user => user.online)
+          .reduce((acc, user) => {
+            acc[user.id] = true;
+            return acc;
+          }, {});
+
+        setOnlineUsers(onlineUsers);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -101,7 +114,7 @@ export default function MessagesPage() {
     const fetchGroups = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8404/groups?type=joined",
+          "http://localhost:8404/groups?type=joined&offset=1000",
           {
             method: "GET",
             credentials: "include",
@@ -122,14 +135,10 @@ export default function MessagesPage() {
     }
   }, [messages]);
 
-  const handleUserSelect = (user, isGroup) => {
+  const handleUserSelect = (user) => {
     setSelectedUser(user);
-    let fetchMessages;
-    if (isGroup === "group") {
-      fetchMessages = `id=0&group_id=${user.id}`;
-    } else {
-      fetchMessages = `id=${user.id}&group_id=0`;
-    }
+
+    let fetchMessages = `id=${user.id}&offset=1000`;
     fetch(`http://localhost:8404/chats?${fetchMessages}`, {
       method: "GET",
       credentials: "include",
@@ -144,10 +153,9 @@ export default function MessagesPage() {
       });
   };
 
+
   useEffect(() => {
     const handleMessage = (msg) => {
-      console.log(selectedUser);
-
       if (msg.type === 'message') {
         setMessages((prevMessages) => [
           ...prevMessages,
@@ -160,11 +168,31 @@ export default function MessagesPage() {
         ]);
       }
     };
+    const handleNewConnection = (msg) => {
+      if (msg.type === 'new_connection') {
+        setOnlineUsers((prevOnlineUsers) => ({
+          ...prevOnlineUsers,
+          [msg.user_id]: true,
+        }));
+      }
+    };
+    const handleDisconnection = (msg) => {
+      if (msg.type === 'disconnection') {
+        setOnlineUsers((prevOnlineUsers) => ({
+          ...prevOnlineUsers,
+          [msg.user_id]: false,
+        }));
+      }
+    };
 
-    subscribe('message', handleMessage);
+    addToListeners('message', handleMessage);
+    addToListeners('new_connection', handleNewConnection);
+    addToListeners('disconnection', handleDisconnection);
 
     return () => {
-      unsubscribe('message', handleMessage);
+      removeFromListeners('message', handleMessage);
+      removeFromListeners('new_connection', handleNewConnection);
+      removeFromListeners('disconnection', handleDisconnection);
     };
   }, []);
 
@@ -180,56 +208,12 @@ export default function MessagesPage() {
 
     setMessages(messages ? [...messages, message] : [message]);
     websocket.send(JSON.stringify({ type: 'message', content: newMessage, user_id: selectedUser.id }));
-
-    // await fetch("http://localhost:8404/message", {
-    //   method: "POST",
-    //   body: messageData,
-    //   credentials: "include",
-    // }).catch((error) => {
-    //   console.error("Error sending message:", error);
-    // });
-
     setNewMessage("");
   };
 
-  // const currentUser = {
-  //   first_name: "Mohammed Amine",
-  //   last_name: "Dinani",
-  //   avatar: "./avatars/thorfinn-vinland-saga-episode-23-1.png",
-  //   username: "mdinani",
-  // };
-
-  // const [ana, setAna] = useState(null);
-
-  // useEffect(() => {
-  //   const fetchCurrentUser = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:8404/home", {
-  //         method: "GET",
-  //         credentials: "include",
-  //       });
-  //       console.log(response);
-
-  //       const data = await response.json();
-  //       console.log('data: ', data);
-
-  //       setAna(data.user);
-  //       console.log('user inside: ', ana);
-
-  //     } catch (error) {
-  //       console.error("Error fetching current user:", error);
-  //     }
-  //   };
-  //   fetchCurrentUser();
-  // }, []);
-
-  // console.log('user out: ', ana);
-
-
   return (
     <div className="messages-page-container">
-      {/* <Navbar user={ana} /> */}
-
+      <Navbar />
       <div className="messages-page-content">
         <div className="messages-sidebar">
           <div className="messages-header">
@@ -270,10 +254,9 @@ export default function MessagesPage() {
                     user={user}
                     isActive={selectedUser && selectedUser.id === user.id}
                     onClick={() => {
-                      handleUserSelect(user, "user")
+                      handleUserSelect(user)
                       user.total_messages = 0;
-                    }
-                    }
+                    }}
                   />
                 )) : ''
                 : groups ? groups.map((group) => (
@@ -281,7 +264,7 @@ export default function MessagesPage() {
                     key={group.id}
                     user={group}
                     isActive={selectedUser && selectedUser.id === group.id}
-                    onClick={() => handleUserSelect(group, "group")}
+                    onClick={() => handleUserSelect(group)}
                   />
                 )) : ''}
             </ul>
@@ -305,8 +288,8 @@ export default function MessagesPage() {
                         : selectedUser.name}
                     </h3>
                     <p className="conversation-user-status">
-                      <span className="status-dot online"></span>
-                      Online
+                      <span className={`status-dot ${selectedUser.id ? (onlineUsers[selectedUser.id] ? 'online' : 'offline') : 'offline'}`}></span>
+                      {selectedUser.id ? (onlineUsers[selectedUser.id] ? 'Online' : 'Offline') : 'Offline'}
                     </p>
                   </div>
                 </div>
@@ -344,7 +327,7 @@ export default function MessagesPage() {
               </div>
 
               <form className="message-input-form" onSubmit={handleSendMessage}>
-                {/* <button type="button" className="attachment-button">
+                <button type="button" className="attachment-button">
                   <svg
                     width="20"
                     height="20"
@@ -360,7 +343,7 @@ export default function MessagesPage() {
                       strokeLinejoin="round"
                     />
                   </svg>
-                </button> */}
+                </button>
                 <input
                   type="text"
                   placeholder="Type a message..."

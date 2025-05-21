@@ -6,7 +6,7 @@ export default function PendingGroupRequestCard({ group, onCancelRequest }) {
         <div className="pending-group-header">
           <div className="pending-group-info">
             <img
-              src={group.image}
+              src={`.${group.image}`}
               alt={group.name}
               className="pending-group-avatar"
             />
@@ -15,16 +15,17 @@ export default function PendingGroupRequestCard({ group, onCancelRequest }) {
               <h3>{group.name}</h3>
               <div className="pending-group-status">
                 <span>Request Pending</span>
+                <div>
+                  <button
+                    onClick={() => onCancelRequest(group.group_id)}
+                    className="pending-group-cancel-btn"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-
-          <button
-            onClick={() => onCancelRequest(group.id)}
-            className="pending-group-cancel-btn"
-          >
-            Cancel
-          </button>
         </div>
 
         {group.description && (

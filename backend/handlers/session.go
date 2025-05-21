@@ -11,7 +11,7 @@ import (
 
 func SessionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		fmt.Println("Method not allowed")
+		fmt.Println("Method not allowed", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)
@@ -19,7 +19,7 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
-		fmt.Println("Failed to retrieve user")
+		fmt.Println("Failed to retrieve user", err)
 		json.NewEncoder(w).Encode(false)
 		http.SetCookie(w, &http.Cookie{
 			Name:   "session_token",

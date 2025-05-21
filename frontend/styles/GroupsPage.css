@@ -128,11 +128,246 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
   
-  .group-detail-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid #E5E7EB;
-    position: relative;
+.group-detail-header {
+  padding: 0;
+  border-bottom: none;
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.group-cover-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  position: relative;
+}
+
+.group-header-content {
+  padding: 1.5rem;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,1));
+  position: relative;
+  margin-top: -60px;
+  border-radius: 2rem 2rem 0 0;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(229, 233, 253, 0.5);
+  border-bottom: none;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border: none;
+  color: #4B5563;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #3555F9;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(53, 85, 249, 0.2);
+}
+
+.group-detail-info {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.group-detail-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
+  object-fit: cover;
+  border: 4px solid white;
+  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); */
+  transition: transform 0.3s ease;
+}
+
+
+
+.group-detail-text {
+  flex: 1;
+}
+
+.group-detail-text h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1F2937;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.group-privacy-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  background-color: #F1F4FD;
+  color: #3555F9;
+}
+
+.group-detail-text p {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  color: #4B5563;
+  line-height: 1.5;
+}
+
+.group-detail-meta {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin-top: 0.75rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meta-item svg {
+  width: 18px;
+  height: 18px;
+  color: #3555F9;
+}
+
+.group-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #E5E9FD;
+}
+
+.user-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.admin-badge {
+  background-color: rgba(53, 85, 249, 0.1);
+  color: #3555F9;
+}
+.guest-badge {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.group-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #E5E9FD;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 1rem;
+}
+.create-post-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #3555F9;
+  color: white;
+  border: 1px solid #E5E9FD;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: white;
+  color: #3555F9;
+  border: 1px solid #E5E9FD;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-action-btn:hover {
+  background-color: #F1F4FD;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(53, 85, 249, 0.1);
+}
+
+.leave-group-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: white;
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.leave-group-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+}
+
+@media (max-width: 768px) {
+  .group-header-actions {
+    flex-direction: column;
+    align-items: flex-start;
   }
+  
+  .admin-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
   
   .back-button {
     display: flex;
@@ -158,12 +393,12 @@
     margin-bottom: 1rem;
   }
   
-  .group-detail-image {
-    width: 120px;
-    height: 120px;
-    border-radius: 1rem;
+  /* .group-detail-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50px;
     object-fit: cover;
-  }
+  } */
   
   .group-detail-text {
     flex: 1;
@@ -378,43 +613,95 @@
   
   .members-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 1rem;
   }
   
   .member-card {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: center;
     background-color: white;
     border-radius: 0.75rem;
-    padding: 1rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    position: relative;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    gap: 2rem;
   }
   
-  .member-avatar {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 50%;
-    object-fit: cover;
-  }
+  /* .member-card:hover {
+    border-color: #E5E9FD;
+    box-shadow: 0 4px 8px rgba(53, 85, 249, 0.08);
+    transform: translateY(-2px);
+  } */
   
-  .member-info {
+  .member-card-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     flex: 1;
   }
   
-  .member-info h4 {
-    margin: 0 0 0.25rem 0;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #1F2937;
+  .member-avatar-container {
+    position: relative;
+    flex-shrink: 0;
   }
   
-  .member-info p {
+  .member-avatar {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #F1F4FD;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+  }
+  
+  /* .member-card:hover .member-avatar {
+    transform: scale(1.05);
+  } */
+  
+  .member-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .member-name {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1F2937;
+    line-height: 1.3;
+  }
+  
+  .member-username {
     margin: 0;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #6B7280;
+    line-height: 1.2;
+  }
+  
+ 
+  
+  .view-profile-button {
+    background-color: #F1F4FD;
+    color: #3555F9;
+    border: none;
+    border-radius: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  
+  .view-profile-button:hover {
+    background-color: #3555F9;
+    color: white;
+    box-shadow: 0 2px 8px rgba(53, 85, 249, 0.2);
   }
   
   .admin-badge {
@@ -818,7 +1105,17 @@
   color: #6B7280;
 }
 
-
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 .invitation-actions {
   display: flex;
@@ -1009,8 +1306,8 @@
   
   .group-title {
     margin: 0 0 0.5rem 0;
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 500;
     color: #1F2937;
     line-height: 1.2;
   }
@@ -1071,3 +1368,5 @@
     background-color: #F1F4FD;
     color: #3555F9;
   }
+
+  

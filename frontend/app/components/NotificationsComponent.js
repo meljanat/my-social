@@ -1,204 +1,17 @@
-// "use client";
-// import React, { useState, useEffect, useRef } from 'react';
-// import "../styles/Notifications.css";
-
-// const Notifications = () => {
-//   const [notifications, setNotifications] = useState([]);
-//   const [isOpen, setIsOpen] = useState(false);
-//   const [notificationType, setNotificationType] = useState("all");
-//   const notificationRef = useRef(null);
-
-//   const fetchNotifications = async () => {
-//     try {
-//       console.log("aaaaaaa");
-//       const response = await fetch("http://localhost:8404/notifications", {
-//         method: "GET",
-//         credentials: "include",
-//       });
-
-//       console.log("Status:", response.status);
-
-//       if (!response.ok) throw new Error('Failed to fetch notifications');
-
-//       const data = await response.json();
-//       console.log("المحتوى:", data);
-
-//       setNotifications(Array.isArray(data) ? data : []);
-//     } catch (error) {
-//       console.error(error.message);
-//     }
-//   };
-
-//   const markAllAsRead = async () => {
-//     try {
-//       const response = await fetch("http://localhost:8404/notifications/mark_all_as_read", {
-//         method: 'PUT',
-//         credentials: 'include',
-//       });
-
-//       if (!response.ok) throw new Error('Failed to mark all as read');
-
-//       setNotifications((prev) =>
-//         prev.map((n) => ({ ...n, read: true }))
-//       );
-//     } catch (error) {
-//       console.error(error.message);
-//     }
-//   };
-
-//   const markAsRead = async (id) => {
-//     try {
-//       const response = await fetch("http://localhost:8404/notifications/mark_as_read", {
-//         method: 'PUT',
-//         headers: { 'Content-Type': 'application/json' },
-//         credentials: 'include',
-//         body: JSON.stringify(id),
-//       });
-
-//       if (!response.ok) throw new Error('Failed to mark as read');
-
-//       setNotifications((prev) =>
-//         prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-//       );
-//     } catch (error) {
-//       console.error(error.message);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchNotifications();
-//   }, []);
-
-//   useEffect(() => {
-//     const handleClickOutside = (event) => {
-//       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-//         setIsOpen(false);
-//       }
-//     };
-
-//     document.addEventListener('mousedown', handleClickOutside);
-//     return () => document.removeEventListener('mousedown', handleClickOutside);
-//   }, []);
-
-//   // const toggleDropdown = () => setIsOpen(!isOpen);
-
-//   const unreadCount = notifications.filter((n) => !n.read).length;
-
-//   const filteredNotifications = notifications.filter((n) => {
-//     if (notificationType === "all") return true;
-//     return n.type_notification === notificationType;
-//   });
-
-//   return (
-//     <div className="notification-wrapper" ref={notificationRef}>
-//       <div className="notification-dropdown open-always">
-//         <div className="notification-header">
-//           <span>Notifications</span>
-//           <button onClick={markAllAsRead}>Mark all as read</button>
-//         </div>
-
-//         <div className="notification-type-toggle">
-//           <button
-//             onClick={() => setNotificationType("all")}
-//             className={notificationType === "all" ? "active" : ""}
-//           >
-//             All
-//           </button>
-//           <button
-//             onClick={() => setNotificationType("general")}
-//             className={notificationType === "general" ? "active" : ""}
-//           >
-//             General
-//           </button>
-//           <button
-//             onClick={() => setNotificationType("chat")}
-//             className={notificationType === "chat" ? "active" : ""}
-//           >
-//             Chat
-//           </button>
-//         </div>
-
-//         <ul className="notification-list">
-//           {filteredNotifications.length === 0 ? (
-//             <li className="no-notifications">No notifications</li>
-//           ) : (
-//             filteredNotifications.map((n) => (
-//               <li
-//                 key={n.id}
-//                 className={n.read ? 'read' : 'unread'}
-//                 onClick={() => markAsRead(n.id)}
-//               >
-//                 {n.message}
-//               </li>
-//             ))
-//           )}
-//         </ul>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default Notifications;
-
-// // "use client";
-// // import { useEffect, useState } from "react";
-// // import "../styles/Notifications.css";
-
-// // export default function NotificationsComponent() {
-// //   const [notifications, setNotifications] = useState([]);
-
-// //   useEffect(() => {
-// //     const fetchNotifications = async () => {
-// //       try {
-// //         const response = await fetch("http://localhost:8404/notifications", {
-// //           method: "GET",
-// //           credentials: "include",
-// //         });
-
-// //         if (!response.ok) throw new Error("Failed to fetch notifications");
-
-// //         // const data = await response.json();
-// //         // setNotifications(data);
-
-// //         const data = await response.json();
-// //         setNotifications(Array.isArray(data) ? data : []);
-
-// //       } catch (error) {
-// //         console.error("Error fetching notifications:", error);
-// //       }
-// //     };
-
-// //     fetchNotifications();
-// //   }, []);
-
-// //   if (!notifications.length) return <p>No notifications found.</p>;
-
-// //   return (
-// //     <div className="notifications-container">
-// //       <h2>Notifications</h2>
-// //       <ul>
-// //         {notifications.map((n) => (
-// //           <li key={n.id} style={{ fontWeight: n.read ? "normal" : "bold" }}>
-// //             {n.message}
-// //           </li>
-// //         ))}
-// //       </ul>
-// //     </div>
-// //   );
-// // }
-
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import "../styles/Notifications.css";
-// import { connectSocket, subscribeToMessages } from "./websocket";
+import NotificationCard from "../components/NotificationCard";
+import { addToListeners, removeFromListeners } from "../websocket/ws.js";
 
-const Notifications = () => {
+const NotificationsComponent = () => {
   const [notifications, setNotifications] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
   const [notificationType, setNotificationType] = useState("all");
+  const [loading, setLoading] = useState(true);
   const notificationRef = useRef(null);
 
   const fetchNotifications = async () => {
+    setLoading(true);
     try {
       const response = await fetch("http://localhost:8404/notifications", {
         method: "GET",
@@ -208,134 +21,104 @@ const Notifications = () => {
       if (!response.ok) throw new Error("Failed to fetch notifications");
 
       const data = await response.json();
-
       setNotifications(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error(error.message);
+      console.error("Error fetching notifications:", error.message);
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleNotifications = (msg) => {
+      if (msg.type === 'notifications') {
+        setNotifications(msg.notifications);
+      }
+    };
+
+    addToListeners('notifications', handleNotifications);
+
+    return () => {
+      removeFromListeners('notifications', handleNotifications);
+    };
+  }, []);
 
   const markAllAsRead = async () => {
     try {
       const response = await fetch(
         "http://localhost:8404/notifications/mark_all_as_read",
         {
-          method: "PUT",
+          method: "POST",
           credentials: "include",
         }
       );
 
       if (!response.ok) throw new Error("Failed to mark all as read");
 
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
     } catch (error) {
-      console.error(error.message);
-    }
-  };
-
-  const markAsRead = async (id) => {
-    try {
-      const response = await fetch(
-        "http://localhost:8404/notifications/mark_as_read",
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(id),
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to mark as read");
-
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-      );
-    } catch (error) {
-      console.error(error.message);
+      console.error("Error marking notifications as read:", error.message);
     }
   };
 
   useEffect(() => {
     fetchNotifications();
-
-    // connectSocket();
-    // subscribeToMessages((data) => {
-    //   if (data.type === "notification") {
-    //     console.log("aaaaa");
-
-    //     setNotifications((prev) => [data.notification, ...prev]);
-    //   }
-    // });
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const filteredNotifications = notifications.filter((n) => {
+  const filteredNotifications = notifications.filter((notification) => {
     if (notificationType === "all") return true;
-    return n.type_notification === notificationType;
+    return notification.type_notification === notificationType;
   });
 
   return (
-    <div className="notification-wrapper" ref={notificationRef}>
-      <div className="notification-dropdown open-always">
-        <div className="notification-header">
-          <span>Notifications</span>
-          <button onClick={markAllAsRead}>Mark all as read</button>
+    <div className="notifications-dropdown" ref={notificationRef}>
+      <div className="notifications-header">
+        <h3>Notifications</h3>
+        <div className="notifications-actions">
+          <button onClick={markAllAsRead} className="mark-read-btn">
+            Mark all read
+          </button>
+          <a href="/notification" className="see-all-btn">
+            See all <span className="arrow">→</span>
+          </a>
         </div>
+      </div>
 
-        <div className="notification-type-toggle">
-          <button
-            onClick={() => setNotificationType("all")}
-            className={notificationType === "all" ? "active" : ""}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setNotificationType("general")}
-            className={notificationType === "general" ? "active" : ""}
-          >
-            General
-          </button>
-          <button
-            onClick={() => setNotificationType("chat")}
-            className={notificationType === "chat" ? "active" : ""}
-          >
-            Chat
-          </button>
-        </div>
+      <div className="notification-tabs">
+        <button
+          onClick={() => setNotificationType("all")}
+          className={notificationType === "all" ? "active" : ""}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setNotificationType("not-read")}
+          className={notificationType === "not-read" ? "active" : ""}
+        >
+          Not Read
+        </button>
+      </div>
 
-        <ul className="notification-list">
-          {filteredNotifications.length === 0 ? (
-            <li className="no-notifications">No notifications</li>
-          ) : (
-            filteredNotifications.map((n) => (
-              <li
-                key={n.id}
-                className={n.read ? "read" : "unread"}
-                onClick={() => markAsRead(n.id)}
-              >
-                {n.message}
-              </li>
+      <div className="notifications-list">
+        {loading ? (
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>Loading notifications...</p>
+          </div>
+        ) : filteredNotifications.length > 0 ? (
+          filteredNotifications
+            .slice(0, 5)
+            .map((notification, idx) => (
+              <NotificationCard key={idx} notification={notification} />
             ))
-          )}
-        </ul>
+        ) : (
+          <div className="empty-notifications">
+            <p>No notifications yet</p>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default Notifications;
+export default NotificationsComponent;

@@ -4,9 +4,8 @@ import "../styles/LeftSideBar.css";
 import UserCard from "./UserCard";
 
 export default function LeftSidebar({ users, bestcategories }) {
-  const handleSearch = (e) => {
-    setSearchQuery(e.target.value);
-  };
+  const safeUsers = users || [];
+  const safeCategories = bestcategories || [];
 
   return (
     <div className="left-sidebar">
@@ -22,41 +21,20 @@ export default function LeftSidebar({ users, bestcategories }) {
             See all <span className="arrow">→</span>
           </button>
         </div>
-        {users.length === 0 && (
-          <div className="no-users">
-            <p>No users found</p>
+        {safeUsers.length === 0 ? (
+          <div className="empty-state">
+            <p className="empty-title">No suggested users yet</p>
+            {/* <p className="empty-description">
+              Connect with others to see suggestions based on your network
+            </p> */}
           </div>
+        ) : (
+          <ul className="user-list">
+            {safeUsers.map((user) => (
+              <UserCard key={user.user_id} user={user} action={"follow"} />
+            ))}
+          </ul>
         )}
-        <ul className="user-list">
-          {users.map((user) => (
-            // <a key={user.id} href={`/profile/${user.id}`} className="user-link">
-            <UserCard key={user.id} user={user} action={"follow"} />
-            // </a>
-
-            // <li key={user.id} className="user-item">
-            //   <img
-            //     src={
-            //       user.avatar ||
-            //       "./avatars/thorfinn-vinland-saga-episode-23-1.png"
-            //     }
-            //     className="user-avatar"
-            //     alt={user.username}
-            //   />
-            //   <div className="user-details">
-            //     <div className="user-info">
-            //       <h4 className="user-name">{`${user.first_name} ${user.last_name}`}</h4>
-            //       <p className="user-username">@{user.username}</p>
-            //     </div>
-            //     <button
-            //       className="follow-btn"
-            //       onClick={() => handleFollow(user.id)}
-            //     >
-            //       Follow
-            //     </button>
-            //   </div>
-            // </li>
-          ))}
-        </ul>
       </div>
 
       <div className="sidebar-section">
@@ -72,24 +50,31 @@ export default function LeftSidebar({ users, bestcategories }) {
           </button>
         </div>
 
-        <ul className="category-list">
-          {bestcategories.length === 0 && (
-            <div className="no-categories">
-              <p>No categories found</p>
-            </div>
-          )}
-          {bestcategories.map((category) => (
-            <li key={category.id} className="category-item">
-              <div className="category-icon">
-                <img src={`/icons/${category.name}.png`} alt={category.name} />
-              </div>
-              <span className="category-name">{category.name}</span>
-              <span className="category-count">
-                {category.count || 0} posts
-              </span>
-            </li>
-          ))}
-        </ul>
+        {safeCategories.length === 0 ? (
+          <div className="empty-state">
+            <p className="empty-title">No categories yet</p>
+            <p className="empty-description">
+              Categories will appear as content is created
+            </p>
+          </div>
+        ) : (
+          <ul className="category-list">
+            {safeCategories.map((category) => (
+              <li key={category.category_id} className="category-item">
+                <div className="category-icon">
+                  <img
+                    src={`/icons/${category.name}.png`}
+                    alt={category.name}
+                  />
+                </div>
+                <span className="category-name">{category.name}</span>
+                <span className="category-count">
+                  {category.count || 0} posts
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

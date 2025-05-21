@@ -2,7 +2,6 @@ package database
 
 import (
 	structs "social-network/data"
-	"time"
 )
 
 func GetProfileInfo(user_id int64) (structs.User, error) {
@@ -11,7 +10,7 @@ func GetProfileInfo(user_id int64) (structs.User, error) {
 	if err != nil {
 		return user, err
 	}
-	user.TotalPosts, err = GetCountUserPosts(user_id)
+	user.Post.TotalPosts, err = GetCountUserPosts(user_id, 0)
 	if err != nil {
 		return user, err
 	}
@@ -23,23 +22,23 @@ func GetProfileInfo(user_id int64) (structs.User, error) {
 	if err != nil {
 		return user, err
 	}
-	user.TotalLikes, err = GetCountUserLikes(user_id)
+	user.Post.TotalLikes, err = GetCountUserLikes(user_id)
 	if err != nil {
 		return user, err
 	}
-	user.TotalComments, err = GetCountUserComments(user_id)
+	user.Post.TotalComments, err = GetCountUserComments(user_id)
 	if err != nil {
 		return user, err
 	}
-	user.TotalChatsMessages, user.TotalGroupsMessages, err = GetCountUserMessages(user_id)
+	user.Message.TotalChatsMessages, user.Message.TotalGroupsMessages, err = GetCountUserMessages(user_id)
 	if err != nil {
 		return user, err
 	}
-	user.TotalMessages = user.TotalChatsMessages + user.TotalGroupsMessages
+	user.Message.TotalMessages = user.Message.TotalChatsMessages + user.Message.TotalGroupsMessages
 	return user, err
 }
 
-func UpdateProfile(user_id int64, username, firstname, lastname, email, about, avatar, cover, privacy string, date_of_birth time.Time) error {
-	_, err := DB.Exec("UPDATE users SET username = ?, firstname = ?, lastname = ?, email = ?, avatar = ?, cover = ?, privacy = ?, about = ?, date_of_birth = ? WHERE id = ?", username, firstname, lastname, email, avatar, cover, privacy, about, date_of_birth, user_id)
+func UpdateProfile(user_id int64, username, firstname, lastname, about, privacy string) error {
+	_, err := DB.Exec("UPDATE users SET username = ?, firstname = ?, lastname = ?, privacy = ?, about = ? WHERE id = ?", username, firstname, lastname, privacy, about, user_id)
 	return err
 }

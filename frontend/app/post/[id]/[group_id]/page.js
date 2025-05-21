@@ -27,12 +27,50 @@ export default function PostPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [groupImage, setGroupImage] = useState(null);
+  const [homeData, setHomeData] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [postSaved, setPostSaved] = useState();
+
   // const [commentText, setCommentText] = useState("");
   // const [imageFile, setImageFile] = useState(null);
 
   const params = useParams();
   const postId = params.id;
 
+  async function handleSave(postId) {
+    try {
+      const response = await fetch(`http://localhost:8404/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ id: postId, group_id: 0 }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.log(error);
+      } else {
+        const updatedPost = await response.json();
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  saved: updatedPost.saved,
+                  total_saves: updatedPost.total_saves,
+                }
+              : post
+          )
+        );
+        console.log(updatedPost);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
   useEffect(() => {
     if (!id) return;
 
@@ -40,7 +78,7 @@ export default function PostPage() {
       setIsLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:8404/post?post_id=${id}&group_id=${group_id}`,
+          `http://localhost:8404/post?post_id=${id}&group_id=${group_id}&offset=0`,
           {
             method: "GET",
             credentials: "include",
@@ -95,16 +133,14 @@ export default function PostPage() {
 
       const data = await response.json();
 
-      // Add the new comment to the list
-      setComments([...comments, data]);
+      // setComments([...comments, data]);
+      setComments([data, ...comments]);
 
-      // Update the total comments count
       setPost({
         ...post,
         TotalComments: post.TotalComments + 1,
       });
 
-      // Clear the comment input
       setNewComment("");
     } catch (err) {
       console.error("Error adding comment:", err);
@@ -113,6 +149,8 @@ export default function PostPage() {
   };
 
   const handleLike = async () => {
+    console.log("Post id: ", post_id);
+
     try {
       const response = await fetch(`http://localhost:8404/like`, {
         method: "POST",
@@ -120,7 +158,7 @@ export default function PostPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ post_id, group_id }),
+        body: JSON.stringify({ post_id: post_id, group_id }),
       });
 
       if (!response.ok) {
@@ -143,12 +181,71 @@ export default function PostPage() {
     }
   };
 
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch("http://localhost:8404/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data === true) {
+            setIsLoggedIn(true);
+          } else {
+            setIsLoggedIn(false);
+          }
+        }
+      } catch (error) {
+        setError(true);
+        console.error("Error checking login status:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchHomeData();
+    }
+  }, [isLoggedIn]);
+
+  const fetchHomeData = async () => {
+    try {
+      const response = await fetch("http://localhost:8404/home", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setHomeData(data);
+        setPosts(data.posts);
+        console.log("Data received: ", data);
+      }
+    } catch (error) {
+      setError(true);
+
+      console.error("Error fetching posts:", error);
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="post-page-container">
-        {/* <Navbar /> */}
-        <div className="post-page-content">
-          <div className="loading-spinner">Loading...</div>
+      <div className="loading-container">
+        <div className="loading-spinner-wrapper">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Loading Post...</p>
         </div>
       </div>
     );
@@ -189,7 +286,8 @@ export default function PostPage() {
 
   return (
     <div className="post-page-container">
-      <button onClick={goToHome} className="retry-button">
+      {homeData && <Navbar user={homeData.user} />}
+      <button onClick={goToHome} className="back-button">
         Go to Home
       </button>
       {/* <Navbar /> */}
@@ -237,13 +335,50 @@ export default function PostPage() {
           </div>
 
           <div className="post-actions">
-            <div className="action-like" onClick={handleLike}>
-              <img src="/icons/like.svg" alt="Like" />
-              <p>{post.total_likes} Likes</p>
+            <div
+              className={`action-like ${post.is_liked ? "liked-post" : ""}`}
+              onClick={handleLike}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="18"
+                fill="none"
+                viewBox="0 0 20 18"
+              >
+                <path
+                  fill={post.is_liked ? "#2563EB" : "#B8C3E1"}
+                  d="M14.44.1C12.63.1 11.01.98 10 2.33A5.55 5.55 0 0 0 5.56.1C2.49.1 0 2.6 0 5.69 0 6.88.19 7.98.52 9c1.58 5 6.45 7.99 8.86 8.81.34.12.9.12 1.24 0C13.03 16.99 17.9 14 19.48 9c.33-1.02.52-2.12.52-3.31C20 2.6 17.51.1 14.44.1"
+                ></path>
+              </svg>
+              <p
+              // className={`${post.is_liked ? "liked-post" : ""}`}
+              >
+                {post.total_likes} Likes
+              </p>
             </div>
             <div className="action-comment">
               <img src="/icons/comment.svg" alt="Comment" />
               <p>{post.total_comments} Comments</p>
+            </div>
+            <div
+              className={`action-save ${post.saved ? "saved-post" : ""}`}
+              onClick={handleSave}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="20"
+                fill="none"
+                viewBox="0 0 18 20"
+              >
+                <path
+                  d="M13.5 0H3.86C1.73 0 0 1.74 0 3.86v14.09c0 1.8 1.29 2.56 2.87 1.69l4.88-2.71c.52-.29 1.36-.29 1.87 0l4.88 2.71c1.58.88 2.87.12 2.87-1.69V3.86C17.36 1.74 15.63 0 13.5 0m-1.81 7.75c-.97.35-1.99.53-3.01.53s-2.04-.18-3.01-.53a.75.75 0 0 1-.45-.96c.15-.39.58-.59.97-.45 1.61.58 3.38.58 4.99 0a.75.75 0 1 1 .51 1.41"
+                  fill={post.saved ? "#2563EB" : "#B8C3E1"}
+                ></path>
+              </svg>
+              {/* <img src="/icons/comment.svg" alt="Comment" /> */}
+              <span>{post.total_saves} Saves</span>
             </div>
           </div>
           <form className="comment-form" onSubmit={handleCommentSubmit}>
@@ -322,7 +457,7 @@ export default function PostPage() {
               {comments.length > 0 ? (
                 comments.map((comment) => {
                   console.log(comment);
-                  const key = `${comment.id || "defaultID"}-${
+                  const key = `${comment.comment_id || "defaultID"}-${
                     comment.created_at || "defaultCreatedAt"
                   }`;
 

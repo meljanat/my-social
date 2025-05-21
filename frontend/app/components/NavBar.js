@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 // import { useState } from "react";
 // import Link from "next/link";
 // import "../styles/NavBar.css";
@@ -156,7 +156,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import "../styles/NavBar.css";
-import Notifications from "./NotificationsComponent";
+import NotificationsComponent from "./NotificationsComponent";
+import { addToListeners, removeFromListeners } from "../websocket/ws";
 
 export default function Navbar() {
   const [activeLink, setActiveLink] = useState("home");
@@ -177,7 +178,11 @@ export default function Navbar() {
 
         if (response.ok) {
           const data = await response.json();
-          setUser(data);
+          if (data.error) {
+            console.error("Error fetching user data:", data.error);
+          } else {
+            setUser(data);
+          }
         }
       }
       catch (error) {
@@ -185,6 +190,23 @@ export default function Navbar() {
       }
     }
     fetchUser();
+  }, []);
+
+  useEffect(() => {
+    const handleNotifications = (msg) => {
+      if (msg.type === 'notifications') {
+        setUser((prevUser) => ({
+          ...prevUser,
+          total_notifications: msg.notifications.length,
+        }));
+      }
+    };
+
+    addToListeners('notifications', handleNotifications);
+
+    return () => {
+      removeFromListeners('notifications', handleNotifications);
+    };
   }, []);
 
   if (!user) {
@@ -206,7 +228,6 @@ export default function Navbar() {
       });
 
       if (response.ok) {
-        console.log("Logout");
         window.location.reload();
       }
     } catch (error) {
@@ -250,8 +271,10 @@ export default function Navbar() {
             className={`nav-link ${activeLink === "events" ? "active" : ""}`}
             onClick={() => setActiveLink("events")}
           >
-            <img src="./icons/events.svg" alt="Events" />
-            <span>Events</span>
+            <Link href="/Events">
+              <img src="./icons/events.svg" alt="Events" />
+              <span>Events</span>
+            </Link>
           </button>
         </div>
       </div>
@@ -266,17 +289,14 @@ export default function Navbar() {
       <div className="user-actions">
         <button className="notification-button" onClick={toggleNotifications}>
           <img src="./icons/notification.svg" alt="Notifications" />
-          {user.total_notifications > 0 && (
+          {user.total_notifications > 0 ? (
             <span className="badge">{user.total_notifications || 1}</span>
-          )}{" "}
-          : (
-          <span className="notification-count">
-            {user.total_notifications || 0}
-          </span>
-          )
+          ) : (
+            <span className="notification-count">0</span>
+          )}
         </button>
 
-        {showNotifications && <Notifications />}
+        {showNotifications && <NotificationsComponent />}
 
         <button className="action-icon message-badge">
           <Link href="/messages">
@@ -309,7 +329,7 @@ export default function Navbar() {
 
           {showProfileMenu && (
             <div className="profile-menu">
-              <a href={`/profile/${user.id}`} className="menu-item">
+              <a href={`/profile/${user.user_id}`} className="menu-item">
                 <img src="./icons/user.svg" alt="Profile" />
                 <span>My Profile</span>
               </a>

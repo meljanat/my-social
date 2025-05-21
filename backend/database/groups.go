@@ -14,9 +14,14 @@ func CreateGroup(admin int64, name, description, image, cover, privacy string) (
 	return group_id, err
 }
 
-func GetGroups(user_id int64) ([]structs.Group, error) {
+func DeleteGroup(group_id int64) error {
+	_, err := DB.Exec("DELETE FROM groups WHERE id = ?", group_id)
+	return err
+}
+
+func GetGroups(user_id, offset int64) ([]structs.Group, error) {
 	var groups []structs.Group
-	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ?", user_id)
+	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +39,7 @@ func GetGroups(user_id int64) ([]structs.Group, error) {
 		}
 		group.CreatedAt = date.Format("2006-01-02 15:04:05")
 		groups = append(groups, group)
-		group.TotalPosts, err = GetCountGroupPosts(group.ID)
+		group.TotalPosts, err = GetCountUserPosts(group.AdminID, group.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -42,9 +47,9 @@ func GetGroups(user_id int64) ([]structs.Group, error) {
 	return groups, nil
 }
 
-func GetSuggestedGroups(user_id int64) ([]structs.Group, error) {
+func GetSuggestedGroups(user_id, offset int64) ([]structs.Group, error) {
 	var groups []structs.Group
-	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.admin, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin WHERE g.id NOT IN (SELECT group_id FROM group_members WHERE user_id = ? UNION SELECT group_id FROM invitations_groups WHERE invited_id = ? )", user_id, user_id)
+	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.admin, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin WHERE g.id NOT IN (SELECT group_id FROM group_members WHERE user_id = ? UNION SELECT group_id FROM invitations WHERE invited_id = ?) ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +63,7 @@ func GetSuggestedGroups(user_id int64) ([]structs.Group, error) {
 		}
 		group.CreatedAt = date.Format("2006-01-02 15:04:05")
 		groups = append(groups, group)
-		group.TotalPosts, err = GetCountGroupPosts(group.ID)
+		group.TotalPosts, err = GetCountUserPosts(group.AdminID, group.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -66,9 +71,9 @@ func GetSuggestedGroups(user_id int64) ([]structs.Group, error) {
 	return groups, nil
 }
 
-func GetPendingGroups(user_id int64) ([]structs.Group, error) {
+func GetPendingGroups(user_id, offset int64) ([]structs.Group, error) {
 	var groups []structs.Group
-	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.admin, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN invitations_groups i ON g.id = i.group_id WHERE i.invited_id = ?", user_id)
+	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.admin, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN invitations i ON g.id = i.group_id WHERE i.invited_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +87,7 @@ func GetPendingGroups(user_id int64) ([]structs.Group, error) {
 		}
 		group.CreatedAt = date.Format("2006-01-02 15:04:05")
 		groups = append(groups, group)
-		group.TotalPosts, err = GetCountGroupPosts(group.ID)
+		group.TotalPosts, err = GetCountUserPosts(group.AdminID, group.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +103,7 @@ func GetGroupById(group_id int64) (structs.Group, error) {
 		return group, err
 	}
 	group.CreatedAt = date.Format("2006-01-02 15:04:05")
-	group.TotalPosts, err = GetCountGroupPosts(group_id)
+	group.TotalPosts, err = GetCountUserPosts(group.AdminID, group_id)
 	return group, err
 }
 

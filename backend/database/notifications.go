@@ -4,25 +4,21 @@ import (
 	structs "social-network/data"
 )
 
-func CreateNotification(user_id, post_id, notified_id int64, type_notification string) error {
-	if post_id != 0 {
-		_, err := DB.Exec("INSERT INTO notifications (user_id, notified_id, type_notification, post_id) VALUES (?, ?, ?, ?)", user_id, notified_id, type_notification, post_id)
-		return err
-	}
-	_, err := DB.Exec("INSERT INTO notifications (user_id, notified_id, type_notification) VALUES (?, ?, ?)", user_id, notified_id, type_notification)
+func CreateNotification(user_id, notified_id, post_id, group_id, event_id int64, type_notification string) error {
+	_, err := DB.Exec("INSERT INTO notifications (user_id, notified_id, post_id, group_id, event_id, type_notification) VALUES (?, ?, ?, ?, ?, ?)", user_id, notified_id, post_id, group_id, event_id, type_notification)
 	return err
 }
 
-func GetNotifications(notified_id int64) ([]structs.Notification, error) {
+func GetNotifications(notified_id, offset int64) ([]structs.Notification, error) {
 	var notifications []structs.Notification
-	rows, err := DB.Query("SELECT n.id, u.username, u.avatar, n.type_notification FROM notifications n JOIN users u ON u.id = n.notified_id WHERE n.notified_id = ? ORDER BY n.created_at DESC", notified_id)
+	rows, err := DB.Query("SELECT n.id, u.username, u.avatar, n.post_id, n.group_id, n.event_id, n.type_notification, n.read, n.created_at FROM notifications n JOIN users u ON u.id = n.user_id WHERE n.notified_id = ? ORDER BY n.created_at DESC LIMIT ? OFFSET ?", notified_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var notification structs.Notification
-		err = rows.Scan(&notification.ID, &notification.Username, &notification.Avatar, &notification.TypeNotification)
+		err = rows.Scan(&notification.ID, &notification.User.Username, &notification.User.Avatar, &notification.PostID, &notification.GroupID, &notification.EventID, &notification.TypeNotification, &notification.Read, &notification.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -31,12 +27,8 @@ func GetNotifications(notified_id int64) ([]structs.Notification, error) {
 	return notifications, nil
 }
 
-func DeleteNotification(user_id, post_id, post_user_id int64, type_notification string) error {
-	if post_id != 0 {
-		_, err := DB.Exec("DELETE FROM notifications WHERE user_id = ? AND post_id = ? AND type_notification = ?", user_id, post_id, type_notification)
-		return err
-	}
-	_, err := DB.Exec("DELETE FROM notifications WHERE user_id = ? AND type_notification = ?", user_id, type_notification)
+func DeleteNotification(user_id, notified_id, post_id, group_id, event_id int64, type_notification string) error {
+	_, err := DB.Exec("DELETE FROM notifications WHERE user_id = ? AND notified_id = ? AND post_id = ? AND group_id = ? AND event_id = ? AND type_notification = ?", user_id, notified_id, post_id, group_id, event_id, type_notification)
 	return err
 }
 

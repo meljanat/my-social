@@ -65,7 +65,7 @@ export default function PostsComponent({ post, groupId = 0 }) {
         <button
           className="post-view-button"
           onClick={() => {
-            window.location.href = `/post/${post.id}/${groupId}`;
+            window.location.href = `/post/${post.post_id}/${groupId}`;
           }}
         >
           View Post

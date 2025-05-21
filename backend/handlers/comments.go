@@ -13,7 +13,7 @@ import (
 
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		fmt.Println("Method not allowed")
+		fmt.Println("Method not allowed", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)
@@ -22,7 +22,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
-		fmt.Println("Failed to retrieve user")
+		fmt.Println("Failed to retrieve user", err)
 		response := map[string]string{"error": "Failed to retrieve user"}
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response)
@@ -82,7 +82,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 
 	post, err := database.GetPost(user.ID, comment.PostID, comment.GroupID)
 	if err != nil {
-		fmt.Println("Failed to retrieve post")
+		fmt.Println("Failed to retrieve post", err)
 		response := map[string]string{"error": "Failed to retrieve post"}
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response)
@@ -90,18 +90,28 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var id int64
-	if comment.GroupID == 0 {
-		id, err = database.CreateComment(comment.Content, user.ID, post, imagePath)
-	} else {
-		id, err = database.CreateGroupComment(comment.Content, user.ID, comment.GroupID, post, imagePath)
+	var type_notification = "comment"
+	id, err = database.CreateComment(comment.Content, user.ID, post, imagePath)
+	if comment.GroupID != 0 {
+		type_notification += "comment group"
 	}
 
 	if err != nil {
-		fmt.Println("Failed to create comment")
+		fmt.Println("Failed to create comment", err)
 		response := map[string]string{"error": "Failed to create comment"}
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response)
 		return
+	}
+
+	if post.UserID != user.ID {
+		if err := database.CreateNotification(user.ID, post.UserID, post.ID, post.GroupID, 0, type_notification); err != nil {
+			fmt.Println("Failed to create notification", err)
+			response := map[string]string{"error": "Failed to create notification"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
 	}
 
 	newComment := structs.Comment{
@@ -109,7 +119,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		PostID:    comment.PostID,
 		GroupID:   comment.GroupID,
 		Content:   html.EscapeString(comment.Content),
-		Author:    user.Username,
+		User:      *user,
 		CreatedAt: "Just Now",
 		Image:     imagePath,
 	}

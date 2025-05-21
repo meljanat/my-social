@@ -21,7 +21,7 @@ import (
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		fmt.Println("Method not allowed")
+		fmt.Println("Method not allowed", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)
@@ -52,7 +52,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := database.GetUserByEmail(login.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			fmt.Println("Invalid email or password")
+			fmt.Println("Invalid email or password", err)
 			response := map[string]string{"error": "Invalid email or password"}
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(response)
@@ -111,7 +111,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		fmt.Println("Method not allowed")
+		fmt.Println("Method not allowed", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)
@@ -119,118 +119,85 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var register structs.User
-	err := r.ParseMultipartForm(20 << 20)
-	if err != nil {
-		fmt.Println("Error parsing form data:", err)
-		http.Error(w, "Cannot parse form", http.StatusBadRequest)
-		return
-	}
-
+	var err error
+	register.Type = r.FormValue("type")
 	register.Username = r.FormValue("username")
 	register.FirstName = r.FormValue("firstName")
 	register.LastName = r.FormValue("lastName")
-	register.Email = r.FormValue("email")
-	register.Password = r.FormValue("password")
-	register.ConfirmPass = r.FormValue("confirmedPassword")
 	register.Bio = r.FormValue("aboutMe")
 	register.Privacy = r.FormValue("privacy")
-	register.Type = r.FormValue("type")
-	temp := r.FormValue("dateOfBirth")
-	register.DateOfBirth, err = time.Parse("2006-01-02", temp)
-	if err != nil {
-		fmt.Println("Error parsing date of birth:", err)
-		response := map[string]string{"error": "Error Parsing Date"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
 
-	errors, valid := ValidateInput(register.Username, register.FirstName, register.LastName, register.Email, register.Password, register.ConfirmPass, register.Privacy, register.Bio, register.DateOfBirth)
-	if !valid {
-		fmt.Println("Validation error:", errors)
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"error":  "Validation error",
-			"fields": errors,
-		})
-		return
-	}
-
-	var imagePath string
-	image, header, err := r.FormFile("avatar")
-	if err != nil && err.Error() != "http: no such file" {
-		fmt.Println("Error retrieving image:", err)
-		response := map[string]string{"error": "Failed to retrieve image"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
-		return
-	} else if image != nil {
-		imagePath, err = SaveImage(image, header, "../frontend/public/avatars/")
+	if register.Type == "register" {
+		register.Email = r.FormValue("email")
+		register.Password = r.FormValue("password")
+		register.ConfirmPass = r.FormValue("confirmedPassword")
+		temp := r.FormValue("dateOfBirth")
+		register.DateOfBirth, err = time.Parse("2006-01-02", temp)
 		if err != nil {
-			fmt.Println("Error saving image:", err)
-			response := map[string]string{"error": err.Error()}
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-		newpath := strings.Split(imagePath, "/public")
-		imagePath = newpath[1]
-	} else {
-		imagePath = "/inconnu/avatar.png"
-	}
-
-	var coverPath string
-	cover, header, err := r.FormFile("cover")
-	if err != nil && err.Error() != "http: no such file" {
-		fmt.Println("Error retrieving cover:", err)
-		response := map[string]string{"error": "Failed to retrieve cover"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
-		return
-	} else if cover != nil {
-		coverPath, err = SaveImage(cover, header, "../frontend/public/covers/")
-		if err != nil {
-			fmt.Println("Error saving cover:", err)
-			response := map[string]string{"error": err.Error()}
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-		newpath := strings.Split(coverPath, "/public")
-		coverPath = newpath[1]
-	} else {
-		coverPath = "/inconnu/cover.jpg"
-	}
-
-	if register.Type == "update" {
-		register.ID, err = strconv.ParseInt(r.FormValue("id"), 10, 64)
-		if err != nil {
-			fmt.Println("Error parsing ID:", err)
-			response := map[string]string{"error": "Error Parsing ID"}
+			fmt.Println("Error parsing date of birth:", err)
+			response := map[string]string{"error": "Error Parsing Date"}
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(response)
 			return
 		}
-		if err := database.UpdateProfile(register.ID, register.Username, register.FirstName, register.LastName, register.Email, register.Bio, imagePath, coverPath, register.Privacy, register.DateOfBirth); err != nil {
-			if strings.Contains(err.Error(), "UNIQUE constraint failed: users.email") {
-				fmt.Println("Email already exists")
-				response := map[string]string{"error": "Email already exists"}
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(response)
-			} else if strings.Contains(err.Error(), "UNIQUE constraint failed: users.username") {
-				fmt.Println("Username already exists")
-				response := map[string]string{"error": "Username already exists"}
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(response)
-			} else {
-				log.Printf("Error inserting user: %v", err)
-				response := map[string]string{"error": "Registration failed"}
-				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(response)
-			}
+
+		errors, valid := ValidateInput(register.Username, register.FirstName, register.LastName, register.Email, register.Password, register.ConfirmPass, register.Privacy, register.Bio, register.DateOfBirth)
+		if !valid {
+			fmt.Println("Validation error:", errors)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"error":  "Validation error",
+				"fields": errors,
+			})
 			return
 		}
-	} else if register.Type == "register" {
+
+		var imagePath string
+		image, header, err := r.FormFile("avatar")
+		if err != nil && err.Error() != "http: no such file" {
+			fmt.Println("Error retrieving image:", err)
+			response := map[string]string{"error": "Failed to retrieve image"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		} else if image != nil {
+			imagePath, err = SaveImage(image, header, "../frontend/public/avatars/")
+			if err != nil {
+				fmt.Println("Error saving image:", err)
+				response := map[string]string{"error": err.Error()}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
+			newpath := strings.Split(imagePath, "/public")
+			imagePath = newpath[1]
+		} else {
+			imagePath = "/inconnu/avatar.png"
+		}
+
+		var coverPath string
+		cover, header, err := r.FormFile("cover")
+		if err != nil && err.Error() != "http: no such file" {
+			fmt.Println("Error retrieving cover:", err)
+			response := map[string]string{"error": "Failed to retrieve cover"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		} else if cover != nil {
+			coverPath, err = SaveImage(cover, header, "../frontend/public/covers/")
+			if err != nil {
+				fmt.Println("Error saving cover:", err)
+				response := map[string]string{"error": err.Error()}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
+			newpath := strings.Split(coverPath, "/public")
+			coverPath = newpath[1]
+		} else {
+			coverPath = "/inconnu/cover.jpg"
+		}
+
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
 		if err != nil {
 			fmt.Println("Error hashing password:", err)
@@ -268,6 +235,51 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+	} else if register.Type == "update" {
+		register.ID, err = strconv.ParseInt(r.FormValue("id"), 10, 64)
+		if err != nil {
+			fmt.Println("Error parsing ID:", err)
+			response := map[string]string{"error": "Error Parsing ID"}
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		if err := database.UpdateProfile(register.ID, register.Username, register.FirstName, register.LastName, register.Bio, register.Privacy); err != nil {
+			if strings.Contains(err.Error(), "UNIQUE constraint failed: users.email") {
+				fmt.Println("Email already exists")
+				response := map[string]string{"error": "Email already exists"}
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				json.NewEncoder(w).Encode(response)
+			} else if strings.Contains(err.Error(), "UNIQUE constraint failed: users.username") {
+				fmt.Println("Username already exists")
+				response := map[string]string{"error": "Username already exists"}
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				json.NewEncoder(w).Encode(response)
+			} else {
+				log.Printf("Error updating user: %v", err)
+				response := map[string]string{"error": "Profile update failed"}
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+			}
+			return
+		}
+
+		response := map[string]interface{}{
+			"user":    register,
+			"message": "Profile updated successfully!",
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+		return
+	} else {
+		fmt.Println("Invalid request method")
+		response := map[string]string{"error": "Method not allowed"}
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(response)
+		return
 	}
 
 	response := map[string]string{"message": "Registration successful! Please log in."}
@@ -277,7 +289,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		fmt.Println("Invalid request method")
+		fmt.Println("Invalid request method", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)

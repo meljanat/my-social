@@ -10,6 +10,7 @@ export default function ProfileCard({ user, onPostCreated, my_groups }) {
   const [showGroupForm, setShowGroupForm] = useState(false);
   const [showEventForm, setShowEventForm] = useState(false);
   const [groups, setGroups] = useState([]);
+  const [audience, setAudience] = useState([]);
 
   function handleCreatePost() {
     setShowPostForm(true);
@@ -39,7 +40,7 @@ export default function ProfileCard({ user, onPostCreated, my_groups }) {
       </div>
 
       <div className="profile-info">
-        <a href={`/profile/${user.id}`} className="profile-link">
+        <a href={`/profile/${user.user_id}`} className="profile-link">
           <h2 className="profile-name">{`${user.first_name} ${user.last_name}`}</h2>
         </a>
         <p className="profile-username">@{user.username || "username"}</p>
@@ -54,7 +55,7 @@ export default function ProfileCard({ user, onPostCreated, my_groups }) {
             <div className="stat-label">Following</div>
           </div>
           <div className="stat">
-            <div className="stat-value">{user.total_posts}</div>
+            <div className="stat-value">{user.post.total_posts}</div>
             <div className="stat-label">Posts</div>
           </div>
         </div>
@@ -148,6 +149,7 @@ function PostFormModal({ onClose, user, onPostCreated }) {
 
       if (response.ok) {
         const data = await response.json();
+        // console.log("Post created: ", data);
 
         if (data.Users && Array.isArray(data.Users)) {
           setFollowers(data.Users);
@@ -159,7 +161,7 @@ function PostFormModal({ onClose, user, onPostCreated }) {
           if (data.Categories.length > 0) {
             setPostFormInput((prev) => ({
               ...prev,
-              categoryId: data.Categories[0].id,
+              categoryId: data.Categories[0].category_id,
             }));
           }
         }
@@ -182,15 +184,17 @@ function PostFormModal({ onClose, user, onPostCreated }) {
   };
 
   const toggleFollowerSelection = (follower) => {
-    const isSelected = selectedFollowers.includes(follower.id);
+    const isSelected = selectedFollowers.includes(follower.user_id);
 
     if (isSelected) {
-      setSelectedFollowers((prev) => prev.filter((id) => id !== follower.id));
+      setSelectedFollowers((prev) =>
+        prev.filter((id) => id !== follower.user_id)
+      );
       setSelectedFollowerNames((prev) =>
         prev.filter((name) => name !== follower.username)
       );
     } else {
-      setSelectedFollowers((prev) => [...prev, follower.id]);
+      setSelectedFollowers((prev) => [...prev, follower.user_id]);
       setSelectedFollowerNames((prev) => [...prev, follower.username]);
     }
   };
@@ -204,16 +208,9 @@ function PostFormModal({ onClose, user, onPostCreated }) {
     formData.append("title", postFormInput.title);
     formData.append("content", postFormInput.content);
     formData.append("privacy", postFormInput.privacy);
-
     formData.append("category", postFormInput.categoryId.toString());
 
-    if (
-      postFormInput.privacy === "almost_private" &&
-      selectedFollowers.length > 0
-    ) {
-      formData.append("audience", JSON.stringify(selectedFollowers));
-    }
-
+    formData.append("users", selectedFollowers.join(","));
     if (postFormInput.postImage) {
       formData.append("postImage", postFormInput.postImage);
     }
@@ -230,26 +227,35 @@ function PostFormModal({ onClose, user, onPostCreated }) {
         console.error(data);
         throw new Error(data.error || "Failed to create the post");
       }
-
-      const responseData = await response.json();
+      const data = await response.json();
+      // console.log("Post created: ", data);
+      for (let pair of formData.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
+      }
 
       const newPost = {
-        id: responseData.id || Date.now(),
-        title: postFormInput.title,
-        content: postFormInput.content,
-        privacy: postFormInput.privacy,
+        id: data.id || Date.now(),
+        title: data.title || postFormInput.title,
+        content: data.content || postFormInput.content,
+        privacy: data.privacy || postFormInput.privacy || "public",
         author: `${user.first_name} ${user.last_name}`,
-        author_id: user.id,
+        author_id: user.user_id,
         created_at: "Just now",
         category:
-          categories.find((c) => c.id === postFormInput.categoryId)?.name || "",
+          categories.find(
+            (c) => c.category_id === parseInt(postFormInput.categoryId)
+          )?.name || "",
+        category_color: "#000000",
+        category_background: "#f0f0f0",
         total_likes: 0,
         total_comments: 0,
-        image: postFormInput.postImage
-          ? URL.createObjectURL(postFormInput.postImage)
-          : null,
-        avatar: user.avatar || "avatar.jpg",
+        is_liked: false,
+        saved: false,
+        image: data.image || null,
+        avatar: user.avatar || "/avatars/default.jpg",
       };
+
+      console.log("New post object:", newPost);
 
       if (onPostCreated) {
         onPostCreated(newPost);
@@ -257,7 +263,7 @@ function PostFormModal({ onClose, user, onPostCreated }) {
 
       onClose();
     } catch (error) {
-      console.error(error);
+      console.log(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -367,7 +373,7 @@ function PostFormModal({ onClose, user, onPostCreated }) {
               >
                 {categories.length > 0 ? (
                   categories.map((category) => (
-                    <option key={category.name} value={category.id}>
+                    <option key={category.name} value={category.category_id}>
                       {category.name}
                     </option>
                   ))

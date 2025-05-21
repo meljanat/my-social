@@ -3,7 +3,7 @@ import "../styles/FormModal.css";
 
 export default function GroupFormModal({ onClose, user, onGroupCreated }) {
   const [groupFormInput, setGroupFormInput] = useState({
-    user_id: user.id,
+    // user_id: user.id,
     name: "",
     description: "",
     privacy: "public",
@@ -61,14 +61,14 @@ export default function GroupFormModal({ onClose, user, onGroupCreated }) {
       }
 
       const responseData = await response.json();
+      console.log("Group created:", responseData);
 
       const newGroup = {
-        id: responseData.id || Date.now(),
+        id: responseData.group_id || Date.now(),
         name: groupFormInput.name,
+        total_post : 0,
         description: groupFormInput.description,
         privacy: groupFormInput.privacy,
-        creator: `${user.first_name} ${user.last_name}`,
-        creator_id: user.id,
         created_at: "Just now",
         image: groupFormInput.groupImage
           ? URL.createObjectURL(groupFormInput.groupImage)

@@ -42,34 +42,16 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	Clients[user.ID] = append(Clients[user.ID], conn)
 	Mutex.Unlock()
 
-	// connections, err := database.GetConnections(user.ID)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	response := map[string]string{"error": "Failed to retrieve connections"}
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	json.NewEncoder(w).Encode(response)
-	// 	return
-	// }
+	// NotifyUsers(user.ID, "online")
 
-	// Mutex.Lock()
-	// for _, connection := range connections {
-	// 	if _, exist := Clients[connection.ID]; exist {
-	// 		fmt.Println("User already connected:", connection.ID)
-	// 		fmt.Println(Clients)
-	// 		SendWsMessage(connection.ID, map[string]interface{}{"type": "users", "users": connections})
-	// 	}
-	// }
-	// Mutex.Unlock()
-
-	fmt.Println(Clients)
 	fmt.Println("Connected to user:", user.Username)
 	ListenForMessages(conn, user.ID)
-	fmt.Println("Listening for messages...")
 }
 
 func ListenForMessages(conn *websocket.Conn, user_id int64) {
 	defer func() {
 		RemoveClient(conn, user_id)
+		// NotifyUsers(user_id, "offline")
 		// delete(Clients, user_id)
 		conn.Close()
 	}()
@@ -79,10 +61,25 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 		fmt.Println(err)
 		return
 	}
+	notifs, err := database.GetNotifications(user_id, 0)
+	if err != nil {
+		fmt.Println("Error getting notifications:", err)
+		return
+	}
 
 	for {
+		newNotifs, err := database.GetNotifications(user_id, 0)
+		if err != nil {
+			fmt.Println("Error getting notifications:", err)
+			return
+		}
+		if len(notifs) < len(newNotifs) {
+			SendWsMessage(user_id, map[string]interface{}{"type": "notifications", "notifications": newNotifs})
+			notifs = newNotifs
+		}
+
 		var message structs.Message
-		err := conn.ReadJSON(&message)
+		err = conn.ReadJSON(&message)
 		if err != nil {
 			fmt.Println("Error reading JSON:", err)
 			break
@@ -120,13 +117,31 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 			// 	} else if message.GroupID != 0 {
 			// SendWsMessage(message.GroupID, map[string]interface{}{"type": "typing", "id": user.ID, "username": user.Username})
 			// 	}
-			// } else if message.Type == "notification" {
-			// 	if message.UserID != 0 {
-			// 		SendWsMessage(message.UserID, map[string]interface{}{"type": "notification", "id": user.ID, "username": user.Username, "content": message.Content})
-			// 	} else if message.GroupID != 0 {
-			// 		SendWsMessage(message.GroupID, map[string]interface{}{"type": "notification", "id": user.ID, "username": user.Username, "content": message.Content})
-			// 	}
+			// }
 		}
+	}
+}
+
+func NotifyUsers(user_id int64, statu string) {
+	connections, err := database.GetConnections(user_id, 0)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, connection := range connections {
+		if connection.ID == user_id {
+			continue
+		}
+		Mutex.Lock()
+		if _, ok := Clients[connection.ID]; ok {
+			if statu == "online" {
+				SendWsMessage(connection.ID, map[string]interface{}{"type": "new_connection", "user_id": user_id})
+			} else if statu == "offline" {
+				SendWsMessage(connection.ID, map[string]interface{}{"type": "disconnection", "user_id": user_id})
+			}
+		}
+		Mutex.Unlock()
 	}
 }
 

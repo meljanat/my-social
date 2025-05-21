@@ -51,6 +51,7 @@
   .pending-group-status {
     display: flex;
     align-items: center;
+    gap: 0.7rem;
   }
   
   .pending-group-status span {
@@ -79,7 +80,7 @@
     color: #606B85;
     border: none;
     border-radius: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.3rem 1rem;
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;

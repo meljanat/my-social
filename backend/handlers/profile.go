@@ -11,7 +11,7 @@ import (
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		fmt.Println("Method not allowed")
+		fmt.Println("Method not allowed", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)
@@ -20,7 +20,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
-		fmt.Println("Failed to retrieve user")
+		fmt.Println("Failed to retrieve user", err)
 		response := map[string]string{"error": "Failed to retrieve user"}
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response)
@@ -52,7 +52,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		info.Role = "user"
 	}
 
-	followed, err := database.IsFollowed(user.ID, user_id)
+	info.IsFollowing, err = database.IsFollowed(user.ID, user_id)
 	if err != nil {
 		fmt.Println("Error checking follow status:", err)
 		response := map[string]string{"error": "Failed to retrieve followings"}
@@ -61,7 +61,23 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	info.IsFriend = followed
+	info.IsFollower, err = database.IsFollowed(user_id, user.ID)
+	if err != nil {
+		fmt.Println("Error checking follow status:", err)
+		response := map[string]string{"error": "Failed to retrieve followers"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	info.IsPending, err = database.CheckInvitation(user_id, user.ID)
+	if err != nil {
+		fmt.Println("Error checking invitation:", err)
+		response := map[string]string{"error": "Failed to retrieve invitation"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(info)
@@ -69,7 +85,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 
 func ProfilePostsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		fmt.Println("Method not allowed")
+		fmt.Println("Method not allowed", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)
@@ -78,7 +94,7 @@ func ProfilePostsHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
-		fmt.Println("Failed to retrieve user")
+		fmt.Println("Failed to retrieve user", err)
 		response := map[string]string{"error": "Failed to retrieve user"}
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response)
@@ -93,6 +109,15 @@ func ProfilePostsHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 
+	}
+
+	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
+	if err != nil {
+		fmt.Println("Error parsing offset:", err)
+		response := map[string]string{"error": "Invalid offset"}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
 	}
 
 	info, err := database.GetProfileInfo(user_id)
@@ -115,10 +140,21 @@ func ProfilePostsHandler(w http.ResponseWriter, r *http.Request) {
 
 	var posts []structs.Post
 	if followed || info.Privacy == "public" || user_id == user.ID {
-		posts, err = database.GetPostsByUser(user_id, user.ID, followed)
+		posts, err = database.GetPostsByUser(user_id, user.ID, offset, followed)
 		if err != nil {
 			fmt.Println("Error retrieving posts:", err)
 			response := map[string]string{"error": "Failed to retrieve posts"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+	}
+
+	for i := 0; i < len(posts); i++ {
+		posts[i].TotalSaves, err = database.CountSaves(posts[i].ID, posts[i].GroupID)
+		if err != nil {
+			fmt.Println("Failed to count saves", err)
+			response := map[string]string{"error": "Failed to count saves"}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(response)
 			return

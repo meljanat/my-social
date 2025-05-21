@@ -258,12 +258,14 @@
 //   );
 // }
 "use client";
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../styles/ChatWidget.css";
-import UserCard from "./UserCard";
+// import UserCard from "./UserCard";
+import ChatContact from "./ChatContact";
 import Message from "./Message";
 import { websocket } from "../websocket/ws";
-import { subscribe, unsubscribe } from "../websocket/ws";
+import { addToListeners, removeFromListeners } from "../websocket/ws";
+import 'emoji-picker-element';
 
 export default function ChatWidget({ users, groups, myData }) {
   const [activeTab, setActiveTab] = useState("friends");
@@ -274,6 +276,7 @@ export default function ChatWidget({ users, groups, myData }) {
   const [messages, setMessages] = useState([]);
   const [openWidget, setOpenWidget] = useState(true);
   const [openChatWidget, setOpenChatWidget] = useState(true);
+  const [openEmojiSection, setOpenEmojiSection] = useState(false);
   const [messageSending, setMessageSending] = useState("");
   const messagesEndRef = useRef(null);
 
@@ -289,50 +292,23 @@ export default function ChatWidget({ users, groups, myData }) {
     };
 
     setMessages(messages ? [...messages, message] : [message]);
-    websocket.send(JSON.stringify({ type: 'message', content: messageSending, user_id: selectedUser.id }));
+    websocket.send(JSON.stringify({ type: 'message', content: messageSending, user_id: selectedUser.user_id }));
 
     setMessageSending("")
   }
-
-  // async function handleMessagesSending(id) {
-  //   const formData = new FormData();
-  //   formData.append("receiver_id", id);
-  //   formData.append("content", messageSending);
-
-  //   // console.log(messageSending);
-  //   try {
-  //     const response = await fetch("http://localhost:8404/message", {
-  //       method: "POST",
-  //       credentials: "include",
-  //       body: formData,
-  //     });
-  //     console.log(id);
-
-  //     const data = await response.json();
-  //     if (!response.ok) {
-  //       console.log(data);
-  //     }
-  //     console.log(data);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
 
   async function showUserTab(user) {
     setSelectedUser(user);
 
     try {
-      let creds = `id=${user.id}&group_id=0`
-      if (activeTab === "groups") creds = `id=0&group_id=${user.id}`
       const response = await fetch(
-        `http://localhost:8404/chats?${creds}`,
+        `http://localhost:8404/chats?id=${user.user_id}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
           credentials: "include",
-          // body: JSON.stringify(user.id),
         }
       );
 
@@ -342,12 +318,13 @@ export default function ChatWidget({ users, groups, myData }) {
       }
 
       const data = await response.json();
+      console.log("User Data: ", data);
+
       setMessages(data);
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
   }
-
 
   useEffect(() => {
     const handleMessage = (msg) => {
@@ -364,10 +341,10 @@ export default function ChatWidget({ users, groups, myData }) {
       }
     };
 
-    subscribe('message', handleMessage);
+    addToListeners('message', handleMessage);
 
     return () => {
-      unsubscribe('message', handleMessage);
+      removeFromListeners('message', handleMessage);
     };
   }, []);
 
@@ -377,6 +354,11 @@ export default function ChatWidget({ users, groups, myData }) {
   const toggleChatWidget = () => {
     setOpenChatWidget(!openChatWidget);
   };
+  const toggleEmojiSection = () => {
+    console.log(openEmojiSection ? 'emo closed' : 'emo opened');
+
+    setOpenEmojiSection(!openEmojiSection);
+  };
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -384,6 +366,27 @@ export default function ChatWidget({ users, groups, myData }) {
     }
   }, [messages]);
 
+  const emojiPickerRef = useRef(null);
+
+  useEffect(() => {
+    if (!openEmojiSection) return;
+
+    const picker = emojiPickerRef.current;
+    if (!picker) return;
+
+    const handleEmojiClick = (event) => {
+      const emoji = event.detail.unicode;
+      console.log(emoji);
+
+      setMessageSending((prev) => prev + emoji);
+    };
+
+    picker.addEventListener("emoji-click", handleEmojiClick);
+
+    return () => {
+      picker.removeEventListener("emoji-click", handleEmojiClick);
+    };
+  }, [openEmojiSection]);
 
   return (
     <div className="chat-wrapper-fixed">
@@ -415,7 +418,7 @@ export default function ChatWidget({ users, groups, myData }) {
               <div className="messages-container">
                 {messages.map((msg) => (
                   <Message
-                    key={msg.id}
+                    key={msg.message_id}
                     message={msg}
                     isSent={msg.username !== selectedUser.username}
                   />
@@ -440,6 +443,11 @@ export default function ChatWidget({ users, groups, myData }) {
           )}
           {openChatWidget && (
             <div className="message-input">
+              <div className="emoji-toggle">
+                <button onClick={() => {
+                  toggleEmojiSection()
+                }}>emoji</button>
+              </div>
               <input
                 onChange={(e) => {
                   setMessageSending(e.target.value);
@@ -452,7 +460,7 @@ export default function ChatWidget({ users, groups, myData }) {
                 className="send-message-container"
                 onClick={(e) => {
                   e.preventDefault();
-                  handleMessagesSend(selectedUser.id);
+                  handleMessagesSend(selectedUser.user_id);
 
                   // handleMessagesSending(selectedUser.id);
                 }}
@@ -460,6 +468,11 @@ export default function ChatWidget({ users, groups, myData }) {
                 <img className="send-message-icon" src="./icons/send.svg"></img>
                 <p>Send</p>
               </div>
+              {openEmojiSection && (
+                <div className="emoji-section">
+                  <emoji-picker ref={emojiPickerRef}></emoji-picker>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -492,19 +505,18 @@ export default function ChatWidget({ users, groups, myData }) {
                 }`}
               onClick={() => setActiveTab("friends")}
             >
-              <h4 className="friends-message-labes">Friends ({users ? users.length : 0})</h4>
+              <h4 className="friends-message-labes">Friends (5)</h4>
             </div>
             <div
               className={`users-chat-tab ${activeTab === "groups" ? "active-tab" : ""
                 }`}
               onClick={() => setActiveTab("groups")}
             >
-              <h4 className="groups-message-labes">Groups ({groups ? groups.length : 0})</h4>
+              <h4 className="groups-message-labes">Groups (2)</h4>
             </div>
           </div>
 
           <div className="chat-container">
-            {/* {console.log("List to render: ", listToRender)} */}
             <ul className="chat-content">
               {(!listToRender ||
                 (listToRender && listToRender.length === 0)) && (
@@ -551,38 +563,16 @@ export default function ChatWidget({ users, groups, myData }) {
                 )}
               {listToRender &&
                 listToRender.map((user) => (
-                  <div
-                    key={user.id}
+                  <ChatContact
+                    key={user.user_id}
+                    user={user}
+                    isOnline={user.is_online}
                     onClick={() => {
                       console.log("user: ", user);
-                      showUserTab(user, false);
+                      showUserTab(user);
                       setSelectedUser(user);
                     }}
-                  >
-                    <UserCard key={user.id} user={user} />
-                    {/* <li key={user.id} className="user-item">
-                  <img
-                    src={
-                      user.avatar ||
-                      "./avatars/thorfinn-vinland-saga-episode-23-1.png"
-                    }
-                    className="user-avatar"
-                    alt={user.username}
                   />
-                  <div className="user-details">
-                    <div className="user-info">
-                      <h4 className="user-name">{`${user.first_name} ${user.last_name}`}</h4>
-                      <p className="user-username">@{user.username}</p>
-                    </div>
-                    <button
-                      className="follow-btn"
-                      onClick={() => handleFollow(user.id)}
-                    >
-                      Follow
-                    </button>
-                  </div>
-                </li> */}
-                  </div>
                 ))}
             </ul>
           </div>

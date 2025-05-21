@@ -32,8 +32,8 @@ export default function AllCategories() {
       {categories.length > 0 ? (
         <ul>
           {categories.map((category) => (
-            <li key={category.id}>
-              <a href={`/category/${category.id}`}>{category.name}</a>
+            <li key={category.category_id}>
+              <a href={`/category/${category.category_id}`}>{category.name}</a>
             </li>
           ))}
         </ul>

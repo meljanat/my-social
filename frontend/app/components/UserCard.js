@@ -1,4 +1,9 @@
+import { useState } from "react";
+
 export default function UserCard({ user, action, onClick }) {
+  const [isFollowing, setIsFollowing] = useState();
+  const [newStatus, setNewStatus] = useState("Follow");
+
   async function handleFollow(user_id) {
     // console.log(`Following user with ID: ${userId}`);
     try {
@@ -13,6 +18,13 @@ export default function UserCard({ user, action, onClick }) {
 
       if (response.ok) {
         console.log("Followed successfully");
+        response.json().then((data) => {
+          if (data === "unfollow") {
+            setNewStatus("Following");
+          } else if (data === "cancel") {
+            setNewStatus("Cancel");
+          }
+        });
       }
       const data = await response.json();
       console.log("Followed user:", data);
@@ -24,7 +36,7 @@ export default function UserCard({ user, action, onClick }) {
   return (
     <li
       className="user-item"
-      // onClick={}
+    // onClick={}
     >
       <img
         src={user.avatar || user.image}
@@ -49,8 +61,14 @@ export default function UserCard({ user, action, onClick }) {
         </div>
 
         {action === "follow" && (
-          <button className="follow-btn" onClick={() => handleFollow(user.id)}>
-            Follow
+          <button
+            className="follow-btn"
+            onClick={() => {
+              setIsFollowing(!isFollowing);
+              handleFollow(user.user_id);
+            }}
+          >
+            {newStatus}
           </button>
         )}
       </div>

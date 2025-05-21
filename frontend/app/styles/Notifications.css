@@ -1,151 +1,214 @@
-.notification-wrapper {
-    position: relative;
-    display: inline-block;
-  }
-  
-  .notification-icon {
-    cursor: pointer;
-    font-size: 24px;
-    position: relative;
-  }
-  
-  .notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: red;
-    color: white;
-    font-size: 12px;
-    padding: 2px 6px;
-    border-radius: 50%;
-  }
-  
-  .notification-dropdown {
-    position: absolute;
-    top: 30px;
-    right: 0;
-    width: 250px;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    z-index: 1000;
-  }
-  
-  .notification-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .notification-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    max-height: 200px;
-    overflow-y: auto;
-  }
-  
-  .notification-list li {
-    padding: 10px;
-    border-bottom: 1px solid #f0f0f0;
-    cursor: pointer;
-  }
-  
-  .notification-list li.unread {
-    background-color: #f9f9f9;
-    font-weight: bold;
-  }
-  
-  .notification-list li.read {
-    color: #777;
-  }
-  
-  .notification-wrapper {
-    position: relative;
-    display: inline-block;
-  }
-  
-  .notification-icon {
-    cursor: pointer;
-    position: relative;
-    font-size: 24px;
-  }
-  
-  .notification-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: red;
-    color: white;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 12px;
-  }
-  
-  .notification-dropdown {
-    position: absolute;
-    top: 30px;
-    right: 0;
-    background: white;
+.notifications-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 80px;
+  width: 360px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+}
+
+.notifications-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.notifications-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.notifications-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mark-read-btn {
+  background: none;
+  border: none;
+  color: #64748B;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.mark-read-btn:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.see-all-btn {
+  text-decoration: none;
+  color: #3555F9;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  background-color: #EFF6FF;
+}
+
+.see-all-btn:hover {
+  background-color: #DBEAFE;
+}
+
+.see-all-btn .arrow {
+  transition: transform 0.2s;
+}
+
+.see-all-btn:hover .arrow {
+  transform: translateX(3px);
+}
+
+.notification-tabs {
+  display: flex;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: #fafafa;
+}
+
+.notification-tabs button {
+  flex: 1;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  color: #64748B;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.notification-tabs button:hover {
+  color: #333;
+}
+
+.notification-tabs button.active {
+  color: #3555F9;
+  font-weight: 500;
+}
+
+.notification-tabs button.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #3555F9;
+}
+
+.notifications-list {
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 #F1F5F9;
+}
+
+
+
+.empty-notifications {
+  padding: 30px 20px;
+  text-align: center;
+  color: #64748B;
+  font-size: 0.9rem;
+}
+
+.loading-state {
+  padding: 30px 20px;
+  text-align: center;
+  color: #64748B;
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3555F9;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.notification-button {
+  position: relative;
+  background: none;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notification-button:hover {
+  background-color: #F5F7FA;
+}
+
+.notification-button img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.8;
+}
+
+.notification-count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #EF4444;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+@media (max-width: 768px) {
+  .notifications-dropdown {
     width: 300px;
-    border: 1px solid #ccc;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    z-index: 100;
+    right: 10px;
   }
   
-  .notification-header {
-    display: flex;
+  .notifications-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .notifications-actions {
+    width: 100%;
     justify-content: space-between;
-    padding: 10px;
-    font-weight: bold;
-    border-bottom: 1px solid #eee;
   }
-  
-  .notification-type-toggle {
-    display: flex;
-    justify-content: space-around;
-    padding: 5px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .notification-type-toggle button {
-    background: none;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  .notification-type-toggle .active {
-    border-bottom: 2px solid #007bff;
-    color: #007bff;
-  }
-  
-  .notification-list {
-    max-height: 200px;
-    overflow-y: auto;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .notification-list li {
-    padding: 10px;
-    cursor: pointer;
-  }
-  
-  .notification-list li.unread {
-    font-weight: bold;
-    background-color: #f9f9f9;
-  }
-  
-  .notification-list li.read {
-    color: #777;
-  }
-  
-  .no-notifications {
-    padding: 10px;
-    text-align: center;
-    color: #aaa;
-  }
-  
+}

@@ -7,40 +7,38 @@ import (
 )
 
 type User struct {
-	ID                  int64     `json:"id" sqlite:"id"`
-	Username            string    `json:"username" sqlite:"username"`
-	FirstName           string    `json:"first_name" sqlite:"first_name"`
-	LastName            string    `json:"last_name" sqlite:"last_name"`
-	Email               string    `json:"email" sqlite:"email"`
-	DateOfBirth         time.Time `json:"date_of_birth" sqlite:"date_of_birth"`
-	Password            string    `json:"password" sqlite:"password"`
-	ConfirmPass         string    `json:"confirm_pass" sqlite:"confirm_pass"`
-	CreatedAt           time.Time `json:"created_at" sqlite:"created_at"`
-	Avatar              string    `json:"avatar" sqlite:"avatar"`
-	Cover               string    `json:"cover" sqlite:"cover"`
-	Bio                 string    `json:"bio" sqlite:"bio"`
-	Role                string    `json:"role" sqlite:"role"`
-	Privacy             string    `json:"privacy" sqlite:"privacy"`
-	TotalPosts          int64     `json:"total_posts" sqlite:"total_posts"`
-	TotalLikes          int64     `json:"total_likes" sqlite:"total_likes"`
-	TotalComments       int64     `json:"total_comments" sqlite:"total_comments"`
-	TotalFollowers      int64     `json:"total_followers" sqlite:"total_followers"`
-	TotalFollowing      int64     `json:"total_following" sqlite:"total_following"`
-	TotalGroups         int64     `json:"total_groups" sqlite:"total_groups"`
-	TotalEvents         int64     `json:"total_events" sqlite:"total_events"`
-	TotalNotifications  int64     `json:"total_notifications" sqlite:"total_notifications"`
-	TotalMessages       int64     `json:"total_messages" sqlite:"total_messages"`
-	TotalChatsMessages  int64     `json:"total_chat_messages" sqlite:"total_chat_messages"`
-	TotalGroupsMessages int64     `json:"total_group_messages" sqlite:"total_group_messages"`
-	TotalInvitations    int64     `json:"total_invitations" sqlite:"total_invitations"`
-	IsFriend            bool      `json:"is_friend" sqlite:"is_friend"`
-	Online              bool      `json:"online" sqlite:"online"`
-	SessionToken        uuid.UUID `json:"session_token" sqlite:"session_token"`
-	Type                string    `json:"type" sqlite:"type"`
+	ID                 int64     `json:"user_id" sqlite:"user_id"`
+	Username           string    `json:"username" sqlite:"username"`
+	FirstName          string    `json:"first_name" sqlite:"first_name"`
+	LastName           string    `json:"last_name" sqlite:"last_name"`
+	Email              string    `json:"email" sqlite:"email"`
+	DateOfBirth        time.Time `json:"date_of_birth" sqlite:"date_of_birth"`
+	Password           string    `json:"password" sqlite:"password"`
+	ConfirmPass        string    `json:"confirm_pass" sqlite:"confirm_pass"`
+	CreatedAt          time.Time `json:"created_at" sqlite:"created_at"`
+	Avatar             string    `json:"avatar" sqlite:"avatar"`
+	Cover              string    `json:"cover" sqlite:"cover"`
+	Bio                string    `json:"bio" sqlite:"bio"`
+	Role               string    `json:"role" sqlite:"role"`
+	Privacy            string    `json:"privacy" sqlite:"privacy"`
+	Message            Message   `json:"message" sqlite:"message"`
+	Post               Post      `json:"post" sqlite:"post"`
+	TotalFollowers     int64     `json:"total_followers" sqlite:"total_followers"`
+	TotalFollowing     int64     `json:"total_following" sqlite:"total_following"`
+	TotalGroups        int64     `json:"total_groups" sqlite:"total_groups"`
+	TotalEvents        int64     `json:"total_events" sqlite:"total_events"`
+	TotalNotifications int64     `json:"total_notifications" sqlite:"total_notifications"`
+	TotalInvitations   int64     `json:"total_invitations" sqlite:"total_invitations"`
+	IsFollowing        bool      `json:"is_following" sqlite:"is_following"`
+	IsFollower         bool      `json:"is_follower" sqlite:"is_follower"`
+	IsPending          bool      `json:"is_pending" sqlite:"is_pending"`
+	Online             bool      `json:"online" sqlite:"online"`
+	SessionToken       uuid.UUID `json:"session_token" sqlite:"session_token"`
+	Type               string    `json:"type" sqlite:"type"`
 }
 
 type Post struct {
-	ID                 int64     `json:"id" sqlite:"id"`
+	ID                 int64     `json:"post_id" sqlite:"post_id"`
 	Title              string    `json:"title" sqlite:"title"`
 	UserID             int64     `json:"user_id" sqlite:"user_id"`
 	Avatar             string    `json:"avatar" sqlite:"avatar"`
@@ -54,32 +52,37 @@ type Post struct {
 	Image              string    `json:"image" sqlite:"image"`
 	Author             string    `json:"author" sqlite:"author"`
 	CreatedAt          string    `json:"created_at" sqlite:"created_at"`
-	TotalLikes         int64     `json:"total_likes" sqlite:"total_likes"`
 	IsLiked            bool      `json:"is_liked" sqlite:"is_liked"`
+	WhoLiked           []User    `json:"who_liked" sqlite:"who_liked"`
+	TotalLikes         int64     `json:"total_likes" sqlite:"total_likes"`
 	TotalComments      int64     `json:"total_comments" sqlite:"total_comments"`
+	TotalSaves         int64     `json:"total_saves" sqlite:"total_saves"`
+	TotalPosts         int64     `json:"total_posts" sqlite:"total_posts"`
 	Comments           []Comment `json:"comments" sqlite:"comments"`
 	Privacy            string    `json:"privacy" sqlite:"privacy"`
-	Saved              bool      `json:"saved" sqlite:"saved"`
+	IsSaved            bool      `json:"saved" sqlite:"saved"`
 }
 
 type Comment struct {
-	ID        int64  `json:"id" sqlite:"id"`
+	ID        int64  `json:"comment_id" sqlite:"comment_id"`
+	User      User   `json:"user" sqlite:"user"`
 	PostID    int64  `json:"post_id" sqlite:"post_id"`
 	GroupID   int64  `json:"group_id" sqlite:"group_id"`
 	Content   string `json:"content" sqlite:"content"`
-	Author    string `json:"author" sqlite:"author"`
-	Avatar    string `json:"avatar" sqlite:"avatar"`
 	Image     string `json:"image" sqlite:"image"`
+	CreatedAt string `json:"created_at" sqlite:"created_at"`
+}
+type Story struct {
+	ID        int64  `json:"story_id" sqlite:"story_id"`
+	User      User   `json:"user" sqlite:"user"`
+	Image     string `json:"image" sqlite:"image"`
+	IsRead    bool   `json:"status" sqlite:"status"`
 	CreatedAt string `json:"created_at" sqlite:"created_at"`
 }
 
 type Category struct {
-	ID         int64  `json:"id" sqlite:"id"`
-	UserID     int64  `json:"user_id" sqlite:"user_id"`
-	Avatar     string `json:"avatar" sqlite:"avatar"`
-	Username   string `json:"username" sqlite:"username"`
-	FirstName  string `json:"first_name" sqlite:"first_name"`
-	LastName   string `json:"last_name" sqlite:"last_name"`
+	ID         int64  `json:"category_id" sqlite:"category_id"`
+	User       User   `json:"user" sqlite:"user"`
 	Name       string `json:"name" sqlite:"name"`
 	Color      string `json:"color" sqlite:"color"`
 	Background string `json:"background" sqlite:"background"`
@@ -87,13 +90,9 @@ type Category struct {
 }
 
 type Group struct {
-	ID            int64  `json:"id" sqlite:"id"`
+	ID            int64  `json:"group_id" sqlite:"group_id"`
 	Name          string `json:"name" sqlite:"name"`
-	UserID        int64  `json:"user_id" sqlite:"user_id"`
-	Avatar        string `json:"avatar" sqlite:"avatar"`
-	Username      string `json:"username" sqlite:"username"`
-	FirstName     string `json:"first_name" sqlite:"first_name"`
-	LastName      string `json:"last_name" sqlite:"last_name"`
+	User          User   `json:"user" sqlite:"user"`
 	Image         string `json:"image" sqlite:"image"`
 	Cover         string `json:"cover" sqlite:"cover"`
 	Description   string `json:"description" sqlite:"description"`
@@ -108,56 +107,47 @@ type Group struct {
 }
 
 type Message struct {
-	ID             int64  `json:"id" sqlite:"id"`
-	SenderID       int64  `json:"sender_id" sqlite:"sender_id"`
-	GroupID        int64  `json:"group_id" sqlite:"group_id"`
-	UserID         int64  `json:"user_id" sqlite:"user_id"`
-	Avatar         string `json:"avatar" sqlite:"avatar"`
-	Username       string `json:"username" sqlite:"username"`
-	FirstName      string `json:"first_name" sqlite:"first_name"`
-	LastName       string `json:"last_name" sqlite:"last_name"`
-	SenderUsername string `json:"sender_username" sqlite:"sender_username"`
-	SenderAvatar   string `json:"sender_avatar" sqlite:"sender_avatar"`
-	Content        string `json:"content" sqlite:"content"`
-	Image          string `json:"image" sqlite:"image"`
-	CreatedAt      string `json:"created_at" sqlite:"created_at"`
-	Type           string `json:"type" sqlite:"type"`
+	ID                  int64  `json:"message_id" sqlite:"message_id"`
+	SenderID            int64  `json:"sender_id" sqlite:"sender_id"`
+	GroupID             int64  `json:"group_id" sqlite:"group_id"`
+	UserID              int64  `json:"user_id" sqlite:"user_id"`
+	Avatar              string `json:"avatar" sqlite:"avatar"`
+	Username            string `json:"username" sqlite:"username"`
+	FirstName           string `json:"first_name" sqlite:"first_name"`
+	LastName            string `json:"last_name" sqlite:"last_name"`
+	SenderUsername      string `json:"sender_username" sqlite:"sender_username"`
+	SenderAvatar        string `json:"sender_avatar" sqlite:"sender_avatar"`
+	Content             string `json:"content" sqlite:"content"`
+	Image               string `json:"image" sqlite:"image"`
+	CreatedAt           string `json:"created_at" sqlite:"created_at"`
+	TotalMessages       int64  `json:"total_messages" sqlite:"total_messages"`
+	TotalChatsMessages  int64  `json:"total_chat_messages" sqlite:"total_chat_messages"`
+	TotalGroupsMessages int64  `json:"total_group_messages" sqlite:"total_group_messages"`
+	Type                string `json:"type" sqlite:"type"`
 }
 
 type Notification struct {
 	ID               int64     `json:"id" sqlite:"id"`
-	ReceiverID       int64     `json:"receiver_id" sqlite:"receiver_id"`
-	Avatar           string    `json:"avatar" sqlite:"avatar"`
-	Username         string    `json:"username" sqlite:"username"`
-	FirstName        string    `json:"first_name" sqlite:"first_name"`
-	LastName         string    `json:"last_name" sqlite:"last_name"`
-	SenderUsername   string    `json:"sender_username" sqlite:"sender_username"`
-	SenderAvatar     string    `json:"sender_avatar" sqlite:"sender_avatar"`
+	User             User      `json:"user" sqlite:"user"`
 	Content          string    `json:"content" sqlite:"content"`
+	PostID           int64     `json:"post_id" sqlite:"post_id"`
+	GroupID          int64     `json:"group_id" sqlite:"group_id"`
+	EventID          int64     `json:"event_id" sqlite:"event_id"`
 	TypeNotification string    `json:"type_notification" sqlite:"type_notification"`
 	CreatedAt        time.Time `json:"created_at" sqlite:"created_at"`
 	Read             bool      `json:"read" sqlite:"read"`
 }
 
 type Invitation struct {
-	ID       int64  `json:"id" sqlite:"id"`
-	SenderID int64  `json:"sender_id" sqlite:"invited_id"`
-	GroupID  int64  `json:"group_id" sqlite:"group_id"`
-	Sender   string `json:"sender" sqlite:"sender"`
-	Avatar   string `json:"avatar" sqlite:"avatar"`
-	Group    string `json:"group" sqlite:"group"`
+	ID    int64 `json:"id" sqlite:"id"`
+	User  User  `json:"user" sqlite:"user"`
+	Group Group `json:"group" sqlite:"group"`
 }
 
 type Event struct {
 	ID           int64     `json:"id" sqlite:"id"`
-	UserID       int64     `json:"user_id" sqlite:"user_id"`
-	Avatar       string    `json:"avatar" sqlite:"avatar"`
-	Username     string    `json:"username" sqlite:"username"`
-	FirstName    string    `json:"first_name" sqlite:"first_name"`
-	LastName     string    `json:"last_name" sqlite:"last_name"`
-	Group        string    `json:"group" sqlite:"group"`
-	GroupID      int64     `json:"group_id" sqlite:"group_id"`
-	GroupName    string    `json:"group_name" sqlite:"group_name"`
+	User         User      `json:"user" sqlite:"user"`
+	Group        Group     `json:"group" sqlite:"group"`
 	Name         string    `json:"name" sqlite:"name"`
 	Description  string    `json:"description" sqlite:"description"`
 	Image        string    `json:"image" sqlite:"image"`

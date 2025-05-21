@@ -16,7 +16,6 @@ export default function AuthForm({ onLoginSuccess }) {
     aboutMe: "",
     avatar: null,
     cover: null,
-    type: "register",
   });
 
   const [errors, setErrors] = useState({});
@@ -94,7 +93,6 @@ export default function AuthForm({ onLoginSuccess }) {
       if (!formData.lastName) newErrors.lastName = "Last name is required";
       if (!formData.dateOfBirth)
         newErrors.dateOfBirth = "Date of birth is required";
-      if (!formData.aboutMe) newErrors.aboutMe = "About me is required";
 
       if (!formData.confirmedPassword) {
         newErrors.confirmedPassword = "Please confirm your password";
@@ -150,7 +148,6 @@ export default function AuthForm({ onLoginSuccess }) {
       registerData.append("dateOfBirth", formData.dateOfBirth);
       registerData.append("aboutMe", formData.aboutMe);
       registerData.append("privacy", formData.privacy);
-      registerData.append("type", "register");
 
       if (formData.avatar) {
         registerData.append("avatar", formData.avatar);
@@ -160,17 +157,13 @@ export default function AuthForm({ onLoginSuccess }) {
         registerData.append("cover", formData.cover);
       }
 
-      for (const pair of registerData.entries()) {
-        console.log(pair[0] + ':', pair[1]);
-      }
-
-
-      const response = await fetch("http://localhost:8404/register", {
-        method: "POST",
-        body: registerData,
-      });
-      console.log(formData);
-
+      const response = await fetch(
+        "http://localhost:8404/register?type=register",
+        {
+          method: "POST",
+          body: registerData,
+        }
+      );
 
       if (response.ok) {
         setSuccessMessage("Registration successful! You can now log in.");
@@ -180,8 +173,6 @@ export default function AuthForm({ onLoginSuccess }) {
         }, 2000);
       } else {
         const data = await response.json();
-        console.log(data);
-
         setErrors({
           form: data.error || "Registration failed. Please try again.",
         });
@@ -475,8 +466,8 @@ export default function AuthForm({ onLoginSuccess }) {
                 ? "Logging in..."
                 : "Registering..."
               : isLogin
-                ? "Log In"
-                : "Create Account"}
+              ? "Log In"
+              : "Create Account"}
           </button>
         </form>
 

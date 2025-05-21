@@ -2,15 +2,17 @@
 import "../styles/TopGroups.css";
 
 export default function TopGroups({ groups }) {
-  async function handleJoinGroupt(id) {
+  async function handleJoinGroupt(group_id) {
     try {
-      const response = await fetch(`http://localhost:8404/join?id=${id}`, {
+      const response = await fetch(`http://localhost:8404/join`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
+        body: JSON.stringify(parseInt(group_id)),
       });
+      console.log(group_id);
 
       if (response.ok) {
         console.log("Joined group successfully");
@@ -30,37 +32,35 @@ export default function TopGroups({ groups }) {
         </button>
       </div>
 
-      <ul className="group-list">
-        {groups.map((group) => (
-          <li key={group.id} className="group-item">
-            <div className="group-image">
-              <img
-                src={group.image || "/images/default-group.png"}
-                alt={group.name}
-              />
-            </div>
-            <div className="group-info">
-              <span className="group-name">{group.name}</span>
-              <span className="group-members">
-                {group.total_members || 0} members
-              </span>
-            </div>
-            <button
-              className="join-button"
-              onClick={(e) => {
-                handleJoinGroupt(group.id);
-              }}
-            >
-              Join
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      {groups.length === 0 && (
+      {groups?.length === 0 || groups == null ? (
         <div className="empty-state">
-          <p>No groups available</p>
+          <p className="empty-title">No suggested groups yet</p>
         </div>
+      ) : (
+        <ul className="group-list">
+          {groups?.map((group) => (
+            <li key={group.group_id} className="group-item">
+              <div className="group-image">
+                <img
+                  src={group.image || "/images/default-group.png"}
+                  alt={group.name}
+                />
+              </div>
+              <div className="group-info">
+                <span className="group-name">{group.name}</span>
+                <span className="group-members">
+                  {group.total_members || 0} members
+                </span>
+              </div>
+              <button
+                className="join-button"
+                onClick={() => handleJoinGroupt(group.group_id)}
+              >
+                Join
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

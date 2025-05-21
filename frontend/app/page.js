@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// import Navbar from "./components/NavBar";
+import Navbar from "./components/NavBar";
 import LeftSidebar from "./components/LeftSideBar";
 import ProfileCard from "./components/ProfileCard";
 import TopGroups from "./components/TopGroups";
 import PostComponent from "./components/PostComponent";
 import AuthForm from "./components/AuthForm";
+import StoriesComponent from "./components/StoriesComponent";
 
 // import Notifications from "./components/NotificationsComponent";
 import ChatWidget from "./components/ChatWidget";
 import "./styles/page.css";
-// import { connectWebSocket } from "./websocket/ws.js";
-// import { websocket } from "./websocket/ws.js"
 
 export default function Home() {
   const [error, setError] = useState(null);
@@ -56,19 +55,21 @@ export default function Home() {
   useEffect(() => {
     if (isLoggedIn) {
       fetchHomeData();
-      // connectWebSocket();
     }
   }, [isLoggedIn]);
 
   const fetchHomeData = async () => {
     try {
-      const response = await fetch("http://localhost:8404/home", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
+      const response = await fetch(
+        "http://localhost:8404/home?offset=0&offset_messages=0",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -84,7 +85,10 @@ export default function Home() {
   };
 
   const addNewPost = (newPost) => {
-    setPosts((prevPosts) => [newPost, ...prevPosts]);
+    setPosts((prevPosts) => {
+      const updatedPosts = [newPost, ...prevPosts];
+      return updatedPosts;
+    });
   };
 
   const toggleForm = () => {
@@ -126,7 +130,7 @@ export default function Home() {
   if (isLoggedIn && homeData) {
     return (
       <div className="app-container">
-        {/* <Navbar user={homeData.user} /> */}
+        <Navbar />
 
         <div className="main-content">
           <div className="grid-layout">
@@ -138,6 +142,11 @@ export default function Home() {
             </div>
 
             <div className="center-column">
+              {/* <div className="stories-section">
+                <StoriesComponent
+                 stories={homeData.stories}  
+                />
+              </div> */}
               <PostComponent posts={posts} />
             </div>
 

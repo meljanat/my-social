@@ -13,7 +13,7 @@ export default function PostFormModal({
     categoryId: 0,
     postImage: null,
   });
-//   console.log("groupid: ", group_id);
+  //   console.log("groupid: ", group_id);
 
   const [imageInputKey, setImageInputKey] = useState(Date.now());
   const [categories, setCategories] = useState([]);
@@ -41,7 +41,7 @@ export default function PostFormModal({
           if (data.length > 0) {
             setPostFormInput((prev) => ({
               ...prev,
-              categoryId: data[0].id,
+              categoryId: data[0].category_id,
             }));
           }
         }
@@ -103,7 +103,8 @@ export default function PostFormModal({
         // author_id: user.id,
         created_at: "Just now",
         category:
-          categories.find((c) => c.id === postFormInput.categoryId)?.name || "",
+          categories.find((c) => c.category_id === postFormInput.categoryId)
+            ?.name || "",
         total_likes: 0,
         total_comments: 0,
         image: postFormInput.postImage

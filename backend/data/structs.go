@@ -22,6 +22,7 @@ type User struct {
 	Role               string    `json:"role" sqlite:"role"`
 	Privacy            string    `json:"privacy" sqlite:"privacy"`
 	Message            Message   `json:"message" sqlite:"message"`
+	IsTyping           bool      `json:"is_typing" sqlite:"is_typing"`
 	Post               Post      `json:"post" sqlite:"post"`
 	TotalFollowers     int64     `json:"total_followers" sqlite:"total_followers"`
 	TotalFollowing     int64     `json:"total_following" sqlite:"total_following"`

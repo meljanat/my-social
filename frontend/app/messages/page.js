@@ -135,10 +135,18 @@ export default function MessagesPage() {
     }
   }, [messages]);
 
-  const handleUserSelect = (user) => {
+
+  const handleScroll = () => {
+    if (MessagesPage.scrollY >= MessagesPage.innerHeight) {
+      fetchMoreMessages(selectedUser, messages.length);
+    }
+    console.log(MessagesPage.scrollY, MessagesPage.innerHeight);
+  }
+
+  const handleUserSelect = (user, offset = 0) => {
     setSelectedUser(user);
 
-    let fetchMessages = `id=${user.user_id}&offset=0`;
+    let fetchMessages = `id=${user.user_id}&offset=${offset}`;
     fetch(`http://localhost:8404/chats?${fetchMessages}`, {
       method: "GET",
       credentials: "include",
@@ -153,6 +161,21 @@ export default function MessagesPage() {
       });
   };
 
+  const fetchMoreMessages = (user, offset) => {
+    let fetchMessages = `id=${user.user_id}&offset=${offset}`;
+    fetch(`http://localhost:8404/chats?${fetchMessages}`, {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setMessages(messages ? [...data, ...messages] : data);
+      })
+      .catch((error) => {
+        console.error("Error fetching messages:", error);
+        setMessages([]);
+      });
+  }
 
   useEffect(() => {
     const handleMessage = (msg) => {
@@ -315,7 +338,8 @@ export default function MessagesPage() {
                 </div>
               </div>
 
-              <div className="conversation-messages">
+              <div className="conversation-messages"
+                onScroll={handleScroll}>
                 {messages ? messages.map((message) => (
                   <Message
                     key={message.id}

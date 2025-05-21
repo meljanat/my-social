@@ -98,7 +98,6 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 				}
 
 				SendWsMessage(message.UserID, map[string]interface{}{"type": "message", "username": user.Username, "content": message.Content})
-
 			} else if message.GroupID != 0 {
 				if _, err := database.GetGroupById(message.GroupID); err != nil {
 					fmt.Println(err)

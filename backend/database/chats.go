@@ -35,7 +35,7 @@ func SendMessage(sender_id, receiver_id, group_id int64, content, image string) 
 		_, err := DB.Exec("INSERT INTO group_messages (sender_id, group_id, message, status) VALUES (?, ?, ?, ?)", sender_id, group_id, content, "unread")
 		return err
 	}
-	_, err := DB.Exec("INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)", sender_id, receiver_id, content)
+	_, err := DB.Exec("INSERT INTO messages (sender_id, receiver_id, group_id, content) VALUES (?, ?, ?, ?)", sender_id, receiver_id, 0, content)
 	return err
 }
 

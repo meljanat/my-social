@@ -91,7 +91,7 @@ export default function MessagesPage() {
         });
         const data = await response.json();
         console.log(data);
-        
+
 
         setUsers(data);
 
@@ -138,7 +138,7 @@ export default function MessagesPage() {
   const handleUserSelect = (user) => {
     setSelectedUser(user);
 
-    let fetchMessages = `id=${user.id}&offset=1000`;
+    let fetchMessages = `id=${user.user_id}&offset=0`;
     fetch(`http://localhost:8404/chats?${fetchMessages}`, {
       method: "GET",
       credentials: "include",
@@ -207,7 +207,7 @@ export default function MessagesPage() {
     };
 
     setMessages(messages ? [...messages, message] : [message]);
-    websocket.send(JSON.stringify({ type: 'message', content: newMessage, user_id: selectedUser.id }));
+    websocket.send(JSON.stringify({ type: 'message', content: newMessage, user_id: selectedUser.user_id }));
     setNewMessage("");
   };
 

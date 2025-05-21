@@ -31,7 +31,6 @@ func GetConnectionsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	connections, err := database.GetConnections(user.ID, 0)
-	fmt.Println("Connections", connections)
 	if err != nil {
 		fmt.Println("Failed to retrieve connections")
 		response := map[string]string{"error": "Failed to retrieve connections"}

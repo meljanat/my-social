@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Navbar from "./components/NavBar";
 import LeftSidebar from "./components/LeftSideBar";
 import ProfileCard from "./components/ProfileCard";
 import TopGroups from "./components/TopGroups";

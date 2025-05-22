@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 // import { useRouter } from "next/navigation";
 
 import Navbar from "../components/NavBar";
@@ -305,6 +305,8 @@ export default function GroupsPage() {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
+      console.log("hi yosf");
+      
       console.log(`Group ${type} Data:`, data);
       setSelectedGroup((prev) => ({
         ...prev,
@@ -382,7 +384,6 @@ export default function GroupsPage() {
       console.log("Invitations Data:", data);
       setInvitationsGroups(data);
       setIsLoading(false);
-
     } catch (error) {
       console.error("Error fetching invitations data:", error);
       setInvitationsGroups([]);
@@ -390,7 +391,7 @@ export default function GroupsPage() {
     }
   };
 
-  const handleAcceptInvitation = async () => {
+  const handleAcceptInvitation = async (invitationId, groupId, userId) => {
     try {
       setIsLoading(true);
       const response = await fetch(`http://localhost:8404/accept_invitation`, {
@@ -398,7 +399,11 @@ export default function GroupsPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ invitation_id: invitation_id }),
+        body: JSON.stringify({
+          invitation_id: invitationId,
+          group: {group_id: groupId},
+          user: {user_id: userId},
+        }),
         credentials: "include",
       });
 
@@ -716,7 +721,13 @@ export default function GroupsPage() {
                     <InvitationCard
                       key={invitation.invitation_id}
                       invitation={invitation}
-                      onAccept={handleAcceptInvitation}
+                      onAccept={() => {
+                        handleAcceptInvitation(
+                          invitation.id,
+                          invitation.group.group_id,
+                          invitation.user.user_id
+                        );
+                      }}
                       onDecline={handleDeclineInvitation}
                     />
                   ))
@@ -894,24 +905,6 @@ export default function GroupsPage() {
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
-                            d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <span>
-                          {selectedGroup.total_messages || 0} messages
-                        </span>
-                      </div>
-                      <div className="meta-item">
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                             stroke="currentColor"
                             strokeWidth="2"
@@ -993,7 +986,7 @@ export default function GroupsPage() {
                             strokeLinejoin="round"
                           />
                         </svg>
-                        Invitaios
+                        Invitations
                       </button>
                       <button
                         className="admin-action-btn"
@@ -1074,36 +1067,38 @@ export default function GroupsPage() {
                       </button>
                     </div>
                   ) : (
-                    <button
-                      className="leave-group-btn"
-                      onClick={() => {
-                        leaveGroup(selectedGroup.group_id);
-                      }}
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
+                    (
+                      <button
+                        className="leave-group-btn"
+                        onClick={() => {
+                          leaveGroup(selectedGroup.group_id);
+                        }}
                       >
-                        <path
-                          d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M16 17l5-5-5-5M21 12H9"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      Leave Group
-                    </button>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M16 17l5-5-5-5M21 12H9"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        {selectedGroup.role == "member" ? "Leave Group" : "Join Group" }
+                      </button>
+                    ) 
                   )}
                 </div>
               </div>
@@ -1150,14 +1145,6 @@ export default function GroupsPage() {
               >
                 Events
               </button>
-              <button
-                className={`tab-button ${
-                  groupView === "chat" ? "active-tab" : ""
-                }`}
-                onClick={() => setGroupView("chat")}
-              >
-                Chat
-              </button>
             </div>
 
             <div className="profile-actions">
@@ -1175,17 +1162,20 @@ export default function GroupsPage() {
                   {/* {selectedGroup.role === "admin" ||
                     (selectedGroup.role === "member") &
                     ( */}
-                  <button
-                    disabled={
-                      selectedGroup.role !== "admin" &&
-                      selectedGroup.role !== "member"
-                    }
-                    onClick={handleCreatePost}
-                    className="create-post-action-btn"
-                  >
-                    <img src="/icons/create.svg" alt="" />
-                    <span>Create post</span>
-                  </button>
+                  {activeTab === "my-groups" && (
+                    <button
+                      disabled={
+                        selectedGroup.role !== "admin" &&
+                        selectedGroup.role !== "member"
+                      }
+                      onClick={handleCreatePost}
+                      className="create-post-action-btn"
+                    >
+                      <img src="/icons/create.svg" alt="" />
+                      <span>Create post</span>
+                      {/* <span>Create post</span> */}
+                    </button>
+                  )}
                   {/* )} */}
 
                   {(selectedGroup.posts || []).length > 0 ? (

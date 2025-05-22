@@ -62,6 +62,7 @@ func main() {
 	http.HandleFunc("/join", handlers.JoinGroupHandler)
 	http.HandleFunc("/groups", handlers.GetGroupsHandler)
 	http.HandleFunc("/events", handlers.GetEventsHandler)
+	http.HandleFunc("/join_to_event", handlers.JoinToEventHandler)
 	http.HandleFunc("/accept_invitation", handlers.AcceptInvitationHandler)
 	http.HandleFunc("/decline_invitation", handlers.DeclineInvitationHandler)
 	http.HandleFunc("/invitations_groups", handlers.GetInvitationsGroups)

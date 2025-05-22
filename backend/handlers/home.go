@@ -108,7 +108,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	suggested_groups, err := database.GetSuggestedGroups(user.ID, 5)
+	suggested_groups, err := database.GetSuggestedGroups(user.ID, 0)
 	if err != nil {
 		fmt.Println("Failed to retrieve suggested groups", err)
 		response := map[string]string{"error": "Failed to retrieve suggested groups"}
@@ -154,6 +154,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		Connections:    connections,
 		Stories:        stories,
 	}
+	fmt.Println("groups", suggested_groups)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(home)

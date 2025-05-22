@@ -148,7 +148,6 @@ export default function GroupFormModal({ onClose, user, onGroupCreated }) {
               >
                 <option value="public">Public</option>
                 <option value="private">Private</option>
-                <option value="closed">Closed</option>
               </select>
             </div>
 

@@ -35,13 +35,16 @@ async function deleteGroup(group_id) {
 
 async function InvitUsers(group_id) {
   try {
-    const response = await fetch(`http://localhost:8404/add_members?group_id=${group_id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
+    const response = await fetch(
+      `http://localhost:8404/add_members?group_id=${group_id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      }
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch group data");
     }
@@ -51,4 +54,31 @@ async function InvitUsers(group_id) {
     console.log(err);
   }
 }
-export { joinGroup, deleteGroup };
+
+async function fetchGroupData(endpoint) {
+  try {
+    setIsLoading(true);
+    const response = await fetch(
+      `http://localhost:8404/groups?type=${endpoint}&offset=0`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch group data");
+    }
+    const data = await response.json();
+    if (endpoint === "joined") {
+      setMyGroups(data);
+    }
+    setGroupData(data);
+    console.log(`Data:`, data);
+    setIsLoading(false);
+  } catch (error) {
+    console.error("Error fetching group data:", error);
+    setGroupData([]);
+    setIsLoading(false);
+  }
+}
+export { joinGroup, deleteGroup, InvitUsers, fetchGroupData };

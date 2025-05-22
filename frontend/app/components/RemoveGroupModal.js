@@ -1,7 +1,6 @@
 import "../styles/RemoveGroupModal.css";
 
 export default function RemoveGroupModal({ group, onClose, onRemove }) {
-  const group_id = parseInt(group.group_id);
   const handleRemoveGroup = async () => {
     try {
       const response = await fetch(`http://localhost:8404/join`, {
@@ -9,7 +8,7 @@ export default function RemoveGroupModal({ group, onClose, onRemove }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ group_id }),
+        body: JSON.stringify(parseInt(group.group_id)),
         credentials: "include",
       });
       if (response.ok) {

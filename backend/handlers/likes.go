@@ -28,7 +28,6 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 
 	var post structs.Post
 	err = json.NewDecoder(r.Body).Decode(&post)
-
 	if err != nil {
 		fmt.Println("Error decoding request body:", err)
 		response := map[string]string{"error": "Invalid request"}

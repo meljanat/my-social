@@ -16,6 +16,18 @@ func CreateGroup(admin int64, name, description, image, cover, privacy string) (
 
 func DeleteGroup(group_id int64) error {
 	_, err := DB.Exec("DELETE FROM groups WHERE id = ?", group_id)
+	if err != nil {
+		return err
+	}
+	_, err = DB.Exec("DELETE FROM group_members WHERE group_id = ?", group_id)
+	if err != nil {
+		return err
+	}
+	_, err = DB.Exec("DELETE FROM posts WHERE group_id = ?", group_id)
+	if err != nil {
+		return err
+	}
+	_, err = DB.Exec("DELETE FROM invitations WHERE group_id = ?", group_id)
 	return err
 }
 
@@ -67,11 +79,11 @@ func GetSuggestedGroups(user_id, offset int64) ([]structs.Group, error) {
 			return nil, err
 		}
 		group.CreatedAt = date.Format("2006-01-02 15:04:05")
-		groups = append(groups, group)
-		group.TotalPosts, err = GetCountUserPosts(group.AdminID, group.ID)
+		group.TotalPosts, err = GetCountGroupPosts(group.ID)
 		if err != nil {
 			return nil, err
 		}
+		groups = append(groups, group)
 	}
 	return groups, nil
 }
@@ -91,11 +103,11 @@ func GetPendingGroups(user_id, offset int64) ([]structs.Group, error) {
 			return nil, err
 		}
 		group.CreatedAt = date.Format("2006-01-02 15:04:05")
-		groups = append(groups, group)
-		group.TotalPosts, err = GetCountUserPosts(group.AdminID, group.ID)
+		group.TotalPosts, err = GetCountGroupPosts(group.ID)
 		if err != nil {
 			return nil, err
 		}
+		groups = append(groups, group)
 	}
 	return groups, nil
 }

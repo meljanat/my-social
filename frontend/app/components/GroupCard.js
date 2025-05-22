@@ -1,6 +1,6 @@
 import React from "react";
 import "../../styles/GroupsPage.css";
-import { joinGroup, deleteGroup } from "../functions/group";
+import { joinGroup, deleteGroup, fetchGroupData } from "../functions/group";
 
 export default function GroupCard({ group, onClick, isJoined }) {
   async function leaveGroup(group_id) {
@@ -36,7 +36,9 @@ export default function GroupCard({ group, onClick, isJoined }) {
 
         <div className="group-details">
           {/* <h3 className="group-title">{group.description}</h3> */}
-          <p className="group-meta">{`${group.total_members || 0} members - ${group.total_posts} posts`}</p>
+          <p className="group-meta">{`${group.total_members || 0} members - ${
+            group.total_posts
+          } posts`}</p>
         </div>
 
         <div className="group-actions">

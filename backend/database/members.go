@@ -1,10 +1,12 @@
 package database
 
 import (
+	"fmt"
 	structs "social-network/data"
 )
 
 func JoinGroup(user_id, group_id int64) error {
+	fmt.Println("Joining group", group_id)
 	_, err := DB.Exec("INSERT INTO group_members (user_id, group_id) VALUES (?, ?)", user_id, group_id)
 	if err != nil {
 		return err
@@ -30,7 +32,7 @@ func IsMemberGroup(group_id, user_id int64) (bool, error) {
 
 func GetGroupMembers(user_id, group_id, offset int64) ([]structs.User, error) {
 	var members []structs.User
-	rows, err := DB.Query("SELECT u.id, u.username, u.avatar, u.last_name, u.first_name FROM users u JOIN group_members gm ON u.id = gm.user_id WHERE gm.group_id = ? LIMIT ? OFFSET ?", group_id, 10, offset)
+	rows, err := DB.Query("SELECT u.id, u.username, u.avatar, u.lastname, u.firstname FROM users u JOIN group_members gm ON u.id = gm.user_id WHERE gm.group_id = ? LIMIT ? OFFSET ?", group_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}

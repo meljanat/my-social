@@ -68,14 +68,34 @@ func GetEventGroup(group_id, offset int64) ([]structs.Event, error) {
 		if err != nil && !strings.Contains(err.Error(), `name "image": converting NULL to string`) {
 			return nil, err
 		}
+		event.Group.ID = group_id
 		event.CreatedAt = TimeAgo(date)
 		events = append(events, event)
 	}
 	return events, nil
 }
 
+func IsMemberEvent(user_id, event_id int64) (bool, error) {
+	var count int64
+	err := DB.QueryRow("SELECT COUNT(*) FROM event_members WHERE user_id = ? AND event_id = ?", user_id, event_id).Scan(&count)
+	return count > 0, err
+}
+
 func GetCountUserEvents(id int64) (int64, error) {
 	var count int64
 	err := DB.QueryRow("SELECT COUNT(*) FROM event_members WHERE user_id = ?", id).Scan(&count)
 	return count, err
+}
+
+func JoinToEvent(user_id, event_id int64) error {
+	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id) VALUES (?, ?)", user_id, event_id)
+	return err
+}
+func LeaveEvent(user_id, event_id int64) error {
+	_, err := DB.Exec("DELETE FROM event_members WHERE user_id = ? AND event_id = ?", user_id, event_id)
+	return err
+}
+func DeleteEvent(event_id int64) error {
+	_, err := DB.Exec("DELETE FROM group_events WHERE id = ?", event_id)
+	return err
 }

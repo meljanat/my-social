@@ -11,19 +11,51 @@ export default function EventCard({ event, compact = false }) {
   const formatDate = (date) => {
     const month = date.toLocaleString("default", { month: "short" });
     const day = date.getDate();
-    return { month, day };
+    const year = date.getFullYear();
+    return { month, day, year };
   };
 
-  const { month, day } = formatDate(startDate);
-
+  const { month, day, year } = formatDate(startDate);
+  const {endMonth,endDay, endYear } = formatDate(endDate);
   // Format time range
-  const timeRange = `${startDate.toLocaleTimeString([], {
+  const StartRange = `Start Date: ${startDate.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
-  })} - ${endDate.toLocaleTimeString([], {
+  })} ${day}/${month}/${year}`
+  const EndRange = `End Date: ${endDate.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
-  })}`;
+  })}${endDay}/${endMonth}/${endYear}`;
+
+  const JoinToEvent = () => {
+    try {
+      console.log("Joining event:", event.event_id, event.group.group_id);
+      
+      fetch(`http://localhost:8404/join_to_event`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"},
+          credentials: "include",
+          body: JSON.stringify({
+            event_id: event.event_id,
+            group_id: parseInt(event.group_id),
+          })
+        })
+        .then((response) => {
+          if (response.ok) {
+            console.log("Event joined successfully");
+            
+          } else {
+            console.log("Failed to join the event.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error joining event:", error);
+        });
+    } catch (error) {
+      console.error("Error joining event:", error);
+    }
+  };
 
   // Generate gradient colors based on event name
   const generateGradient = (name) => {
@@ -87,7 +119,8 @@ export default function EventCard({ event, compact = false }) {
               <circle cx="12" cy="12" r="10" />
               <path d="M12 6v6l4 2" />
             </svg>
-            <span>{timeRange}</span>
+            <span>{StartRange}</span>
+            <span>{EndRange}</span>
           </div>
 
           {!compact && event.group_name && (
@@ -119,7 +152,8 @@ export default function EventCard({ event, compact = false }) {
       </div>
 
       <div className="event-card-footer">
-        <button className="event-action-button">
+        <button className="event-action-button"
+        onClick={JoinToEvent}>
           <svg viewBox="0 0 24 24" className="event-button-icon">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
           </svg>

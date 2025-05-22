@@ -128,7 +128,7 @@ type Message struct {
 }
 
 type Notification struct {
-	ID               int64     `json:"id" sqlite:"id"`
+	ID               int64     `json:"notification_id" sqlite:"notification_id"`
 	User             User      `json:"user" sqlite:"user"`
 	Content          string    `json:"content" sqlite:"content"`
 	PostID           int64     `json:"post_id" sqlite:"post_id"`
@@ -140,13 +140,13 @@ type Notification struct {
 }
 
 type Invitation struct {
-	ID    int64 `json:"id" sqlite:"id"`
+	ID    int64 `json:"invitation_id" sqlite:"invitation_id"`
 	User  User  `json:"user" sqlite:"user"`
 	Group Group `json:"group" sqlite:"group"`
 }
 
 type Event struct {
-	ID           int64     `json:"id" sqlite:"id"`
+	ID           int64     `json:"event_id" sqlite:"event_id"`
 	User         User      `json:"user" sqlite:"user"`
 	Group        Group     `json:"group" sqlite:"group"`
 	Name         string    `json:"name" sqlite:"name"`

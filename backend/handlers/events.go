@@ -110,7 +110,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 		newpath := strings.Split(imagePath, "/public")
 		imagePath = newpath[1]
 	} else {
-		imagePath = "/inconnu/events.jpg"
+		imagePath = "/inconnu/event.jpg"
 	}
 
 	id, err := database.CreateEvent(user.ID, event.Name, event.Description, event.Location, event.StartDate, event.EndDate, event.Group.ID, imagePath)
@@ -276,6 +276,89 @@ func GetEventsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(events)
 }
 
+func JoinToEventHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Println("Method not allowed", r.Method)
+		response := map[string]string{"error": "Method not allowed"}
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	user, err := GetUserFromSession(r)
+	if err != nil || user == nil {
+		fmt.Println("Failed to retrieve user", err)
+		response := map[string]string{"error": "Failed to retrieve user"}
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	type Event struct {
+		GroupID int64 `json:"group_id"`
+		EventID int64 `json:"event_id"`
+	}
+	var event Event
+	err = json.NewDecoder(r.Body).Decode(&event)
+	if err != nil {
+		fmt.Println("Error decoding request body:", err)
+		response := map[string]string{"error": "Invalid request body"}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	fmt.Println("event", event)
+
+	_, err = database.GetGroupById(event.GroupID)
+	if err != nil {
+		fmt.Println("Error retrieving group:", err)
+		response := map[string]string{"error": "Failed to retrieve group"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	member, err := database.IsMemberGroup(user.ID, event.GroupID)
+	if err != nil || member {
+		fmt.Println("User is already a member of the group", err)
+		response := map[string]string{"error": "User is already a member of the group"}
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	_, err = database.GetEvent(event.EventID)
+	if err != nil {
+		fmt.Println("Error retrieving event:", err)
+		response := map[string]string{"error": "Failed to retrieve event"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	member, err = database.IsMemberEvent(user.ID, event.GroupID)
+	if err != nil || !member {
+		fmt.Println("User is not a member of the event", err)
+		response := map[string]string{"error": "User is not a member of the event"}
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if err = database.JoinToEvent(user.ID, event.EventID); err != nil {
+		fmt.Println("Error joining to event:", err)
+		response := map[string]string{"error": "Failed to join to event"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	response := map[string]string{"message": "Joined to event successfully"}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 func ValidateEvent(name, description, location string, startDate, endDate time.Time) (map[string]string, bool) {
 	errors := make(map[string]string)
 	const maxNameLength = 30
@@ -302,8 +385,6 @@ func ValidateEvent(name, description, location string, startDate, endDate time.T
 
 	if startDate.IsZero() {
 		errors["start_date"] = "Start date is required"
-	} else if startDate.After(endDate) {
-		errors["start_date"] = "Start date must be before end date"
 	}
 
 	if endDate.IsZero() {
@@ -312,10 +393,6 @@ func ValidateEvent(name, description, location string, startDate, endDate time.T
 
 	if endDate.Before(startDate) {
 		errors["end_date"] = "End date must be after start date"
-	}
-
-	if endDate.Before(time.Now()) {
-		errors["end_date"] = "End date must be in the future"
 	}
 
 	if startDate.Before(time.Now()) {

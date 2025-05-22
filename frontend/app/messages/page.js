@@ -45,7 +45,7 @@ const UserCard = ({ user, isActive, onClick }) => {
       onClick={onClick}
     >
       <img
-        src={user.avatar}
+        src={user.avatar|| user.image}
         className="user-avatar"
         alt={user.username || user.name}
       />
@@ -64,9 +64,13 @@ const UserCard = ({ user, isActive, onClick }) => {
                 : ""}
           </p>
         </div>
-        {user.unread_count > 0 && (
-          <div className="unread-badge">{user.unread_count}</div>
-        )}
+        {user.message && user.message.total_messages > 0 ? (
+          <div className="unread-badge">{user.message.total_messages}</div>
+        ): user.total_messages > 0 ? (
+          <div className="unread-badge">{user.total_messages}</div>
+        ) : (
+          ""
+        )}  
       </div>
     </li>
   );
@@ -114,7 +118,7 @@ export default function MessagesPage() {
     const fetchGroups = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8404/groups?type=joined&offset=1000",
+          "http://localhost:8404/groups?type=joined&offset=0",
           {
             method: "GET",
             credentials: "include",
@@ -145,6 +149,7 @@ export default function MessagesPage() {
 
   const handleUserSelect = (user, offset = 0) => {
     setSelectedUser(user);
+    
 
     let fetchMessages = `id=${user.user_id}&offset=${offset}`;
     fetch(`http://localhost:8404/chats?${fetchMessages}`, {
@@ -272,9 +277,9 @@ export default function MessagesPage() {
               {activeTab === "friends"
                 ? users ? users.map((user) => (
                   <UserCard
-                    key={user.id}
+                    key={user.user_id}
                     user={user}
-                    isActive={selectedUser && selectedUser.id === user.id}
+                    isActive={selectedUser && selectedUser.user_id === user.user_id}
                     onClick={() => {
                       handleUserSelect(user)
                       user.total_messages = 0;
@@ -283,9 +288,9 @@ export default function MessagesPage() {
                 )) : ''
                 : groups ? groups.map((group) => (
                   <UserCard
-                    key={group.id}
+                    key={group.group_id}
                     user={group}
-                    isActive={selectedUser && selectedUser.id === group.id}
+                    isActive={selectedUser && selectedUser.id === group.group_id}
                     onClick={() => handleUserSelect(group)}
                   />
                 )) : ''}
@@ -309,10 +314,12 @@ export default function MessagesPage() {
                         ? `${selectedUser.first_name} ${selectedUser.last_name}`
                         : selectedUser.name}
                     </h3>
-                    <p className="conversation-user-status">
-                      <span className={`status-dot ${selectedUser.id ? (onlineUsers[selectedUser.id] ? 'online' : 'offline') : 'offline'}`}></span>
-                      {selectedUser.id ? (onlineUsers[selectedUser.id] ? 'Online' : 'Offline') : 'Offline'}
+                    {selectedUser.username  && (
+                      <p className="conversation-user-status">
+                      <span className={`status-dot ${selectedUser.user_id ? (onlineUsers[selectedUser.user_id] ? 'online' : 'offline') : 'offline'}`}></span>
+                      {selectedUser.user_id ? (onlineUsers[selectedUser.user_id] ? 'Online' : 'Offline') : 'Offline'}
                     </p>
+                    )}
                   </div>
                 </div>
                 <div className="conversation-actions">
@@ -339,9 +346,9 @@ export default function MessagesPage() {
 
               <div className="conversation-messages"
                 onScroll={handleScroll}>
-                {messages ? messages.map((message) => (
+                {messages && messages.length > 0 ? messages.map((message) => (
                   <Message
-                    key={message.id}
+                    key={message.message_id}
                     message={message}
                     isSent={message.username !== selectedUser.username}
                   />

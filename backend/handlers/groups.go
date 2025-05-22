@@ -328,7 +328,7 @@ func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
-		fmt.Println("Failed to retrieve user", err)
+		fmt.Println("Failed to retrive user", err)
 		response := map[string]string{"error": "Failed to retrieve user"}
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response)
@@ -385,8 +385,8 @@ func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(members)
 		} else {
+			fmt.Println("You are not a member of this group")
 			response := map[string]string{"error": "You are not a member of this group"}
-			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(response)
 		}
 		return

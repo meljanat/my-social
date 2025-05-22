@@ -3,9 +3,10 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	structs "social-network/data"
 	"strings"
 	"time"
+
+	structs "social-network/data"
 )
 
 func CreatePost(user_id, group_id, category_id int64, title, content, image, privacy string) (int64, error) {

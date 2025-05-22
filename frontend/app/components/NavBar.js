@@ -177,17 +177,17 @@ export default function Navbar() {
           credentials: "include",
         });
 
+        console.log("response: ", response);
+
         if (response.ok) {
           const data = await response.json();
-          if (data.error) {
-            console.error("Error fetching user data:", data.error);
-          } else {
-            setUser(data);
-          }
+          setUser(data);
+        } else {
+          console.log("User not logged in");
         }
       }
       catch (error) {
-        console.error("Error fetching user data:", error);
+        console.log("Failed to fetch user data:", error);
       }
     }
     fetchUser();

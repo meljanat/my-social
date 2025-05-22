@@ -2,9 +2,10 @@ package database
 
 import (
 	"database/sql"
-	structs "social-network/data"
 	"strings"
 	"time"
+
+	structs "social-network/data"
 )
 
 func CreateEvent(user_id int64, name, description, location string, start, end time.Time, group_id int64, image string) (int64, error) {
@@ -91,10 +92,12 @@ func JoinToEvent(user_id, event_id int64) error {
 	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id) VALUES (?, ?)", user_id, event_id)
 	return err
 }
+
 func LeaveEvent(user_id, event_id int64) error {
 	_, err := DB.Exec("DELETE FROM event_members WHERE user_id = ? AND event_id = ?", user_id, event_id)
 	return err
 }
+
 func DeleteEvent(event_id int64) error {
 	_, err := DB.Exec("DELETE FROM group_events WHERE id = ?", event_id)
 	return err

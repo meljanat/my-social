@@ -140,7 +140,7 @@ export default function Home() {
 
             <div className="center-column">
               <div className="stories-section">
-                <StoriesComponent/>
+                <StoriesComponent />
               </div>
               <PostComponent posts={posts} />
             </div>

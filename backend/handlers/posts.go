@@ -6,10 +6,11 @@ import (
 	"html"
 	"log"
 	"net/http"
-	structs "social-network/data"
-	"social-network/database"
 	"strconv"
 	"strings"
+
+	structs "social-network/data"
+	"social-network/database"
 )
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {

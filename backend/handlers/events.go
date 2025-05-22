@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	structs "social-network/data"
-	"social-network/database"
 	"strconv"
 	"strings"
 	"time"
+
+	structs "social-network/data"
+	"social-network/database"
 )
 
 func CreateEventHandler(w http.ResponseWriter, r *http.Request) {

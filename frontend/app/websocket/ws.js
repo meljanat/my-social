@@ -1,3 +1,8 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+
 export let websocket;
 const listeners = {};
 
@@ -45,23 +50,37 @@ export const removeFromListeners = (event, callback) => {
     }
 };
 
-let isLoggedIn = false;
+export default function WebSocketManager() {
+    const router = useRouter();
+    const pathname = usePathname();
 
-const response = await fetch("http://localhost:8404/", {
-    method: "GET",
-    headers: {
-        "Content-Type": "application/json",
-    },
-    credentials: "include",
-});
+    useEffect(() => {
+        async function checkAuth() {
+            try {
+                const res = await fetch("http://localhost:8404/", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                });
 
-if (response.ok) {
-    const data = await response.json();
-    connectWebSocket();
-    isLoggedIn = data;
-}
+                if (!res.ok) throw new Error("Not logged in");
 
-if (!isLoggedIn && window.location.pathname !== '/') {
-    window.location.href = 'http://localhost:3000/';
-    console.log("User is not logged in, redirecting to login page.");
+                const data = await res.json();
+                if (data) {
+                    connectWebSocket();
+                } else {
+                    if (pathname !== "/") router.push("/");
+                }
+            } catch (err) {
+                console.error("Auth check failed:", err);
+                if (pathname !== "/") router.push("/");
+            }
+        }
+
+        checkAuth();
+    }, []);
+
+    return null;
 }

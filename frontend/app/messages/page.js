@@ -45,7 +45,7 @@ const UserCard = ({ user, isActive, onClick }) => {
       onClick={onClick}
     >
       <img
-        src={user.avatar|| user.image}
+        src={user.avatar || user.image}
         className="user-avatar"
         alt={user.username || user.name}
       />
@@ -66,11 +66,11 @@ const UserCard = ({ user, isActive, onClick }) => {
         </div>
         {user.message && user.message.total_messages > 0 ? (
           <div className="unread-badge">{user.message.total_messages}</div>
-        ): user.total_messages > 0 ? (
+        ) : user.total_messages > 0 ? (
           <div className="unread-badge">{user.total_messages}</div>
         ) : (
           ""
-        )}  
+        )}
       </div>
     </li>
   );
@@ -85,6 +85,12 @@ export default function MessagesPage() {
   const [users, setUsers] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState(null);
   const [groups, setGroups] = useState([]);
+  const [openEmojiSection, setOpenEmojiSection] = useState(false);
+
+  const emojiPickerRef = useRef(null);
+  useEffect(() => {
+    import("emoji-picker-element");
+  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -149,7 +155,7 @@ export default function MessagesPage() {
 
   const handleUserSelect = (user, offset = 0) => {
     setSelectedUser(user);
-    
+
 
     let fetchMessages = `id=${user.user_id}&offset=${offset}`;
     fetch(`http://localhost:8404/chats?${fetchMessages}`, {
@@ -239,6 +245,32 @@ export default function MessagesPage() {
     setNewMessage("");
   };
 
+  const toggleEmojiSection = () => {
+    console.log(openEmojiSection ? 'emo closed' : 'emo opened');
+
+    setOpenEmojiSection(!openEmojiSection);
+  };
+
+  useEffect(() => {
+    if (!openEmojiSection) return;
+
+    const picker = emojiPickerRef.current;
+    if (!picker) return;
+
+    const handleEmojiClick = (event) => {
+      const emoji = event.detail.unicode;
+      console.log(emoji);
+
+      setNewMessage((prev) => prev + emoji);
+    };
+
+    picker.addEventListener("emoji-click", handleEmojiClick);
+
+    return () => {
+      picker.removeEventListener("emoji-click", handleEmojiClick);
+    };
+  }, [openEmojiSection]);
+
   return (
     <div className="messages-page-container">
       <div className="messages-page-content">
@@ -314,11 +346,11 @@ export default function MessagesPage() {
                         ? `${selectedUser.first_name} ${selectedUser.last_name}`
                         : selectedUser.name}
                     </h3>
-                    {selectedUser.username  && (
+                    {selectedUser.username && (
                       <p className="conversation-user-status">
-                      <span className={`status-dot ${selectedUser.user_id ? (onlineUsers[selectedUser.user_id] ? 'online' : 'offline') : 'offline'}`}></span>
-                      {selectedUser.user_id ? (onlineUsers[selectedUser.user_id] ? 'Online' : 'Offline') : 'Offline'}
-                    </p>
+                        <span className={`status-dot ${selectedUser.user_id ? (onlineUsers[selectedUser.user_id] ? 'online' : 'offline') : 'offline'}`}></span>
+                        {selectedUser.user_id ? (onlineUsers[selectedUser.user_id] ? 'Online' : 'Offline') : 'Offline'}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -374,6 +406,11 @@ export default function MessagesPage() {
                     />
                   </svg>
                 </button>
+                <div className="emoji-toggle">
+                  <button onClick={() => {
+                    toggleEmojiSection()
+                  }}>😄</button>
+                </div>
                 <input
                   type="text"
                   placeholder="Type a message..."
@@ -395,6 +432,11 @@ export default function MessagesPage() {
                     />
                   </svg>
                 </button>
+                {openEmojiSection && (
+                  <div className="emoji-section">
+                    <emoji-picker ref={emojiPickerRef}></emoji-picker>
+                  </div>
+                )}
               </form>
             </>
           ) : (

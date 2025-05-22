@@ -6,7 +6,7 @@ import ChatContact from "./ChatContact";
 import Message from "./Message";
 import { websocket } from "../websocket/ws";
 import { addToListeners, removeFromListeners } from "../websocket/ws";
-import 'emoji-picker-element';
+import dynamic from 'next/dynamic';
 
 export default function ChatWidget({ users, groups, myData }) {
   const [activeTab, setActiveTab] = useState("friends");
@@ -20,6 +20,11 @@ export default function ChatWidget({ users, groups, myData }) {
   const [openEmojiSection, setOpenEmojiSection] = useState(false);
   const [messageSending, setMessageSending] = useState("");
   const messagesEndRef = useRef(null);
+
+  const emojiPickerRef = useRef(null);
+  useEffect(() => {
+    import("emoji-picker-element");
+  }, []);
 
   const listToRender = activeTab === "friends" ? users : groups;
 
@@ -107,8 +112,6 @@ export default function ChatWidget({ users, groups, myData }) {
     }
   }, [messages]);
 
-  const emojiPickerRef = useRef(null);
-
   useEffect(() => {
     if (!openEmojiSection) return;
 
@@ -187,7 +190,7 @@ export default function ChatWidget({ users, groups, myData }) {
               <div className="emoji-toggle">
                 <button onClick={() => {
                   toggleEmojiSection()
-                }}>emoji</button>
+                }}>😄</button>
               </div>
               <input
                 onChange={(e) => {

@@ -485,7 +485,7 @@ export default function GroupsPage() {
       }
       console.log("Response status:", response.status);
       const data = await response.json();
-      console.log("Group created:", data);
+      console.log("Group crekjkbkjbated:", data);
 
       // if (!response.ok) {
       //   alert(data.error || "Failed to create group.");

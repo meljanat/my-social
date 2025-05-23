@@ -70,7 +70,7 @@ func CreateGrpoupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var coverPath string
-	cover, header, err := r.FormFile("cover")
+	cover, header, err := r.FormFile("groupCover")
 	if err != nil && err.Error() != "http: no such file" {
 		fmt.Println("Error retrieving cover:", err)
 		response := map[string]string{"error": "Failed to retrieve cover"}
@@ -116,10 +116,11 @@ func CreateGrpoupHandler(w http.ResponseWriter, r *http.Request) {
 
 	newGroup := structs.Group{
 		ID:          id_group,
+		Admin:       user.Username,
 		Name:        html.EscapeString(group.Name),
 		Description: html.EscapeString(group.Description),
-		Image:       group.Image,
-		Cover:       group.Cover,
+		Image:       imagePath,
+		Cover:       coverPath,
 		Privacy:     group.Privacy,
 	}
 

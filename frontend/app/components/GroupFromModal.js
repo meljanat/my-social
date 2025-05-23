@@ -61,22 +61,19 @@ export default function GroupFormModal({ onClose, user, onGroupCreated }) {
       }
 
       const responseData = await response.json();
-      console.log("Group created:", responseData);
-
       const newGroup = {
-        id: responseData.group_id || Date.now(),
+        group_id: responseData.group_id || Date.now(),
         name: groupFormInput.name,
-        total_post : 0,
+        total_posts : 0,
+        total_members: 1,
         description: groupFormInput.description,
         privacy: groupFormInput.privacy,
         created_at: "Just now",
-        image: groupFormInput.groupImage
-          ? URL.createObjectURL(groupFormInput.groupImage)
-          : null,
-        cover: groupFormInput.groupCover
-          ? URL.createObjectURL(groupFormInput.groupCover)
-          : null,
+        image: responseData.image,
+        cover: responseData.cover,
       };
+      console.log("New Group:", newGroup);
+      
 
       if (onGroupCreated) {
         onGroupCreated(newGroup);

@@ -90,7 +90,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var imagePath string
-	image, header, err := r.FormFile("groupImage")
+	image, header, err := r.FormFile("eventImage")
 	if err != nil && err.Error() != "http: no such file" {
 		fmt.Println("Error retrieving image:", err)
 		response := map[string]string{"error": "Failed to retrieve image"}
@@ -338,26 +338,38 @@ func JoinToEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	member, err = database.IsMemberEvent(user.ID, event.GroupID)
-	if err != nil || !member {
-		fmt.Println("User is not a member of the event", err)
-		response := map[string]string{"error": "User is not a member of the event"}
+	member, err = database.IsMemberEvent(user.ID, event.EventID)
+	if err != nil {
+		fmt.Println("Error checking user", err)
+		response := map[string]string{"error": "Error checking user"}
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	if err = database.JoinToEvent(user.ID, event.EventID); err != nil {
-		fmt.Println("Error joining to event:", err)
-		response := map[string]string{"error": "Failed to join to event"}
-		w.WriteHeader(http.StatusInternalServerError)
+	if member {
+		if err = database.LeaveEvent(user.ID, event.EventID); err != nil {
+			fmt.Println("Error leaving event:", err)
+			response := map[string]string{"error": "Failed to leave event"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		response := map[string]string{"message": "Left event successfully"}
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
-		return
+	} else {
+		if err = database.JoinToEvent(user.ID, event.EventID); err != nil {
+			fmt.Println("Error joining to event:", err)
+			response := map[string]string{"error": "Failed to join to event"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		response := map[string]string{"message": "Joined to event successfully"}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
 	}
-
-	response := map[string]string{"message": "Joined to event successfully"}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
 }
 
 func ValidateEvent(name, description, location string, startDate, endDate time.Time) (map[string]string, bool) {

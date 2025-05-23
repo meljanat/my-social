@@ -47,7 +47,7 @@ func GetEvents(user_id, offset int64, Type string) ([]structs.Event, error) {
 func GetEvent(id int64) (structs.Event, error) {
 	var event structs.Event
 	var date time.Time
-	err := DB.QueryRow("SELECT u.username, g.name, e.name, e.description, e.start_date, e.end_date, e.location, e.created_at, e.image FROM group_events e JOIN users u ON u.id = e.created_by JOIN groups g ON g.id = e.group_id WHERE e.id = ?", id).Scan(&event.Creator, &event.Group, &event.Name, &event.Description, &event.StartDate, &event.EndDate, &event.Location, &date, &event.Image)
+	err := DB.QueryRow("SELECT u.username, g.name, e.name, e.description, e.start_date, e.end_date, e.location, e.created_at, e.image FROM group_events e JOIN users u ON u.id = e.created_by JOIN groups g ON g.id = e.group_id WHERE e.id = ?", id).Scan(&event.Creator, &event.Group.Name, &event.Name, &event.Description, &event.StartDate, &event.EndDate, &event.Location, &date, &event.Image)
 	if err != nil && !strings.Contains(err.Error(), `name "image": converting NULL to string`) {
 		return structs.Event{}, err
 	}

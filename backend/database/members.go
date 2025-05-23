@@ -1,12 +1,10 @@
 package database
 
 import (
-	"fmt"
 	structs "social-network/data"
 )
 
 func JoinGroup(user_id, group_id int64) error {
-	fmt.Println("Joining group", group_id)
 	_, err := DB.Exec("INSERT INTO group_members (user_id, group_id) VALUES (?, ?)", user_id, group_id)
 	if err != nil {
 		return err

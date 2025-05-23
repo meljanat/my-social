@@ -305,8 +305,6 @@ export default function GroupsPage() {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
-      console.log("hi yosf");
-
       console.log(`Group ${type} Data:`, data);
       setSelectedGroup((prev) => ({
         ...prev,
@@ -1285,50 +1283,6 @@ export default function GroupsPage() {
                       group={selectedGroup}
                     />
                   )}
-                </div>
-              )}
-
-              {groupView === "chat" && (
-                <div className="group-chat-container">
-                  <div className="chat-messages">
-                    {messages.length === 0 && (
-                      <div className="empty-state">
-                        <p className="empty-title">No messages yet</p>
-                      </div>
-                    )}
-                    {messages.map((message) => (
-                      <Message
-                        key={message.message_id}
-                        message={message}
-                        isSent={message.username === "me"}
-                      />
-                    ))}
-                  </div>
-
-                  <form
-                    className="message-input-form"
-                    onSubmit={handleSendMessage}
-                  >
-                    <input
-                      type="text"
-                      placeholder="Type a message to the group..."
-                      className="message-input"
-                    />
-                    <button type="submit" className="send-button">
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                    </button>
-                  </form>
                 </div>
               )}
             </div>

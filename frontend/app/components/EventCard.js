@@ -38,7 +38,7 @@ export default function EventCard({ event, compact = false }) {
           credentials: "include",
           body: JSON.stringify({
             event_id: event.event_id,
-            group_id: parseInt(event.group_id),
+            group_id: parseInt(event.group.group_id),
           })
         })
         .then((response) => {

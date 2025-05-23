@@ -154,7 +154,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		Connections:    connections,
 		Stories:        stories,
 	}
-	fmt.Println("groups", suggested_groups)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(home)

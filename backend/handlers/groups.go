@@ -10,6 +10,7 @@ import (
 	"social-network/database"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func CreateGrpoupHandler(w http.ResponseWriter, r *http.Request) {
@@ -119,6 +120,7 @@ func CreateGrpoupHandler(w http.ResponseWriter, r *http.Request) {
 		Admin:       user.Username,
 		Name:        html.EscapeString(group.Name),
 		Description: html.EscapeString(group.Description),
+		CreatedAt:   time.Now().Format("2006-01-02 15:04"),
 		Image:       imagePath,
 		Cover:       coverPath,
 		Privacy:     group.Privacy,

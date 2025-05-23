@@ -33,7 +33,7 @@ func DeleteGroup(group_id int64) error {
 
 func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
 	var groups []structs.Group
-	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user.ID, 10, offset)
+	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user.ID, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
 	for rows.Next() {
 		var group structs.Group
 		var date time.Time
-		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Image, &group.Cover, &date, &group.AdminID, &group.Admin, &group.TotalMembers)
+		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Image, &group.Cover, &date, &group.AdminID, &group.Privacy, &group.Admin, &group.TotalMembers)
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +66,7 @@ func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
 
 func GetSuggestedGroups(user_id, offset int64) ([]structs.Group, error) {
 	var groups []structs.Group
-	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.admin, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin WHERE g.id NOT IN (SELECT group_id FROM group_members WHERE user_id = ? UNION SELECT group_id FROM invitations WHERE invited_id = ?) ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, user_id, 10, offset)
+	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.admin, g.privacy, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin WHERE g.id NOT IN (SELECT group_id FROM group_members WHERE user_id = ? UNION SELECT group_id FROM invitations WHERE invited_id = ?) ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func GetSuggestedGroups(user_id, offset int64) ([]structs.Group, error) {
 	for rows.Next() {
 		var group structs.Group
 		var date time.Time
-		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Image, &group.Cover, &group.AdminID, &date, &group.Admin, &group.TotalMembers)
+		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Image, &group.Cover, &group.AdminID, &group.Privacy, &date, &group.Admin, &group.TotalMembers)
 		if err != nil {
 			return nil, err
 		}
@@ -90,7 +90,7 @@ func GetSuggestedGroups(user_id, offset int64) ([]structs.Group, error) {
 
 func GetPendingGroups(user_id, offset int64) ([]structs.Group, error) {
 	var groups []structs.Group
-	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.admin, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN invitations i ON g.id = i.group_id WHERE i.invited_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
+	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.admin, g.privacy, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN invitations i ON g.id = i.group_id WHERE i.invited_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func GetPendingGroups(user_id, offset int64) ([]structs.Group, error) {
 	for rows.Next() {
 		var group structs.Group
 		var date time.Time
-		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Image, &group.Cover, &group.AdminID, &date, &group.Admin, &group.TotalMembers)
+		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Image, &group.Cover, &group.AdminID, &group.Privacy, &date, &group.Admin, &group.TotalMembers)
 		if err != nil {
 			return nil, err
 		}

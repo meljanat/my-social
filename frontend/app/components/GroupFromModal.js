@@ -66,10 +66,12 @@ export default function GroupFormModal({ onClose, user, onGroupCreated }) {
       const newGroup = {
         group_id: responseData.group_id,
         name: responseData.name,
-        total_post: 0,
+        role: "admin",
+        total_posts: 0,
+        total_members: 1,
         description: responseData.description,
         privacy: responseData.privacy,
-        created_at: "Just now",
+        created_at: responseData.created_at,
         image: responseData.image,
         cover: responseData.cover,
       };

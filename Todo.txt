@@ -95,3 +95,5 @@
 - start w end rigelhom fl event
 
 - delete event min nkoun ana admin dial l grp wla mol l event
+
+- fach tccre l event derha tbaan 

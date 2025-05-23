@@ -38,7 +38,7 @@ export default function GroupCard({ group, onClick, isJoined }) {
           {/* <h3 className="group-title">{group.description}</h3> */}
           <p className="group-meta">{`${group.total_members || 0} members - ${
             group.total_posts
-          } posts`}</p>
+          } posts - ${group.privacy}`}</p>
         </div>
 
         <div className="group-actions">

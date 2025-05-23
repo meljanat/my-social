@@ -173,9 +173,21 @@ export default function AuthForm({ onLoginSuccess }) {
         }, 2000);
       } else {
         const data = await response.json();
-        setErrors({
-          form: data.error || "Registration failed. Please try again.",
-        });
+
+        if (data.fields) {
+          const fieldErrors = {};
+
+          for (const [key, message] of Object.entries(data.fields)) {
+            const mappedKey = fieldMap[key] || key;
+            fieldErrors[mappedKey] = message;
+          }
+
+          setErrors(fieldErrors);
+        } else {
+          setErrors({
+            form: data.error || "Registration failed. Please try again.",
+          });
+        }
       }
     } catch (error) {
       setErrors({

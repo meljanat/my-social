@@ -1,7 +1,11 @@
 import "../styles/PendingGroupRequestCard.css";
-export default function PendingGroupRequestCard({ group, onCancelRequest }) {
+export default function PendingGroupRequestCard({
+  group,
+  onCancelRequest,
+  onClick,
+}) {
   return (
-    <div className="pending-group-card">
+    <div className="pending-group-card" onClick={onClick}>
       <div className="pending-group-content">
         <div className="pending-group-header">
           <div className="pending-group-info">
@@ -17,7 +21,11 @@ export default function PendingGroupRequestCard({ group, onCancelRequest }) {
                 <span>Request Pending</span>
                 <div>
                   <button
-                    onClick={() => onCancelRequest(group.group_id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+
+                      onCancelRequest(group.group_id);
+                    }}
                     className="pending-group-cancel-btn"
                   >
                     Cancel

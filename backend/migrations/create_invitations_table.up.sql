@@ -7,6 +7,5 @@ CREATE TABLE IF NOT EXISTS invitations (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (invited_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (recipient_id) REFERENCES users (id) ON DELETE CASCADE,
-    FOREIGN KEY (group_id) REFERENCES groups (id) ON DELETE CASCADE,
     UNIQUE (invited_id, recipient_id, group_id)
 );

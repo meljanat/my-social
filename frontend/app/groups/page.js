@@ -18,29 +18,10 @@ import GroupFormModal from "../components/GroupFromModal";
 import RemoveGroupModal from "../components/RemoveGroupModal";
 import InvitationsModal from "../components/InvitationsModal";
 import InviteUsersModal from "../components/UsersToInviteModal";
+import { handleFollow } from "../functions/user";
 
 function removeGroup(group_id, user_id) {
   leaveGroup(group_id, user_id);
-}
-
-async function handleCancelRequest(groupId) {
-  try {
-    const response = await fetch(`http://localhost:8404/join`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(parseInt(groupId)),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to fetch group data");
-    }
-    const data = await response.json();
-    console.log(`Data:`, data);
-  } catch (err) {
-    console.log(err);
-  }
 }
 
 async function sendInvitation(userId, groupId) {
@@ -440,23 +421,6 @@ export default function GroupsPage() {
     }
   };
 
-  async function leaveGroup(group_id) {
-    try {
-      const response = await fetch(`http://localhost:8404/join`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(parseInt(group_id)),
-      });
-    } catch (err) {
-      console.log(err);
-    }
-
-    fetchGroupData("joined");
-  }
-
   const createGroupHandler = async (e) => {
     e.preventDefault();
 
@@ -791,11 +755,10 @@ export default function GroupsPage() {
                   <PendingGroupRequestCard
                     key={group.group_id}
                     group={group}
-                    onCancelRequest={handleCancelRequest}
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log("dasdas");
-
+                      console.log("dasdas", group);
+                      handleFollow(0, group.group_id);
                       handleGroupSelect(group);
                     }}
                   />
@@ -1078,7 +1041,7 @@ export default function GroupsPage() {
                           : "admin-action-btn"
                       }`}
                       onClick={() => {
-                        leaveGroup(selectedGroup.group_id);
+                        handleFollow(0, selectedGroup.group_id);
                       }}
                     >
                       <svg

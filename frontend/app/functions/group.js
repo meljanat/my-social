@@ -18,21 +18,6 @@ async function joinGroup(group_id) {
   }
 }
 
-async function deleteGroup(group_id) {
-  try {
-    const response = await fetch(`http://localhost:8404/join`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(parseInt(group_id)),
-    });
-  } catch (err) {
-    console.log(err);
-  }
-}
-
 async function InvitUsers(group_id) {
   try {
     const response = await fetch(
@@ -81,4 +66,4 @@ async function fetchGroupData(endpoint) {
     setIsLoading(false);
   }
 }
-export { joinGroup, deleteGroup, InvitUsers, fetchGroupData };
+export { joinGroup, InvitUsers, fetchGroupData };

@@ -70,7 +70,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	info.IsPending, err = database.CheckInvitation(user_id, user.ID)
+	info.IsPending, err = database.CheckInvitation(user_id, user.ID, 0)
 	if err != nil {
 		fmt.Println("Error checking invitation:", err)
 		response := map[string]string{"error": "Failed to retrieve invitation"}

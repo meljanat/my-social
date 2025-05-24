@@ -97,3 +97,5 @@
 - delete event min nkoun ana admin dial l grp wla mol l event
 
 - fach tccre l event derha tbaan 
+
+- gad design dial ussers fach ytafichaw

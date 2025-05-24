@@ -1,7 +1,7 @@
+import { handleFollow } from "../functions/user";
 import "../styles/PendingGroupRequestCard.css";
 export default function PendingGroupRequestCard({
   group,
-  onCancelRequest,
   onClick,
 }) {
   return (
@@ -24,7 +24,7 @@ export default function PendingGroupRequestCard({
                     onClick={(e) => {
                       e.stopPropagation();
 
-                      onCancelRequest(group.group_id);
+                      handleFollow(group.admin_id, group.group_id);
                     }}
                     className="pending-group-cancel-btn"
                   >

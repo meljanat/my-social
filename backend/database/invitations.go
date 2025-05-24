@@ -1,39 +1,28 @@
 package database
 
-import structs "social-network/data"
+import (
+	structs "social-network/data"
+)
 
-func CreateInvitation(invited_id, recipient_id int64) error {
-	_, err := DB.Exec("INSERT INTO invitations (recipient_id, invited_id) VALUES (?, ?)", recipient_id, invited_id)
-	return err
-}
-
-func CreateInvitationGroup(invited_id, recipient_id, group_id int64) error {
+func CreateInvitation(invited_id, recipient_id, group_id int64) error {
 	_, err := DB.Exec("INSERT INTO invitations (recipient_id, invited_id, group_id) VALUES (?, ?, ?)", recipient_id, invited_id, group_id)
 	return err
 }
 
-func AcceptInvitation(intitation_id, invited_id, recipient_id, group_id int64) error {
+func AcceptInvitation(invitation_id, invited_id, recipient_id, group_id int64) error {
+	var err error
 	if group_id != 0 {
-		_, err := DB.Exec("INSERT INTO group_members (user_id, group_id) VALUES (?, ?)", invited_id, group_id)
-		if err != nil {
-			return err
-		}
-		_, err = DB.Exec("Delete FROM invitations WHERE id = ?", intitation_id)
-		return err
+		_, err = DB.Exec("INSERT INTO group_members (user_id, group_id) VALUES (?, ?)", invited_id, group_id)
+	} else {
+		_, err = DB.Exec("INSERT INTO followers (follower_id, followed_id) VALUES (?, ?)", recipient_id, invited_id)
 	}
-	_, err := DB.Exec("INSERT INTO followers (follower_id, followed_id) VALUES (?, ?)", recipient_id, invited_id)
 	if err != nil {
 		return err
 	}
-	_, err = DB.Exec("Delete FROM invitations WHERE id = ?", intitation_id)
-	return err
+	return DeleteInvitation(invitation_id)
 }
 
-func DeclineInvitation(intitation_id, group_id int64) error {
-	if group_id != 0 {
-		_, err := DB.Exec("Delete FROM invitations WHERE id = ?", intitation_id)
-		return err
-	}
+func DeleteInvitation(intitation_id int64) error {
 	_, err := DB.Exec("Delete FROM invitations WHERE id = ?", intitation_id)
 	return err
 }
@@ -92,16 +81,6 @@ func GetInvitationsGroup(group_id, offset int64) ([]structs.Invitation, error) {
 	return invitations, nil
 }
 
-func DeleteInvitation(user_id, invited_id int64) error {
-	_, err := DB.Exec("DELETE FROM invitations WHERE recipient_id = ? AND invited_id = ?", user_id, invited_id)
-	return err
-}
-
-func DeleteInvitationGroup(invited_id, group_id int64) error {
-	_, err := DB.Exec("DELETE FROM invitations WHERE group_id = ? AND invited_id = ?", group_id, invited_id)
-	return err
-}
-
 func GetInvitationById(invitation_id, group_id int64) (structs.Invitation, error) {
 	var invitation structs.Invitation
 	if group_id != 0 {
@@ -112,14 +91,14 @@ func GetInvitationById(invitation_id, group_id int64) (structs.Invitation, error
 	return invitation, err
 }
 
-func CheckInvitation(invited_id, recipient_id int64) (bool, error) {
+func CheckInvitation(invited_id, recipient_id, group_id int64) (bool, error) {
 	var count int
-	err := DB.QueryRow("SELECT COUNT(*) FROM invitations WHERE recipient_id = ? AND invited_id = ?", recipient_id, invited_id).Scan(&count)
+	err := DB.QueryRow("SELECT COUNT(*) FROM invitations WHERE recipient_id = ? AND invited_id = ? AND group_id = ?", recipient_id, invited_id, group_id).Scan(&count)
 	return count > 0, err
 }
 
-func CheckInvitationGroup(invited_id, group_id int64) (bool, error) {
-	var count int
-	err := DB.QueryRow("SELECT COUNT(*) FROM invitations WHERE invited_id = ? AND group_id = ?", invited_id, group_id).Scan(&count)
-	return count > 0, err
+func GetInvitationID(invited_id, recipient_id, group_id int64) (int64, error) {
+	var invitation_id int64
+	err := DB.QueryRow("SELECT id FROM invitations WHERE recipient_id = ? AND invited_id = ? AND group_id = ?", recipient_id, invited_id, group_id).Scan(&invitation_id)
+	return invitation_id, err
 }

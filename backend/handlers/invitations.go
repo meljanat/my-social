@@ -9,6 +9,279 @@ import (
 	"strconv"
 )
 
+func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Println("Method not allowed", r.Method)
+		response := map[string]string{"error": "Method not allowed"}
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	user, err := GetUserFromSession(r)
+	if err != nil || user == nil {
+		fmt.Println("Failed to retrieve user", err)
+		response := map[string]string{"error": "Failed to retrieve user"}
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	type Invitation struct {
+		User  int64 `json:"user_id"`
+		Group int64 `json:"group_id"`
+	}
+
+	var invitation Invitation
+	err = json.NewDecoder(r.Body).Decode(&invitation)
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+		response := map[string]string{"error": "Invalid request body"}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if invitation.User == user.ID {
+		fmt.Println("User cannot follow themselves")
+		response := map[string]string{"error": "User cannot follow themselves"}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	var userToFollowing structs.User
+	var isFollowed bool
+	if invitation.User != 0 {
+		userToFollowing, err = database.GetUserById(invitation.User)
+		if err != nil {
+			fmt.Println("Failed to retrieve follower", err)
+			response := map[string]string{"error": "Failed to retrieve follower"}
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		} else if userToFollowing.ID == user.ID {
+			fmt.Println("Cannot accept your own invitation", err)
+			response := map[string]string{"error": "Cannot accept your own invitation"}
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		isFollowed, err = database.IsFollowed(user.ID, invitation.User)
+		if err != nil {
+			fmt.Println("Failed to check if user is followed", err)
+			response := map[string]string{"error": "Failed to check if user is followed"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+	}
+
+	isInvitation, err := database.CheckInvitation(user.ID, invitation.User, invitation.Group)
+	if err != nil {
+		fmt.Println("Failed to retrieve invitation", err)
+		response := map[string]string{"error": "Failed to retrieve invitation"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	var invitation_id int64
+	if isInvitation {
+		invitation_id, err = database.GetInvitationID(user.ID, invitation.User, invitation.Group)
+		if err != nil {
+			fmt.Println("Failed to retrieve invitation ID", err)
+			response := map[string]string{"error": "Failed to retrieve invitation ID"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+	}
+
+	if invitation.Group == 0 {
+		if !isFollowed {
+			if userToFollowing.Privacy == "public" {
+				if err := database.AddFollower(user.ID, invitation.User); err != nil {
+					fmt.Println("Failed to follow user", err)
+					response := map[string]string{"error": "Failed to follow user"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+
+				if err := database.CreateNotification(user.ID, invitation.User, 0, 0, 0, "follow"); err != nil {
+					fmt.Println("Failed to create notification", err)
+					response := map[string]string{"error": "Failed to create notification"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode("unfollow")
+			} else if !isInvitation {
+				if err := database.CreateInvitation(user.ID, invitation.User, invitation.Group); err != nil {
+					fmt.Println("Failed to send invitation", err)
+					response := map[string]string{"error": "Failed to send invitation"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+
+				if err := database.CreateNotification(user.ID, invitation.User, 0, 0, 0, "invitation"); err != nil {
+					fmt.Println("Failed to create notification", err)
+					response := map[string]string{"error": "Failed to create notification"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode("cancel")
+			} else {
+				if err := database.DeleteInvitation(invitation_id); err != nil {
+					fmt.Println("Failed to delete invitation", err)
+					response := map[string]string{"error": "Failed to delete invitation"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+
+				if err := database.DeleteNotification(user.ID, invitation.User, 0, 0, 0, "invitation"); err != nil {
+					fmt.Println("Failed to create notification", err)
+					response := map[string]string{"error": "Failed to delete notification"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode("follow")
+			}
+			return
+		} else {
+			if err := database.RemoveFollower(user.ID, invitation.User); err != nil {
+				fmt.Println("Failed to unfollow user", err)
+				response := map[string]string{"error": "Failed to unfollow user"}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
+
+			if err := database.DeleteNotification(user.ID, invitation.User, 0, 0, 0, "follow"); err != nil {
+				fmt.Println("Failed to create notification", err)
+				response := map[string]string{"error": "Failed to delete notification"}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode("follow")
+		}
+	} else {
+		group, err := database.GetGroupById(invitation.Group)
+		if err != nil {
+			fmt.Println("Failed to retrieve group", err)
+			response := map[string]string{"error": "Failed to retrieve group"}
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		isMember, err := database.IsMemberGroup(invitation.Group, user.ID)
+		if err != nil {
+			fmt.Println("Failed to check if user is member", err)
+			response := map[string]string{"error": "Failed to check if user is member"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		if !isMember {
+			if group.Privacy == "public" {
+				if err := database.JoinGroup(user.ID, invitation.Group); err != nil {
+					fmt.Println("Failed to join group", err)
+					response := map[string]string{"error": "Failed to join group"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+
+				if err := database.CreateNotification(user.ID, group.AdminID, group.ID, 0, 0, "join"); err != nil {
+					fmt.Println("Failed to create notification", err)
+					response := map[string]string{"error": "Failed to create notification"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode("join")
+			} else if !isInvitation {
+				if err := database.CreateInvitation(user.ID, group.AdminID, group.ID); err != nil {
+					fmt.Println("Failed to send invitation", err)
+					response := map[string]string{"error": "Failed to send invitation"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+				if err := database.CreateNotification(user.ID, group.AdminID, group.ID, 0, 0, "invitation"); err != nil {
+					fmt.Println("Failed to create notification", err)
+					response := map[string]string{"error": "Failed to create notification"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode("cancel")
+			} else {
+				if err := database.DeleteInvitation(invitation_id); err != nil {
+					fmt.Println("Failed to delete invitation", err)
+					response := map[string]string{"error": "Failed to delete invitation"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+				if err := database.DeleteNotification(user.ID, group.AdminID, group.ID, 0, 0, "invitation"); err != nil {
+					fmt.Println("Failed to create notification", err)
+					response := map[string]string{"error": "Failed to delete notification"}
+					w.WriteHeader(http.StatusInternalServerError)
+					json.NewEncoder(w).Encode(response)
+					return
+				}
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode("follow")
+			}
+		} else if group.AdminID != user.ID {
+			if err := database.LeaveGroup(user.ID, invitation.Group); err != nil {
+				fmt.Println("Failed to leave group", err)
+				response := map[string]string{"error": "Failed to leave group"}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
+			if err := database.DeleteNotification(user.ID, group.AdminID, group.ID, 0, 0, "join"); err != nil {
+				fmt.Println("Failed to create notification", err)
+				response := map[string]string{"error": "Failed to delete notification"}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode("leave")
+		} else {
+			if err := database.DeleteGroup(invitation.Group); err != nil {
+				fmt.Println("Failed to delete group", err)
+				response := map[string]string{"error": "Failed to delete group"}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode("delete")
+		}
+	}
+}
+
 func GetInvitationsGroups(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		fmt.Println("Method not allowed", r.Method)
@@ -182,7 +455,7 @@ func DeclineInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := database.DeclineInvitation(invitation.ID, invitation.Group.ID); err != nil {
+	if err := database.DeleteInvitation(invitation.ID); err != nil {
 		fmt.Println("Failed to decline invitation", err)
 		response := map[string]string{"error": "Failed to decline invitation"}
 		w.WriteHeader(http.StatusInternalServerError)

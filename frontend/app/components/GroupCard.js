@@ -1,24 +1,8 @@
 import React from "react";
 import "../../styles/GroupsPage.css";
-import { joinGroup, deleteGroup, fetchGroupData } from "../functions/group";
+import { handleFollow } from "../functions/user";
 
 export default function GroupCard({ group, onClick, isJoined }) {
-  async function leaveGroup(group_id) {
-    try {
-      const response = await fetch(`http://localhost:8404/join`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(parseInt(group_id)),
-      });
-    } catch (err) {
-      console.log(err);
-    }
-
-    fetchGroupData("joined");
-  }
   return (
     <div className="group-card" onClick={onClick}>
       <div className="group-card-content">
@@ -46,11 +30,7 @@ export default function GroupCard({ group, onClick, isJoined }) {
             className={`group-join-btn ${isJoined ? "joined" : ""}`}
             onClick={(e) => {
               e.stopPropagation();
-              if (isJoined) {
-                leaveGroup(group.group_id);
-              } else {
-                joinGroup(group.group_id);
-              }
+              handleFollow(0, group.group_id);
             }}
           >
             {group.role === "admin"

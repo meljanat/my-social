@@ -198,7 +198,7 @@ func AddMembers(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if err = database.CreateInvitationGroup(user.ID, usr_id, group_id); err != nil {
+			if err = database.CreateInvitation(user.ID, usr_id, group_id); err != nil {
 				fmt.Println("Failed to send invitation to this user", err)
 				response := map[string]string{"error": "Failed to send invitation to this user"}
 				w.WriteHeader(http.StatusInternalServerError)

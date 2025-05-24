@@ -10,7 +10,13 @@ import (
 )
 
 func SessionHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
+	if r.URL.Path != "/" {
+		fmt.Println("Not found", r.URL.Path)
+		response := map[string]string{"error": "Not found"}
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(response)
+		return
+	} else if r.Method != http.MethodGet {
 		fmt.Println("Method not allowed", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)

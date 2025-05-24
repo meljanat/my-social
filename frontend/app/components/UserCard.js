@@ -1,37 +1,8 @@
 import { useState } from "react";
+import { handleFollow } from "../functions/user";
 
 export default function UserCard({ user, action, onClick }) {
-  const [isFollowing, setIsFollowing] = useState();
   const [newStatus, setNewStatus] = useState("Follow");
-
-  async function handleFollow(user_id) {
-    // console.log(`Following user with ID: ${userId}`);
-    try {
-      const response = await fetch(`http://localhost:8404/follow`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user_id),
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        console.log("Followed successfully");
-        response.json().then((data) => {
-          if (data === "unfollow") {
-            setNewStatus("Following");
-          } else if (data === "cancel") {
-            setNewStatus("Cancel");
-          }
-        });
-      }
-      const data = await response.json();
-      console.log("Followed user:", data);
-    } catch (error) {
-      console.error("Error following user:", error);
-    }
-  }
 
   return (
     <li
@@ -64,8 +35,7 @@ export default function UserCard({ user, action, onClick }) {
           <button
             className="follow-btn"
             onClick={() => {
-              setIsFollowing(!isFollowing);
-              handleFollow(user.user_id);
+              setNewStatus(handleFollow(user.user_id, 0));
             }}
           >
             {newStatus}

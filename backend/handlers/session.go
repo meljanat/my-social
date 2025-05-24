@@ -44,8 +44,7 @@ func CheckTheUserHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
 		fmt.Println("Failed to retrieve user")
-		response := map[string]string{"error": "Failed to retrieve user"}
-		w.WriteHeader(http.StatusUnauthorized)
+		response := map[string]string{"error": "User not logged in"}
 		json.NewEncoder(w).Encode(response)
 		return
 	}

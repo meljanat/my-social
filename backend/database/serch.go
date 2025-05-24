@@ -2,8 +2,8 @@ package database
 
 import structs "social-network/data"
 
-func SearchUsers(query string) ([]structs.User, error) {
-	rows, err := DB.Query(`SELECT u.id, u.username, u.avatar FROM users u WHERE u.username LIKE ?`, "%"+query+"%")
+func SearchUsers(query string, offset int64) ([]structs.User, error) {
+	rows, err := DB.Query(`SELECT u.id, u.username, u.avatar FROM users u WHERE u.username LIKE ?`, query+"%")
 	if err != nil {
 		return nil, err
 	}
@@ -20,8 +20,8 @@ func SearchUsers(query string) ([]structs.User, error) {
 	return users, nil
 }
 
-func SearchGroups(query string) ([]structs.Group, error) {
-	rows, err := DB.Query(`SELECT g.id, g.name, g.image FROM groups g WHERE g.name LIKE ?`, "%"+query+"%")
+func SearchGroups(query string, offset int64) ([]structs.Group, error) {
+	rows, err := DB.Query(`SELECT g.id, g.name, g.image FROM groups g WHERE g.name LIKE ?`, query+"%")
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +38,8 @@ func SearchGroups(query string) ([]structs.Group, error) {
 	return groups, nil
 }
 
-func SearchEvents(query string) ([]structs.Event, error) {
-	rows, err := DB.Query(`SELECT e.id, e.name, e.avatar FROM events e WHERE e.name LIKE ?`, "%"+query+"%")
+func SearchEvents(query string, offset int64) ([]structs.Event, error) {
+	rows, err := DB.Query(`SELECT e.id, e.name, e.avatar FROM events e WHERE e.name LIKE ?`, query+"%")
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ func SearchEvents(query string) ([]structs.Event, error) {
 	return events, nil
 }
 
-func SearchPosts(query string) ([]structs.Post, error) {
-	rows, err := DB.Query(`SELECT p.id, p.content, p.created_at FROM posts p WHERE p.content LIKE ?`, "%"+query+"%")
+func SearchPosts(query string, offset int64) ([]structs.Post, error) {
+	rows, err := DB.Query(`SELECT p.id, p.content, p.created_at FROM posts p WHERE p.content LIKE ?`, query+"%")
 	if err != nil {
 		return nil, err
 	}

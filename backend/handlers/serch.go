@@ -6,6 +6,7 @@ import (
 	"net/http"
 	structs "social-network/data"
 	"social-network/database"
+	"strconv"
 )
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +40,15 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	var group bool
 	var event bool
 	var post bool
+	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
+	if err != nil {
+		fmt.Println("Invalid offset", err)
+		response := map[string]string{"error": "Invalid offset"}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
 	Type := r.URL.Query().Get("type")
 	if Type == "" {
 		usr = true
@@ -67,7 +77,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	var posts []structs.Post
 
 	if usr {
-		users, err = database.SearchUsers(query)
+		users, err = database.SearchUsers(query, offset)
 		if err != nil {
 			fmt.Println("Error searching users:", err)
 			response := map[string]string{"error": "Failed to search users"}
@@ -78,7 +88,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if group {
-		groups, err = database.SearchGroups(query)
+		groups, err = database.SearchGroups(query, offset)
 		if err != nil {
 			fmt.Println("Error searching groups:", err)
 			response := map[string]string{"error": "Failed to search groups"}
@@ -89,7 +99,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if event {
-		events, err = database.SearchEvents(query)
+		events, err = database.SearchEvents(query, offset)
 		if err != nil {
 			fmt.Println("Error searching events:", err)
 			response := map[string]string{"error": "Failed to search events"}
@@ -100,7 +110,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if post {
-		posts, err = database.SearchPosts(query)
+		posts, err = database.SearchPosts(query, offset)
 		if err != nil {
 			fmt.Println("Error searching posts:", err)
 			response := map[string]string{"error": "Failed to search posts"}

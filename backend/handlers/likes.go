@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
 	structs "social-network/data"
 	"social-network/database"
 )
@@ -46,7 +47,7 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var type_notification = "like"
+	type_notification := "like"
 	count, err := database.LikePost(user.ID, post)
 	if err != nil {
 		fmt.Println("Error liking post:", err)
@@ -86,7 +87,7 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		post.WhoLiked = who_liked
 	}
-	fmt.Println("wholiked:", post.WhoLiked)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(post)
 }

@@ -18,7 +18,7 @@ import GroupFormModal from "../components/GroupFromModal";
 import RemoveGroupModal from "../components/RemoveGroupModal";
 import InvitationsModal from "../components/InvitationsModal";
 import InviteUsersModal from "../components/UsersToInviteModal";
-import { handleFollow } from "../functions/user";
+import { handleFollow, handelAccept, handleReject, handelAcceptOtherGroup, handleRejectOtherGroup } from "../functions/user";
 
 function removeGroup(group_id, user_id) {
   leaveGroup(group_id, user_id);
@@ -87,7 +87,7 @@ async function sendInvitation(userId, groupId) {
 //               cx="12"
 //               cy="10"
 //               r="3"
-//               stroke="currentColor"
+//               stinroke="currentColor"
 //               strokeWidth="2"
 //               strokeLinecap="round"
 //               strokeLinejoin="round"
@@ -340,11 +340,6 @@ export default function GroupsPage() {
     }
   };
 
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    console.log("Test");
-  };
-
   const fetchUserInvitationsData = async () => {
     try {
       setIsLoading(true);
@@ -369,58 +364,6 @@ export default function GroupsPage() {
       setIsLoading(false);
     }
   };
-
-  const handleAcceptInvitation = async (invitationId, groupId, userId) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`http://localhost:8404/accept_invitation`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          invitation_id: invitationId,
-          group: { group_id: groupId },
-          user: { user_id: userId },
-        }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to accept invitation");
-      }
-      fetchGroupData("invitations");
-    } catch (error) {
-      console.error("Error accepting invitation:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDeclineInvitation = async (invitationId) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`http://localhost:8404/decline_invitation`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ invitation_id: invitationId }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to decline invitation");
-      }
-
-      fetchGroupData("invitations");
-    } catch (error) {
-      console.error("Error declining invitation:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const createGroupHandler = async (e) => {
     e.preventDefault();
 
@@ -679,20 +622,45 @@ export default function GroupsPage() {
                 <div className="loading-message">Loading...</div>
               ) : activeTab === "invitations" ? (
                 (invitationsGroups || []).length > 0 ? (
-                  (invitationsGroups || []).map((invitation) => (
+                  (invitationsGroups || []).map((invitation) => {
+                    console.log("hadi heya", invitation);
+                    
+                    {invitation.user.username == invitation.group.admin ? 
+                      <InvitationCard
+                      key={invitation.invitation_id}
+                      invitation={invitation}
+                      onAccept={() => {
+                        handelAcceptOtherGroup(
+                          invitation.user.user_id,
+                          invitation.group.group_id
+                        );
+                      }}
+                      onDecline={() => {
+                        handleRejectOtherGroup(
+                          invitation.user.user_id,
+                          invitation.group.group_id
+                        );
+                      }}
+                    />
+                    :
                     <InvitationCard
                       key={invitation.invitation_id}
                       invitation={invitation}
                       onAccept={() => {
-                        handleAcceptInvitation(
-                          invitation.id,
-                          invitation.group.group_id,
-                          invitation.user.user_id
+                        handelAccept(
+                          invitation.user.user_id,
+                          invitation.group.group_id
                         );
                       }}
-                      onDecline={handleDeclineInvitation}
+                      onDecline={() => {
+                        handleReject(
+                          invitation.user.user_id,
+                          invitation.group.group_id
+                        );
+                      }}
                     />
-                  ))
+                    }
+                  })
                 ) : (
                   <div className="no-invitations-message">
                     <p>You have no pending invitations.</p>
@@ -1036,7 +1004,8 @@ export default function GroupsPage() {
                   ) : (
                     <button
                       className={` ${
-                        selectedGroup.role === "member" ||  activeTab === "pending-groups"
+                        selectedGroup.role === "member" ||
+                        activeTab === "pending-groups"
                           ? "leave-group-btn"
                           : "admin-action-btn"
                       }`}
@@ -1080,8 +1049,8 @@ export default function GroupsPage() {
               <InvitationsModal
                 invitations={selectedGroup.invitations || []}
                 onClose={() => setShowInvitationsModal(false)}
-                onAccept={handleAcceptInvitation}
-                onReject={handleDeclineInvitation}
+                onAccept={handelAccept}
+                onReject={handleReject}
               />
             )}
             <div className="group-detail-tabs">

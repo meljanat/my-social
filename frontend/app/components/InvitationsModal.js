@@ -7,9 +7,6 @@ export default function InvitationsModal({
   onReject,
 }) {
   const hasInvitations = invitations && invitations.length > 0;
-
-  console.log("Invitations in modal:", invitations);
-
   return (
     <div className="modal-overlay">
       <div className="invitation-modal-content">
@@ -42,7 +39,7 @@ export default function InvitationsModal({
                   <button
                     className="accept-button"
                     onClick={() =>
-                      onAccept(invitation.id, invitation.user.user_id)
+                      onAccept(invitation.user.user_id, invitation.group.group_id)
                     }
                   >
                     Accept
@@ -50,7 +47,7 @@ export default function InvitationsModal({
                   <button
                     className="decline-btn"
                     onClick={() =>
-                      onReject(invitation.id, invitation.user.user_id)
+                      onReject(invitation.user.user_id, invitation.group.group_id)
                     }
                   >
                     Decline

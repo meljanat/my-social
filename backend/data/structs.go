@@ -143,9 +143,10 @@ type Notification struct {
 }
 
 type Invitation struct {
-	ID    int64 `json:"invitation_id" sqlite:"invitation_id"`
-	User  User  `json:"user" sqlite:"user"`
-	Group Group `json:"group" sqlite:"group"`
+	ID        int64  `json:"invitation_id" sqlite:"invitation_id"`
+	CreatedAt string `json:"created_at" sqlite:"created_at"`
+	User      User   `json:"user" sqlite:"user"`
+	Group     Group  `json:"group" sqlite:"group"`
 }
 
 type Event struct {

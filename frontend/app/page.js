@@ -20,6 +20,8 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [homeData, setHomeData] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -57,31 +59,71 @@ export default function Home() {
     }
   }, [isLoggedIn]);
 
-  const fetchHomeData = async () => {
+  const fetchHomeData = async (offset = 0) => {
     try {
       const response = await fetch(
-        "http://localhost:8404/home?offset=0&offset_messages=0",
+        `http://localhost:8404/home?offset=${offset}&offset_messages=${offset}`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           credentials: "include",
         }
       );
 
-      if (response.ok) {
-        const data = await response.json();
-        setHomeData(data);
-        setPosts(data.posts);
-        console.log("Data received: ", data);
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      const data = await response.json();
+      console.log("Fetched posts:", data.posts);
+
+      if (!data.posts || !Array.isArray(data.posts)) {
+        console.error("Posts is not an array or missing", data.posts);
+        if (offset === 0) setPosts([]);
+        setHasMorePosts(false);
+        return [];
       }
+
+      if (offset === 0) {
+        setPosts(data.posts);
+      } else {
+        setPosts((prev) => [...prev, ...data.posts]);
+      }
+
+      if (data.posts.length === 0) {
+        setHasMorePosts(false);
+      } else {
+        setHasMorePosts(true);
+      }
+
+      setHomeData(data);
+
+      return data.posts;
     } catch (error) {
       setError(true);
-
       console.error("Error fetching posts:", error);
+      setHasMorePosts(false);
+      return [];
     }
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const nearBottom =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 500;
+      if (nearBottom && !isFetchingMore && hasMorePosts) {
+        setIsFetchingMore(true);
+        fetchHomeData(posts.length).then((newPosts) => {
+          if (newPosts.length === 0) {
+            console.log("No more posts to fetch");
+            setHasMorePosts(false);
+          }
+          setIsFetchingMore(false);
+        });
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [posts, isFetchingMore, hasMorePosts]);
 
   const addNewPost = (newPost) => {
     setPosts((prevPosts) => {

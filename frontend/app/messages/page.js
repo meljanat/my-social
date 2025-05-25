@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import Navbar from "../components/NavBar";
 import "../../styles/MessagesPage.css";
 import { addToListeners, removeFromListeners } from "../websocket/ws.js";
 import { websocket } from "../websocket/ws.js"
+import EmojiSection from "../components/EmojiSection";
 
 const Message = ({ message, isSent }) => {
   return (
@@ -86,11 +86,6 @@ export default function MessagesPage() {
   const [onlineUsers, setOnlineUsers] = useState(null);
   const [groups, setGroups] = useState([]);
   const [openEmojiSection, setOpenEmojiSection] = useState(false);
-
-  const emojiPickerRef = useRef(null);
-  useEffect(() => {
-    import("emoji-picker-element");
-  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -246,30 +241,8 @@ export default function MessagesPage() {
   };
 
   const toggleEmojiSection = () => {
-    console.log(openEmojiSection ? 'emo closed' : 'emo opened');
-
     setOpenEmojiSection(!openEmojiSection);
   };
-
-  useEffect(() => {
-    if (!openEmojiSection) return;
-
-    const picker = emojiPickerRef.current;
-    if (!picker) return;
-
-    const handleEmojiClick = (event) => {
-      const emoji = event.detail.unicode;
-      console.log(emoji);
-
-      setNewMessage((prev) => prev + emoji);
-    };
-
-    picker.addEventListener("emoji-click", handleEmojiClick);
-
-    return () => {
-      picker.removeEventListener("emoji-click", handleEmojiClick);
-    };
-  }, [openEmojiSection]);
 
   return (
     <div className="messages-page-container">
@@ -433,9 +406,10 @@ export default function MessagesPage() {
                   </svg>
                 </button>
                 {openEmojiSection && (
-                  <div className="emoji-section">
-                    <emoji-picker ref={emojiPickerRef}></emoji-picker>
-                  </div>
+                  <EmojiSection
+                    onEmojiSelect={(emoji) => {
+                      setNewMessage((prev) => prev + emoji);
+                    }} />
                 )}
               </form>
             </>

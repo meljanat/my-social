@@ -1,8 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import "../styles/AllUsersPage.css";
-import { handleFollow } from "../functions/user";
-import { handleCancelRequest } from "../functions/user";
+import { handleFollow, handelAccept, handleReject } from "../functions/user";
 
 export default function AllUsersPage() {
   const [activeTab, setActiveTab] = useState("suggested");
@@ -208,13 +207,13 @@ export default function AllUsersPage() {
                   <div className="request-actions">
                     <button
                       className="follow-button"
-                      onClick={() => handelAccept(request.user_id)}
+                      onClick={() => handelAccept(request.user_id, 0)}
                     >
                       Accept
                     </button>
                     <button
                       className="reject-button"
-                      onClick={() => handleReject(request.user_id)}
+                      onClick={() => handleReject(request.user_id, 0)}
                     >
                       Reject
                     </button>

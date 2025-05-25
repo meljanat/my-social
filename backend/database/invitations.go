@@ -14,7 +14,7 @@ func AcceptInvitation(invitation_id, invited_id, recipient_id, group_id int64) e
 	if group_id != 0 {
 		_, err = DB.Exec("INSERT INTO group_members (user_id, group_id) VALUES (?, ?)", invited_id, group_id)
 	} else {
-		_, err = DB.Exec("INSERT INTO followers (follower_id, followed_id) VALUES (?, ?)", recipient_id, invited_id)
+		_, err = DB.Exec("INSERT INTO follows (follower_id, following_id) VALUES (?, ?)", recipient_id, invited_id)
 	}
 	if err != nil {
 		return err
@@ -81,15 +81,15 @@ func GetInvitationsGroup(group_id, offset int64) ([]structs.Invitation, error) {
 	return invitations, nil
 }
 
-func GetInvitationById(invitation_id, group_id int64) (structs.Invitation, error) {
-	var invitation structs.Invitation
-	if group_id != 0 {
-		err := DB.QueryRow("SELECT i.id, u.id, u.username, u.avatar, g.name FROM invitations i JOIN users u ON u.id = i.invited_id JOIN groups g ON i.group_id = g.id WHERE i.id = ?", invitation_id).Scan(&invitation.ID, &invitation.User.ID, &invitation.User.Username, &invitation.User.Avatar, &invitation.Group)
-		return invitation, err
-	}
-	err := DB.QueryRow("SELECT i.id, i.invited_id, u.username, u.avatar FROM invitations i JOIN users u ON i.invited_id = u.id WHERE i.id = ?", invitation_id).Scan(&invitation.ID, &invitation.User.ID, &invitation.User.Username, &invitation.User.Avatar)
-	return invitation, err
-}
+// func GetInvitationById(invitation_id, group_id int64) (structs.Invitation, error) {
+// 	var invitation structs.Invitation
+// 	if group_id != 0 {
+// 		err := DB.QueryRow("SELECT i.id, u.id, u.username, u.avatar, g.name FROM invitations i JOIN users u ON u.id = i.invited_id JOIN groups g ON i.group_id = g.id WHERE i.id = ?", invitation_id).Scan(&invitation.ID, &invitation.User.ID, &invitation.User.Username, &invitation.User.Avatar, &invitation.Group)
+// 		return invitation, err
+// 	}
+// 	err := DB.QueryRow("SELECT i.id, i.invited_id, u.username, u.avatar FROM invitations i JOIN users u ON i.invited_id = u.id WHERE i.id = ?", invitation_id).Scan(&invitation.ID, &invitation.User.ID, &invitation.User.Username, &invitation.User.Avatar)
+// 	return invitation, err
+// }
 
 func CheckInvitation(invited_id, recipient_id, group_id int64) (bool, error) {
 	var count int

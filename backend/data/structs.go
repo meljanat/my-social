@@ -4,7 +4,10 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/gorilla/websocket"
 )
+
+var Clients = make(map[int64][]*websocket.Conn)
 
 type User struct {
 	ID                 int64     `json:"user_id" sqlite:"user_id"`

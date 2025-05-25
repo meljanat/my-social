@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	Clients  = make(map[int64][]*websocket.Conn)
+	Clients  = structs.Clients
 	Mutex    sync.Mutex
 	upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
@@ -73,6 +73,7 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 			fmt.Println("Error getting notifications:", err)
 			return
 		}
+
 		if len(notifs) < len(newNotifs) {
 			SendWsMessage(user_id, map[string]interface{}{"type": "notifications", "notifications": newNotifs})
 			notifs = newNotifs
@@ -147,7 +148,6 @@ func NotifyUsers(user_id int64, statu string) {
 func SendWsMessage(user_id int64, message map[string]interface{}) {
 	Mutex.Lock()
 	defer Mutex.Unlock()
-	fmt.Println("Sending message to user:", user_id)
 	if clients, ok := Clients[user_id]; ok {
 		fmt.Println(ok, user_id, Clients)
 		for _, client := range clients {

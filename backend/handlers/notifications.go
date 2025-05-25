@@ -44,7 +44,7 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	fmt.Println("Notifications:", notifications)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(notifications)
 }

@@ -1,11 +1,35 @@
 package database
 
 import (
+	"fmt"
+	"sync"
+
 	structs "social-network/data"
 )
 
+var (
+	Clients = structs.Clients
+	Mutex   sync.Mutex
+)
+
+func SendWsMessage(user_id int64, message map[string]interface{}) {
+	Mutex.Lock()
+	defer Mutex.Unlock()
+	if clients, ok := Clients[user_id]; ok {
+		fmt.Println(ok, user_id, Clients)
+		for _, client := range clients {
+			err := client.WriteJSON(message)
+			if err != nil {
+				fmt.Println("Error sending message:", err)
+				return
+			}
+		}
+	}
+}
+
 func CreateNotification(user_id, notified_id, post_id, group_id, event_id int64, type_notification string) error {
 	_, err := DB.Exec("INSERT INTO notifications (user_id, notified_id, post_id, group_id, event_id, type_notification) VALUES (?, ?, ?, ?, ?, ?)", user_id, notified_id, post_id, group_id, event_id, type_notification)
+	SendWsMessage(notified_id, map[string]interface{}{"type": "notifications"})
 	return err
 }
 
@@ -25,6 +49,15 @@ func GetNotifications(notified_id, offset int64) ([]structs.Notification, error)
 		notifications = append(notifications, notification)
 	}
 	return notifications, nil
+}
+
+func GetCountNotifications(user_id int64) (int64, error) {
+	var count int64
+	err := DB.QueryRow("SELECT COUNT(*) FROM notifications WHERE notified_id = ? AND read = 0", user_id).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func DeleteNotification(user_id, notified_id, post_id, group_id, event_id int64, type_notification string) error {

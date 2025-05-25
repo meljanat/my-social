@@ -6,7 +6,7 @@ import ChatContact from "./ChatContact";
 import Message from "./Message";
 import { websocket } from "../websocket/ws";
 import { addToListeners, removeFromListeners } from "../websocket/ws";
-import dynamic from 'next/dynamic';
+import EmojiSection from "./EmojiSection";
 
 export default function ChatWidget({ users, groups, myData }) {
   const [activeTab, setActiveTab] = useState("friends");
@@ -20,11 +20,6 @@ export default function ChatWidget({ users, groups, myData }) {
   const [openEmojiSection, setOpenEmojiSection] = useState(false);
   const [messageSending, setMessageSending] = useState("");
   const messagesEndRef = useRef(null);
-
-  const emojiPickerRef = useRef(null);
-  useEffect(() => {
-    import("emoji-picker-element");
-  }, []);
 
   const listToRender = activeTab === "friends" ? users : groups;
 
@@ -112,26 +107,6 @@ export default function ChatWidget({ users, groups, myData }) {
     }
   }, [messages]);
 
-  useEffect(() => {
-    if (!openEmojiSection) return;
-
-    const picker = emojiPickerRef.current;
-    if (!picker) return;
-
-    const handleEmojiClick = (event) => {
-      const emoji = event.detail.unicode;
-      console.log(emoji);
-
-      setMessageSending((prev) => prev + emoji);
-    };
-
-    picker.addEventListener("emoji-click", handleEmojiClick);
-
-    return () => {
-      picker.removeEventListener("emoji-click", handleEmojiClick);
-    };
-  }, [openEmojiSection]);
-
   return (
     <div className="chat-wrapper-fixed">
       {selectedUser && (
@@ -171,17 +146,10 @@ export default function ChatWidget({ users, groups, myData }) {
               </div>
             </div>
           )}
-          {openChatWidget && !messages && (
+          {openChatWidget && (!messages || messages.length === 0) && (
             <div className="chat-messages">
               <div className="messages-container">
                 <h4>No Messages yet.</h4>
-                {/* {messages.map((msg) => (
-                <Message
-                  key={msg.id}
-                  message={msg}
-                  isSent={msg.username !== selectedUser.username}
-                />
-              ))} */}
               </div>
             </div>
           )}
@@ -213,9 +181,10 @@ export default function ChatWidget({ users, groups, myData }) {
                 <p>Send</p>
               </div>
               {openEmojiSection && (
-                <div className="emoji-section">
-                  <emoji-picker ref={emojiPickerRef}></emoji-picker>
-                </div>
+                <EmojiSection
+                  onEmojiSelect={(emoji) => {
+                    setMessageSending((prev) => prev + emoji);
+                  }} />
               )}
             </div>
           )}

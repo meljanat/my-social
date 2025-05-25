@@ -14,7 +14,7 @@ func AcceptInvitation(invitation_id, invited_id, recipient_id, group_id int64) e
 	if group_id != 0 {
 		_, err = DB.Exec("INSERT INTO group_members (user_id, group_id) VALUES (?, ?)", invited_id, group_id)
 	} else {
-		_, err = DB.Exec("INSERT INTO follows (follower_id, following_id) VALUES (?, ?)", recipient_id, invited_id)
+		_, err = DB.Exec("INSERT INTO follows (follower_id, following_id) VALUES (?, ?)", invited_id, recipient_id)
 	}
 	if err != nil {
 		return err

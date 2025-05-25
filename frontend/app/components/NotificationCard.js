@@ -49,10 +49,10 @@ export default function NotificationCard({ notification }) {
             <span className="user-name">{notification.username}</span>
             <span className="action-text">
               {notification.type_notification === "invite"
-                ? " requests to follow your profile"
+                ? " requested to follow you"
                 : "like"
-                ? " liked your post"
-                : " accept your request"}
+                  ? " liked your post"
+                  : " accepted your request"}
             </span>
           </div>
 

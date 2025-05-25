@@ -28,6 +28,8 @@ export default function Navbar() {
             console.log(data.error);
           } else {
             setUser(data);
+            console.log(data);
+
           }
         } else {
           console.log("User not logged in");
@@ -45,8 +47,9 @@ export default function Navbar() {
       if (msg.type === 'notifications') {
         setUser((prevUser) => ({
           ...prevUser,
-          total_notifications: msg.notifications.length,
+          total_notifications: prevUser.total_notifications + 1,
         }));
+        console.log("Received notifications:", msg);
       }
     };
 
@@ -62,7 +65,7 @@ export default function Navbar() {
   }
 
   const toggleNotifications = () => {
-    setShowNotifications((prev) => !prev);
+    setShowNotifications(!showNotifications);
   };
 
   const handleLogout = async () => {

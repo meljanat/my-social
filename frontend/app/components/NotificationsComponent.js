@@ -13,7 +13,7 @@ const NotificationsComponent = () => {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:8404/notifications", {
+      const response = await fetch("http://localhost:8404/notifications?offset=0", {
         method: "GET",
         credentials: "include",
       });
@@ -22,6 +22,7 @@ const NotificationsComponent = () => {
 
       const data = await response.json();
       setNotifications(Array.isArray(data) ? data : []);
+      console.log("Raw notifications from server:", data);
     } catch (error) {
       console.error("Error fetching notifications:", error.message);
     } finally {
@@ -29,10 +30,17 @@ const NotificationsComponent = () => {
     }
   };
 
+  console.log(notifications);
+
+
   useEffect(() => {
     const handleNotifications = (msg) => {
       if (msg.type === 'notifications') {
+        console.log("Received notifications:", msg.notifications);
+
         setNotifications(msg.notifications);
+        console.log("Received notifications:", msg.notifications);
+
       }
     };
 

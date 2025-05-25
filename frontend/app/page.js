@@ -7,16 +7,12 @@ import TopGroups from "./components/TopGroups";
 import PostComponent from "./components/PostComponent";
 import AuthForm from "./components/AuthForm";
 import StoriesComponent from "./components/StoriesComponent";
-
-// import Notifications from "./components/NotificationsComponent";
 import ChatWidget from "./components/ChatWidget";
 import "./styles/page.css";
 
 export default function Home() {
   const [error, setError] = useState(null);
-
   const [isLoading, setIsLoading] = useState(true);
-  const [isLogin, setIsLogin] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [homeData, setHomeData] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -51,7 +47,7 @@ export default function Home() {
     };
 
     checkLoginStatus();
-  }, [isLoggedIn !== null]);
+  }, []);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -130,10 +126,6 @@ export default function Home() {
       const updatedPosts = [newPost, ...prevPosts];
       return updatedPosts;
     });
-  };
-
-  const toggleForm = () => {
-    setIsLogin(!isLogin);
   };
 
   const handleLoginSuccess = () => {

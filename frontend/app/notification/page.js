@@ -4,72 +4,11 @@ import "../styles/NotificationPage.css";
 import NotificationCard from "../components/NotificationCard";
 
 export default function NotificationPage() {
-  const [activeTab, setActiveTab] = useState("all");
   const [notifications, setNotifications] = useState([]);
-  const notificationse = [
-    {
-      type: "request",
-      avatar: "./avatars/lionel-messi_imago1019567000h.jpg",
-      name: "Amine Dinani",
-      action: "wants to follow",
-      target: "your profile",
-      time: "5 min ago",
-      hasActions: true,
-      unread: true,
-    },
-    {
-      type: "like",
-      avatar: "./avatars/lionel-messi_imago1019567000h.jpg",
-      name: "Amine Dinani",
-      action: "liked",
-      target: "your post",
-      time: "46 min ago",
-      hasActions: true,
-      unread: true,
-    },
-    {
-      type: "request",
-      avatar: "./avatars/lionel-messi_imago1019567000h.jpg",
-      name: "Amine Dinani",
-      action: "liked",
-      target: "your post",
-      time: "46 min ago",
-      hasActions: true,
-      unread: false,
-    },
-  ];
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data === true) {
-            setIsLoggedIn(true);
-          } else {
-            setIsLoggedIn(false);
-          }
-        }
-      } catch (error) {
-        setError(true);
-        console.error("Error checking login status:", error);
-      }
-    };
-
-    checkLoginStatus();
-  }, []);
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch("http://localhost:8404/notifications", {
+      const response = await fetch("http://localhost:8404/notifications?offset=0", {
         method: "GET",
         credentials: "include",
       });
@@ -87,15 +26,6 @@ export default function NotificationPage() {
 
   useEffect(() => {
     fetchNotifications();
-    //setNotifications((prev) => [data, ...prev]);
-
-    //connectSocket();
-    //if (data.type === "notification") {
-    //console.log("aaaaa");
-
-    //}
-    //subscribeToMessages((data) => {
-    //});
   }, []);
 
   const markAllAsRead = async () => {
@@ -123,29 +53,12 @@ export default function NotificationPage() {
     <div className="notification-container">
       <div className="notification-card">
         <div className="notification-header">
-          <h1 className="notification-title">Notifications</h1>
+          <h1 className="notification-title">Notifications
+            <span className="tab-count">{notifications.length || 0}</span>
+          </h1>
           <button className="mark-read-button" onClick={markAllAsRead}>
             Mark all as read
           </button>
-        </div>
-
-        <div className="tabs-container">
-          <TabButton
-            label="All"
-            count={2}
-            isActive={activeTab === "all"}
-            onClick={() => setActiveTab("all")}
-          />
-          <TabButton
-            label="Read"
-            isActive={activeTab === "read-notification"}
-            onClick={() => setActiveTab("read-notification")}
-          />
-          <TabButton
-            label="Not read"
-            isActive={activeTab === "not-read-notification"}
-            onClick={() => setActiveTab("not-read-notification")}
-          />
         </div>
 
         <div className="notification-list">
@@ -155,20 +68,5 @@ export default function NotificationPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-function TabButton({ label, count, isActive, onClick }) {
-  return (
-    <button
-      className={`tab-button ${isActive ? "tab-active" : ""}`}
-      onClick={onClick}
-    >
-      <div className="tab-content">
-        {label}
-        {count && <span className="tab-count">{count}</span>}
-      </div>
-      {isActive && <div className="tab-indicator"></div>}
-    </button>
   );
 }

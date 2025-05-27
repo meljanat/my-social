@@ -1,6 +1,6 @@
 import "../styles/RemoveGroupModal.css";
 
-export default function RemoveGroupModal({ group, onClose, onRemove }) {
+export default function RemoveGroupModal({ group, onClose, onRemove, action }) {
   const handleRemoveGroup = async () => {
     try {
       const response = await fetch(`http://localhost:8404/join`, {
@@ -26,9 +26,11 @@ export default function RemoveGroupModal({ group, onClose, onRemove }) {
     // <div className="modal">
     <div className="modal-content">
       <h2>Remove Group</h2>
-      <p>Are you sure you want to remove the group "{group.name}"?</p>
+      <p>{`Are you sure you want to ${action} the group "${group.name}"?`}</p>
       <div className="modal-actions">
-        <button onClick={handleRemoveGroup}>Remove Group</button>
+        <button onClick={handleRemoveGroup}>
+          {action === "remove" ? "Remove" : "Leave"} Group
+        </button>
         <button onClick={onClose}>Cancel</button>
       </div>
     </div>

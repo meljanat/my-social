@@ -406,8 +406,8 @@ func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(invitations)
 		} else {
+			fmt.Println("You are not the admin of this group")
 			response := map[string]string{"error": "You are not the admin of this group"}
-			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(response)
 		}
 		return
@@ -435,8 +435,8 @@ func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(posts)
 		} else {
+			fmt.Println("You are not a member of this group")
 			response := map[string]string{"error": "You are not a member of this group"}
-			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(response)
 		}
 		return
@@ -453,8 +453,8 @@ func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(events)
 		} else {
+			fmt.Println("You are not a member of this group")
 			response := map[string]string{"error": "You are not a member of this group"}
-			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(response)
 		}
 		return

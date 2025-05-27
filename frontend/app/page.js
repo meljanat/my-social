@@ -105,7 +105,7 @@ export default function Home() {
     const handleScroll = () => {
       const nearBottom =
         window.innerHeight + window.scrollY >= document.body.offsetHeight - 500;
-      if (nearBottom && !isFetchingMore && hasMorePosts) {
+      if (nearBottom && !isFetchingMore && hasMorePosts && isLoggedIn) {
         setIsFetchingMore(true);
         fetchHomeData(posts.length).then((newPosts) => {
           if (newPosts.length === 0) {

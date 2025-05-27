@@ -391,12 +391,13 @@ func ValidateInput(username, firstName, lastName, email, password, confirm_pass,
 		if date.IsZero() {
 			errors["date"] = "Date cannot be empty"
 		} else {
-			now := time.Now()
-			year1900 := time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC)
+			age := time.Since(date).Hours() / 24 / 365.3
+			if age < 18 {
+				errors["date"] = "You must be at least 18 years old"
+			}
 
-			if date.After(now) {
-				errors["date"] = "Date cannot be in the future"
-			} else if date.Before(year1900) {
+			year1900 := time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC)
+			if date.Before(year1900) {
 				errors["date"] = "Date cannot be before the year 1900"
 			}
 		}

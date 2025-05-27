@@ -18,7 +18,7 @@ import GroupFormModal from "../components/GroupFromModal";
 import RemoveGroupModal from "../components/RemoveGroupModal";
 import InvitationsModal from "../components/InvitationsModal";
 import InviteUsersModal from "../components/UsersToInviteModal";
-import { handleFollow, handelAccept, handleReject, handelAcceptOtherGroup, handleRejectOtherGroup } from "../functions/user";
+import {handleFollow, handelAccept, handleReject, handelAcceptOtherGroup, handleRejectOtherGroup} from "../functions/user";
 
 function removeGroup(group_id, user_id) {
   leaveGroup(group_id, user_id);
@@ -336,7 +336,7 @@ export default function GroupsPage() {
     } else if (tab === "pending-groups") {
       fetchGroupData("pending");
     } else if (tab === "invitations") {
-      fetchUserInvitationsData("invitations");
+      fetchUserInvitationsData();
     }
   };
 
@@ -362,53 +362,6 @@ export default function GroupsPage() {
       console.error("Error fetching invitations data:", error);
       setInvitationsGroups([]);
       setIsLoading(false);
-    }
-  };
-  const createGroupHandler = async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData();
-    formData.append("name", groupName);
-    formData.append("description", groupDescription);
-    formData.append("privacy", privacy);
-    if (groupImage) {
-      formData.append("groupImage", groupImage);
-    }
-
-    try {
-      const response = await fetch("http://localhost:8404/new_group", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Server Error:", errorData);
-        alert(errorData.error || "Failed to create group.");
-        return;
-      }
-      console.log("Response status:", response.status);
-      const data = await response.json();
-      console.log("Group created:", data);
-
-      // if (!response.ok) {
-      //   alert(data.error || "Failed to create group.");
-      //   return;
-      // }
-
-      setGroups((prevGroups) => [
-        ...prevGroups,
-        { ...data, posts: [], events: [] },
-      ]);
-      setGroupName("");
-      setGroupDescription("");
-      setPrivacy("public");
-      setGroupImage(null);
-      setShowForm(false);
-    } catch (error) {
-      console.error("Error creating group:", error);
-      alert(`An error occurred while creating the group: ${error.message}`);
     }
   };
 
@@ -545,6 +498,8 @@ export default function GroupsPage() {
               group={selectedGroup}
               onClose={() => setShowRemoveGroupModal(false)}
               onRemove={removeGroup}
+              action={selectedGroup.role === "admin" ? "remove" : "leave"}
+              onLeave={leaveGroup}
             />
           </div>
         )}
@@ -624,41 +579,43 @@ export default function GroupsPage() {
                 (invitationsGroups || []).length > 0 ? (
                   (invitationsGroups || []).map((invitation) => {
                     console.log("hadi heya", invitation);
-                    
-                    {invitation.user.username == invitation.group.admin ? 
-                      <InvitationCard
-                      key={invitation.invitation_id}
-                      invitation={invitation}
-                      onAccept={() => {
-                        handelAcceptOtherGroup(
-                          invitation.user.user_id,
-                          invitation.group.group_id
-                        );
-                      }}
-                      onDecline={() => {
-                        handleRejectOtherGroup(
-                          invitation.user.user_id,
-                          invitation.group.group_id
-                        );
-                      }}
-                    />
-                    :
-                    <InvitationCard
-                      key={invitation.invitation_id}
-                      invitation={invitation}
-                      onAccept={() => {
-                        handelAccept(
-                          invitation.user.user_id,
-                          invitation.group.group_id
-                        );
-                      }}
-                      onDecline={() => {
-                        handleReject(
-                          invitation.user.user_id,
-                          invitation.group.group_id
-                        );
-                      }}
-                    />
+
+                    {
+                      invitation.user.username == invitation.group.admin ? (
+                        <InvitationCard
+                          key={invitation.invitation_id}
+                          invitation={invitation}
+                          onAccept={() => {
+                            handelAcceptOtherGroup(
+                              invitation.user.user_id,
+                              invitation.group.group_id
+                            );
+                          }}
+                          onDecline={() => {
+                            handleRejectOtherGroup(
+                              invitation.user.user_id,
+                              invitation.group.group_id
+                            );
+                          }}
+                        />
+                      ) : (
+                        <InvitationCard
+                          key={invitation.invitation_id}
+                          invitation={invitation}
+                          onAccept={() => {
+                            handelAccept(
+                              invitation.user.user_id,
+                              invitation.group.group_id
+                            );
+                          }}
+                          onDecline={() => {
+                            handleReject(
+                              invitation.user.user_id,
+                              invitation.group.group_id
+                            );
+                          }}
+                        />
+                      );
                     }
                   })
                 ) : (
@@ -675,6 +632,9 @@ export default function GroupsPage() {
                       isJoined={true}
                       onClick={() => {
                         handleGroupSelect(group);
+                      }}
+                      onLeave={() => {
+                        leaveGroup(group.group_id);
                       }}
                     />
                   ))
@@ -723,9 +683,10 @@ export default function GroupsPage() {
                   <PendingGroupRequestCard
                     key={group.group_id}
                     group={group}
+                    onCancelRequest={handleFollow}
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log("dasdas", group);
+                      console.log("dasdhhhas", group);
                       handleFollow(0, group.group_id);
                       handleGroupSelect(group);
                     }}
@@ -1010,7 +971,23 @@ export default function GroupsPage() {
                           : "admin-action-btn"
                       }`}
                       onClick={() => {
-                        handleFollow(0, selectedGroup.group_id);
+                        console.log(selectedGroup);
+                        
+                        handleFollow(selectedGroup.admin_id, selectedGroup.group_id);
+                        if (activeTab === "my-groups") {
+                          setSelectedGroup(null);
+                        } else if (activeTab === "discover") {
+                          if (selectedGroup.privacy === "private") {
+                            handleTabChange("pending-groups");
+                            setSelectedGroup(selectedGroup);
+                          } else {
+                            handleTabChange("my-groups");
+                            setSelectedGroup(selectedGroup);
+                          }
+                        } else if (activeTab === "pending-groups") {
+                          handleTabChange("discover");
+                          setSelectedGroup(selectedGroup);
+                        }
                       }}
                     >
                       <svg
@@ -1101,119 +1078,157 @@ export default function GroupsPage() {
             <div className="group-detail-content">
               {groupView === "posts" && (
                 <div className="group-posts-container">
-                  {/* {selectedGroup.role === "admin" ||
-                    (selectedGroup.role === "member") &
-                    ( */}
-                  {activeTab === "my-groups" && (
-                    <button
-                      disabled={
-                        selectedGroup.role !== "admin" &&
-                        selectedGroup.role !== "member"
-                      }
-                      onClick={handleCreatePost}
-                      className="create-post-action-btn"
-                    >
-                      <img src="/icons/create.svg" alt="" />
-                      <span>Create post</span>
-                      {/* <span>Create post</span> */}
-                    </button>
-                  )}
-                  {/* )} */}
-
-                  {(selectedGroup.posts || []).length > 0 ? (
-                    (selectedGroup.posts || []).map((post) => (
-                      <PostsComponent
-                        post={post}
-                        key={post.post_id}
-                        groupId={selectedGroup.group_id}
-                      />
-                    ))
+                  {selectedGroup.role === "guest" &&
+                  selectedGroup.privacy === "private" ? (
+                    <div className="empty-state">
+                      <img src="/icons/no-posts.svg" alt="" />
+                      <p>You are not allowed to see Posts</p>
+                    </div>
                   ) : (
-                    <div className="empty-state">
-                      <p className="empty-title">No post available</p>
-                      {/* <p className="empty-description">
+                    <div>
+                      {activeTab === "my-groups" && (
+                        <button
+                          disabled={
+                            selectedGroup.role !== "admin" &&
+                            selectedGroup.role !== "member"
+                          }
+                          onClick={handleCreatePost}
+                          className="create-post-action-btn"
+                        >
+                          <img src="/icons/create.svg" alt="" />
+                          <span>Create post</span>
+                          {/* <span>Create post</span> */}
+                        </button>
+                      )}
+                      {/* )} */}
+
+                      {(selectedGroup.posts || []).length > 0 ? (
+                        (selectedGroup.posts || []).map((post) => (
+                          <PostsComponent
+                            post={post}
+                            key={post.post_id}
+                            groupId={selectedGroup.group_id}
+                          />
+                        ))
+                      ) : (
+                        <div className="empty-state">
+                          <p className="empty-title">No post available</p>
+                          {/* <p className="empty-description">
                       Create yout first post
                     </p> */}
+                        </div>
+                      )}
+
+                      {showPostForm && (
+                        <PostFormModal
+                          onClose={() => setShowPostForm(false)}
+                          // user={user}
+                          onPostCreated={addNewPost}
+                          group_id={selectedGroup.group_id}
+                        />
+                      )}
+
+                      {selectedGroup.posts &&
+                        selectedGroup.posts.length > 0 && <div></div>}
                     </div>
                   )}
-
-                  {showPostForm && (
-                    <PostFormModal
-                      onClose={() => setShowPostForm(false)}
-                      // user={user}
-                      onPostCreated={addNewPost}
-                      group_id={selectedGroup.group_id}
-                    />
-                  )}
-
-                  {selectedGroup.posts && selectedGroup.posts.length > 0 && (
-                    <div></div>
-                  )}
-                </div>
-              )}
-              {groupView === "members" && (
-                <div className="group-members-container">
-                  <div className="members-header">
-                    <h3>Members ({selectedGroup.members?.length})</h3>
-                  </div>
-                  {selectedGroup.members?.length === 0 && (
-                    <div className="empty-state">
-                      <p className="empty-title">No members available</p>
-                      {/* <p className="empty-description">
-                      Create yout first post
-                    </p> */}
-                    </div>
-                  )}
-
-                  {selectedGroup.members &&
-                    selectedGroup.members.length > 0 && (
-                      <div className="members-grid">
-                        {selectedGroup.members.map((member) => (
-                          <MemberCard key={member.user_id} member={member} />
-                        ))}
+                  {groupView === "members" && (
+                    <div className="group-members-container">
+                      <div className="members-header">
+                        <h3>Members ({selectedGroup.members?.length})</h3>
                       </div>
-                    )}
+                      {selectedGroup.role === "guest" &&
+                      selectedGroup.privacy === "private" ? (
+                        <div className="empty-state">
+                          <p className="empty-title">
+                            You are not allowed to see Members
+                          </p>
+                        </div>
+                      ) : (
+                        <div>
+                          {selectedGroup.members?.length === 0 && (
+                            <div className="empty-state">
+                              <p className="empty-title">
+                                No members available
+                              </p>
+                              {/* <p className="empty-description">
+                      Create yout first post
+                    </p> */}
+                            </div>
+                          )}
 
-                  {/* <div className="members-grid">
+                          {selectedGroup.members &&
+                            selectedGroup.members.length > 0 && (
+                              <div className="members-grid">
+                                {selectedGroup.members.map((member) => (
+                                  <MemberCard
+                                    key={member.user_id}
+                                    member={member}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                        </div>
+                      )}
+
+                      {/* <div className="members-grid">
                     {selectedGroup.members?.map((member) => (
                       <MemberCard key={member.user_id} member={member} />
                     ))}
                   </div> */}
-                </div>
-              )}
+                    </div>
+                  )}
 
-              {groupView === "events" && (
-                <div className="group-events-container">
-                  <div className="events-header">
-                    <h3>Upcoming Events</h3>
-                    <button
-                      className="create-event-btn"
-                      onClick={() => setShowEventForm(true)}
-                    >
-                      Create Event
-                      {/* {showEventForm ? "Cancel" : "Create Event"} */}
-                    </button>
-                  </div>
+                  {groupView === "events" && (
+                    <div className="group-events-container">
+                      {selectedGroup.role === "guest" &&
+                      selectedGroup.privacy === "private" ? (
+                        <div className="empty-state">
+                          <p className="empty-title">
+                            You are not allowed to see Events
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="events-header">
+                            <h3>Upcoming Events</h3>
+                            {selectedGroup.role === "admin" ||
+                              (selectedGroup.role === "member" && (
+                                <button
+                                  className="create-event-btn"
+                                  onClick={() => setShowEventForm(true)}
+                                >
+                                  Create Event
+                                  {/* {showEventForm ? "Cancel" : "Create Event"} */}
+                                </button>
+                              ))}
+                          </div>
 
-                  <div className="events-list">
-                    {selectedGroup.events?.length === 0 && (
-                      <div className="empty-state">
-                        <p className="empty-title">No events available</p>
-                        {/* <p className="empty-description">
+                          <div className="events-list">
+                            {selectedGroup.events?.length === 0 && (
+                              <div className="empty-state">
+                                <p className="empty-title">
+                                  No events available
+                                </p>
+                                {/* <p className="empty-description">
                         Create yout first post
                       </p> */}
-                      </div>
-                    )}
-                    {selectedGroup.events?.map((event) => (
-                      <EventCard key={event.event_id} event={event} />
-                    ))}
-                  </div>
-                  {showEventForm && (
-                    <EventFormModal
-                      onClose={() => setShowEventForm((prev) => !prev)}
-                      // user={}
-                      group={selectedGroup}
-                    />
+                              </div>
+                            )}
+                            {selectedGroup.events?.map((event) => (
+                              <EventCard key={event.event_id} event={event} />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      {showEventForm && (
+                        <EventFormModal
+                          onClose={() => setShowEventForm((prev) => !prev)}
+                          // user={}
+                          group={selectedGroup}
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
               )}

@@ -10,6 +10,7 @@ import (
 )
 
 func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("InvitationsHandler called")
 	if r.Method != http.MethodPost {
 		fmt.Println("Method not allowed", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
@@ -42,41 +43,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if invitation.User == user.ID {
-		fmt.Println("User cannot follow themselves")
-		response := map[string]string{"error": "User cannot follow themselves"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
-	var userToFollowing structs.User
-	var isFollowed bool
-	if invitation.User != 0 {
-		userToFollowing, err = database.GetUserById(invitation.User)
-		if err != nil {
-			fmt.Println("Failed to retrieve follower", err)
-			response := map[string]string{"error": "Failed to retrieve follower"}
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(response)
-			return
-		} else if userToFollowing.ID == user.ID {
-			fmt.Println("Cannot accept your own invitation", err)
-			response := map[string]string{"error": "Cannot accept your own invitation"}
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-
-		isFollowed, err = database.IsFollowed(user.ID, invitation.User)
-		if err != nil {
-			fmt.Println("Failed to check if user is followed", err)
-			response := map[string]string{"error": "Failed to check if user is followed"}
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-	}
+	fmt.Println("Invitation received:", invitation)
 
 	isInvitation, err := database.CheckInvitation(user.ID, invitation.User, invitation.Group)
 	if err != nil {
@@ -100,6 +67,30 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if invitation.Group == 0 {
+		userToFollowing, err := database.GetUserById(invitation.User)
+		if err != nil {
+			fmt.Println("Failed to retrieve follower", err)
+			response := map[string]string{"error": "Failed to retrieve follower"}
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		} else if userToFollowing.ID == user.ID {
+			fmt.Println("Cannot send invitation to you", err)
+			response := map[string]string{"error": "Cannot send invitation to you"}
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		isFollowed, err := database.IsFollowed(user.ID, invitation.User)
+		if err != nil {
+			fmt.Println("Failed to check if user is followed", err)
+			response := map[string]string{"error": "Failed to check if user is followed"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
 		if !isFollowed {
 			if userToFollowing.Privacy == "public" {
 				if err := database.AddFollower(user.ID, invitation.User); err != nil {

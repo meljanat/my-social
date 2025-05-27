@@ -63,7 +63,7 @@ const NotificationsComponent = () => {
 
       if (!response.ok) throw new Error("Failed to mark all as read");
 
-      setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     } catch (error) {
       console.error("Error marking notifications as read:", error.message);
     }
@@ -75,7 +75,7 @@ const NotificationsComponent = () => {
 
   const filteredNotifications = notifications.filter((notification) => {
     if (notificationType === "all") return true;
-    return notification.type_notification === notificationType;
+    return notification.read;
   });
 
   return (

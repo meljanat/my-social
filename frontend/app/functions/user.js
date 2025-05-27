@@ -14,14 +14,11 @@ export async function handleFollow(user_id, group_id) {
       credentials: "include",
     });
 
-    if (response.ok) {
-      console.log("Followed successfully");
-      response.json().then((data) => {
-        return data;
-      });
-    }
     const data = await response.json();
-    console.log("Followed user:", data);
+    console.log("Followed chi dfcha user:", data);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
   } catch (error) {
     console.error("Error following user:", error);
   }
@@ -40,11 +37,8 @@ export async function handelAccept(user_id, group_id) {
       }),
       credentials: "include",
     });
-    if (response.ok) {
-      console.log("Accepted successfully");
-      response.json().then((data) => {
-        return data;
-      });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
     console.log("Accepted user:", data);
@@ -67,11 +61,8 @@ export async function handleReject(user_id, group_id) {
       }),
       credentials: "include",
     });
-    if (response.ok) {
-      console.log("Rejected successfully");
-      response.json().then((data) => {
-        return data;
-      });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
     console.log("Rejected user:", data);
@@ -94,11 +85,8 @@ export async function handelAcceptOtherGroup(user_id, group_id) {
       }),
       credentials: "include",
     });
-    if (response.ok) {
-      console.log("Accepted successfully");
-      response.json().then((data) => {
-        return data;
-      });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
     console.log("Accepted user:", data);
@@ -121,11 +109,8 @@ export async function handleRejectOtherGroup(user_id, group_id) {
       }),
       credentials: "include",
     });
-    if (response.ok) {
-      console.log("Rejected successfully");
-      response.json().then((data) => {
-        return data;
-      });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
     console.log("Rejected user:", data);

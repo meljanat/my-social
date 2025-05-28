@@ -50,6 +50,7 @@ func NotificationsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func MarkNotificationsAsReadHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("MarkNotificationsAsReadHandler called")
 	if r.Method != http.MethodPost {
 		fmt.Println("Method not allowed", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
@@ -68,7 +69,6 @@ func MarkNotificationsAsReadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := database.MarkAllNotificationsAsRead(user.ID); err != nil {
-		fmt.Println("Failed to mark notifications as read", err)
 		response := map[string]string{"error": "Failed to mark notifications as read"}
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response)

@@ -131,15 +131,15 @@ type Message struct {
 }
 
 type Notification struct {
-	ID               int64     `json:"notification_id" sqlite:"notification_id"`
-	User             User      `json:"user" sqlite:"user"`
-	Content          string    `json:"content" sqlite:"content"`
-	PostID           int64     `json:"post_id" sqlite:"post_id"`
-	GroupID          int64     `json:"group_id" sqlite:"group_id"`
-	EventID          int64     `json:"event_id" sqlite:"event_id"`
-	TypeNotification string    `json:"type_notification" sqlite:"type_notification"`
-	CreatedAt        time.Time `json:"created_at" sqlite:"created_at"`
-	Read             bool      `json:"read" sqlite:"read"`
+	ID               int64  `json:"notification_id" sqlite:"notification_id"`
+	User             User   `json:"user" sqlite:"user"`
+	Content          string `json:"content" sqlite:"content"`
+	PostID           int64  `json:"post_id" sqlite:"post_id"`
+	GroupID          int64  `json:"group_id" sqlite:"group_id"`
+	EventID          int64  `json:"event_id" sqlite:"event_id"`
+	TypeNotification string `json:"type_notification" sqlite:"type_notification"`
+	CreatedAt        string `json:"created_at" sqlite:"created_at"`
+	Read             bool   `json:"read" sqlite:"read"`
 }
 
 type Invitation struct {

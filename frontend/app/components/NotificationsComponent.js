@@ -73,7 +73,7 @@ const NotificationsComponent = () => {
     fetchNotifications();
   }, []);
 
-  const filteredNotifications = notifications.filter((notification) => {
+  const filteredNotifications = notifications?.filter((notification) => {
     if (notificationType === "all") return true;
     return notification.read;
   });

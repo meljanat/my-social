@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	structs "social-network/data"
 )
@@ -42,10 +43,12 @@ func GetNotifications(notified_id, offset int64) ([]structs.Notification, error)
 	defer rows.Close()
 	for rows.Next() {
 		var notification structs.Notification
-		err = rows.Scan(&notification.ID, &notification.User.Username, &notification.User.Avatar, &notification.PostID, &notification.GroupID, &notification.EventID, &notification.TypeNotification, &notification.Read, &notification.CreatedAt)
+		var date time.Time
+		err = rows.Scan(&notification.ID, &notification.User.Username, &notification.User.Avatar, &notification.PostID, &notification.GroupID, &notification.EventID, &notification.TypeNotification, &notification.Read, &date)
 		if err != nil {
 			return nil, err
 		}
+		notification.CreatedAt = TimeAgo(date)
 		notifications = append(notifications, notification)
 	}
 	return notifications, nil
@@ -66,11 +69,11 @@ func DeleteNotification(user_id, notified_id, post_id, group_id, event_id int64,
 }
 
 func MarkNotificationAsRead(user_id, notfication_id int64) error {
-	_, err := DB.Exec("UPDATE notifications SET read = 1 WHERE user_id = ? AND id = ?", user_id, notfication_id)
+	_, err := DB.Exec("UPDATE notifications SET read = 1 WHERE notified_id = ? AND id = ?", user_id, notfication_id)
 	return err
 }
 
 func MarkAllNotificationsAsRead(user_id int64) error {
-	_, err := DB.Exec("UPDATE notifications SET read = 1 WHERE user_id = ?", user_id)
+	_, err := DB.Exec("UPDATE notifications SET read = 1 WHERE notified_id = ?", user_id)
 	return err
 }

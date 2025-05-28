@@ -333,7 +333,7 @@ export default function PostComponent({ posts: initialPosts }) {
             </button>
           </div>
 
-          <a href={`/post/${post.post_id}/0`} className="post-link">
+          <a href={`/post/${post.post_id}`} className="post-link">
             <button className="see-post-button">
               See post <span className="arrow">→</span>
             </button>

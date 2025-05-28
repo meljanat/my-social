@@ -1,31 +1,7 @@
 import "../styles/NotificationCard.css";
 
 export default function NotificationCard({ notification }) {
-  function timeAgo(dateString) {
-    const now = new Date();
-    const past = new Date(dateString);
-    const diff = now - past;
-
-    if (isNaN(past)) return "Invalid date";
-
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const weeks = Math.floor(days / 7);
-    const months = Math.floor(days / 30);
-    const years = Math.floor(days / 365);
-
-    if (seconds < 60) return `${seconds} seconds ago`;
-    if (minutes < 60) return `${minutes} minutes ago`;
-    if (hours < 24) return `${hours} hours ago`;
-    if (days < 7) return `${days} days ago`;
-    if (weeks < 5) return `${weeks} weeks ago`;
-    if (months < 12) return `${months} months ago`;
-    return `${years} years ago`;
-  }
-
-  const notificationTime = timeAgo(notification.created_at);
+  console.log(notification);
 
   return (
     <div className="notification-item">
@@ -50,13 +26,17 @@ export default function NotificationCard({ notification }) {
             <span className="action-text">
               {notification.type_notification === "invite"
                 ? " requested to follow you"
-                : "like"
-                  ? " liked your post"
-                  : " accepted your request"}
+                : notification.type_notification === "like"
+                ? " liked your post"
+                : notification.type_notification === "comment"
+                ? "commented on your post"
+                : notification.type_notification === "event"
+                ? " invited you to an event"
+                : " accepted your request"}
             </span>
           </div>
 
-          <div className="notification-time">{notificationTime}</div>
+          <div className="notification-time">{notification.created_at}</div>
 
           {notification.hasActions && (
             <div className="action-buttons">

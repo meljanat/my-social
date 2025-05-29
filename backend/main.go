@@ -70,6 +70,7 @@ func main() {
 	http.HandleFunc("/invitations_groups", handlers.GetInvitationsGroups)
 	http.HandleFunc("/notifications", handlers.NotificationsHandler)
 	http.HandleFunc("/notifications/mark_all_as_read", handlers.MarkNotificationsAsReadHandler)
+	http.HandleFunc("/notifications/mark_as_read", handlers.MarkNotificationAsReadHandler)
 	http.HandleFunc("/chats", handlers.ChatHandler)
 	http.HandleFunc("/chats_group", handlers.ChatGroupHandler)
 	http.HandleFunc("/message", handlers.SendMessageHandler)

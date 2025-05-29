@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../styles/Notifications.css";
 import NotificationCard from "../components/NotificationCard";
+import { useRouter } from 'next/navigation';
 import { addToListeners, removeFromListeners } from "../websocket/ws.js";
 
 const NotificationsComponent = () => {
@@ -9,11 +10,12 @@ const NotificationsComponent = () => {
   const [notificationType, setNotificationType] = useState("all");
   const [loading, setLoading] = useState(true);
   const notificationRef = useRef(null);
+  const router = useRouter();
 
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:8404/notifications?offset=0", {
+      const response = await fetch(`http://localhost:8404/notifications?offset=0`, {
         method: "GET",
         credentials: "include",
       });
@@ -30,27 +32,6 @@ const NotificationsComponent = () => {
     }
   };
 
-  console.log(notifications);
-
-
-  useEffect(() => {
-    const handleNotifications = (msg) => {
-      if (msg.type === 'notifications') {
-        console.log("Received notifications:", msg.notifications);
-
-        setNotifications(msg.notifications);
-        console.log("Received notifications:", msg.notifications);
-
-      }
-    };
-
-    addToListeners('notifications', handleNotifications);
-
-    return () => {
-      removeFromListeners('notifications', handleNotifications);
-    };
-  }, []);
-
   const markAllAsRead = async () => {
     try {
       const response = await fetch(
@@ -63,11 +44,43 @@ const NotificationsComponent = () => {
 
       if (!response.ok) throw new Error("Failed to mark all as read");
 
+      console.log(notifications);
+
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      console.log(notifications);
+
     } catch (error) {
       console.error("Error marking notifications as read:", error.message);
     }
   };
+
+  const markAsRead = async (notification) => {
+    try {
+      const response = await fetch(`http://localhost:8404/notifications/mark_as_read?id=${notification.notification_id}`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error("Failed to mark notification as read");
+
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.notification_id === notification.notification_id
+            ? { ...n, read: true }
+            : n
+        )
+      );
+      if (notification.type_notification === "invitation") {
+        router.push('/profile/' + notification.user.user_id);
+      } else if (notification.type_notification === "like" || notification.type_notification === "comment") {
+        router.push('/post/' + notification.post_id);
+      } else if (notification.type_notification === "event") {
+        router.push('/groups');
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error.message);
+    }
+  }
 
   useEffect(() => {
     fetchNotifications();
@@ -75,7 +88,7 @@ const NotificationsComponent = () => {
 
   const filteredNotifications = notifications?.filter((notification) => {
     if (notificationType === "all") return true;
-    return notification.read;
+    return !notification.read;
   });
 
   return (
@@ -117,7 +130,7 @@ const NotificationsComponent = () => {
           filteredNotifications
             .slice(0, 5)
             .map((notification, idx) => (
-              <NotificationCard key={idx} notification={notification} />
+              <NotificationCard key={idx} notification={notification} onClick={() => { markAsRead(notification) }} />
             ))
         ) : (
           <div className="empty-notifications">

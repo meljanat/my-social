@@ -36,7 +36,7 @@ func CreateNotification(user_id, notified_id, post_id, group_id, event_id int64,
 
 func GetNotifications(notified_id, offset int64) ([]structs.Notification, error) {
 	var notifications []structs.Notification
-	rows, err := DB.Query("SELECT n.id, u.username, u.avatar, n.post_id, n.group_id, n.event_id, n.type_notification, n.read, n.created_at FROM notifications n JOIN users u ON u.id = n.user_id WHERE n.notified_id = ? ORDER BY n.created_at DESC LIMIT ? OFFSET ?", notified_id, 10, offset)
+	rows, err := DB.Query("SELECT n.id, u.id, u.username, u.avatar, n.post_id, n.group_id, n.event_id, n.type_notification, n.read, n.created_at FROM notifications n JOIN users u ON u.id = n.user_id WHERE n.notified_id = ? ORDER BY n.created_at DESC LIMIT ? OFFSET ?", notified_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func GetNotifications(notified_id, offset int64) ([]structs.Notification, error)
 	for rows.Next() {
 		var notification structs.Notification
 		var date time.Time
-		err = rows.Scan(&notification.ID, &notification.User.Username, &notification.User.Avatar, &notification.PostID, &notification.GroupID, &notification.EventID, &notification.TypeNotification, &notification.Read, &date)
+		err = rows.Scan(&notification.ID, &notification.User.ID, &notification.User.Username, &notification.User.Avatar, &notification.PostID, &notification.GroupID, &notification.EventID, &notification.TypeNotification, &notification.Read, &date)
 		if err != nil {
 			return nil, err
 		}

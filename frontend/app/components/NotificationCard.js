@@ -1,12 +1,11 @@
+"use client";
 import "../styles/NotificationCard.css";
 
-export default function NotificationCard({ notification }) {
-  console.log(notification);
-
+export default function NotificationCard({ notification, onClick }) {
   return (
-    <div className="notification-item">
+    <div className="notification-item" onClick={onClick}>
       <div className="notification-content">
-        {notification.unread && (
+        {!notification.read && (
           <div className="unread-indicator-container">
             <div className="unread-indicator"></div>
           </div>
@@ -14,25 +13,25 @@ export default function NotificationCard({ notification }) {
 
         <div className="avatar-container">
           <img
-            src={notification.avatar}
-            alt={notification.username}
+            src={notification.user.avatar}
+            alt={notification.user.username}
             className="avatar-image"
           />
         </div>
 
         <div className="notification-text">
           <div className="notification-message">
-            <span className="user-name">{notification.username}</span>
+            <span className="user-name">{notification.user.username}</span>
             <span className="action-text">
-              {notification.type_notification === "invite"
+              {notification.type_notification === "invitation"
                 ? " requested to follow you"
                 : notification.type_notification === "like"
-                ? " liked your post"
-                : notification.type_notification === "comment"
-                ? "commented on your post"
-                : notification.type_notification === "event"
-                ? " invited you to an event"
-                : " accepted your request"}
+                  ? " liked your post"
+                  : notification.type_notification === "comment"
+                    ? " commented on your post"
+                    : notification.type_notification === "event"
+                      ? " invited you to an event"
+                      : " accepted your request"}
             </span>
           </div>
 

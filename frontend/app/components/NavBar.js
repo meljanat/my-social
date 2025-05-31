@@ -1,14 +1,19 @@
 "use client";
-import { useEffect, useState } from "react";
+import { act, use, useEffect, useState } from "react";
 import Link from "next/link";
 import "../styles/NavBar.css";
 import NotificationsComponent from "./NotificationsComponent";
+import SuggestionCard from "./SuggestionCard";
 import { addToListeners, removeFromListeners } from "../websocket/ws";
 
 export default function Navbar() {
   const [activeLink, setActiveLink] = useState("home");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
+  const [activeSugTab, setActiveSugTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState(null);
   const [user, setUser] = useState();
 
   useEffect(() => {
@@ -25,14 +30,11 @@ export default function Navbar() {
         if (response.ok) {
           const data = await response.json();
           if (data.error) {
-            console.log(data.error);
-          } else {
-            setUser(data);
-            console.log(data);
-
+            throw new Error(data.error);
           }
+          setUser(data);
         } else {
-          console.log("User not logged in");
+          throw new Error("Failed to fetch user data");
         }
       }
       catch (error) {
@@ -53,20 +55,76 @@ export default function Navbar() {
       }
     };
 
+    const handleClickOutside = (event) => {
+      if (
+        !event.target.closest(".profile-dropdown") &&
+        !event.target.closest(".search-input-container") &&
+        !event.target.closest(".notification-button")
+      ) {
+        setShowProfileMenu(false);
+        setShowSearchSuggestions(false);
+        setShowNotifications(false);
+      }
+    };
+
     addToListeners('notifications', handleNotifications);
+    document.addEventListener("click", handleClickOutside);
 
     return () => {
       removeFromListeners('notifications', handleNotifications);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, []);
+
+  const fetchSuggestions = async () => {
+    const offset = 0;
+    try {
+      const response = await fetch(`http://localhost:8404/search?query=${searchQuery}&offset=${offset}&type=${activeSugTab}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch suggestions");
+      }
+
+      const data = await response.json();
+
+      console.log(data);
+
+      if (data.error) {
+        throw new Error("Failed to fetch suggestions", data.error);
+      }
+
+      setSuggestions((prevSuggestions) => {
+        const newSuggestions = data;
+        if (prevSuggestions) {
+          return {
+            ...prevSuggestions,
+            users: [...(prevSuggestions.users || []), ...(newSuggestions.users || [])],
+            groups: [...(prevSuggestions.groups || []), ...(newSuggestions.groups || [])],
+            events: [...(prevSuggestions.events || []), ...(newSuggestions.events || [])],
+            posts: [...(prevSuggestions.posts || []), ...(newSuggestions.posts || [])],
+          };
+        }
+        return newSuggestions;
+      });
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+    }
+  }
+
+  useEffect(() => {
+    setSuggestions([]);
+    fetchSuggestions();
+  }, [searchQuery, activeSugTab]);
 
   if (!user) {
     return null;
   }
-
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-  };
 
   const handleLogout = async () => {
     try {
@@ -88,7 +146,21 @@ export default function Navbar() {
 
   const toggleProfileMenu = () => {
     setShowProfileMenu(!showProfileMenu);
+    setShowNotifications(false);
+    setShowSearchSuggestions(false);
   };
+
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+    setShowProfileMenu(false);
+    setShowSearchSuggestions(false);
+  };
+
+  const toggleSearchSuggestions = () => {
+    setShowSearchSuggestions(true);
+    setShowProfileMenu(false);
+    setShowNotifications(false);
+  }
 
   return (
     <nav className="navbar">
@@ -131,9 +203,27 @@ export default function Navbar() {
       </div>
 
       <div className="search-bar">
-        <div className="search-input-container">
+        <div className="search-input-container" onClick={toggleSearchSuggestions}>
           <img src="./icons/search.svg" alt="Search" className="search-icon" />
-          <input type="text" placeholder="Search users and groups" />
+          <input type="text" placeholder="What's on your mind?" onChange={(e) => setSearchQuery(e.target.value)} />
+          {showSearchSuggestions && (
+            <div className="search-suggestions">
+              <div className="nav-links">
+                <button className={`nav-link ${activeSugTab === "all" ? "active" : ""}`} onClick={() => setActiveSugTab("all")}>All</button>
+                <button className={`nav-link ${activeSugTab === "users" ? "active" : ""}`} onClick={() => setActiveSugTab("users")}>Users</button>
+                <button className={`nav-link ${activeSugTab === "groups" ? "active" : ""}`} onClick={() => setActiveSugTab("groups")}>Groups</button>
+                <button className={`nav-link ${activeSugTab === "events" ? "active" : ""}`} onClick={() => setActiveSugTab("events")}>Events</button>
+                <button className={`nav-link ${activeSugTab === "posts" ? "active" : ""}`} onClick={() => setActiveSugTab("posts")}>Posts</button>
+              </div>
+              {Object.values(suggestions).flat().length === 0 ? (
+                <div className="no-suggestions">No suggestions found</div>
+              ) : (
+                Object.values(suggestions).flat().map((suggestion, index) => (
+                  <SuggestionCard key={index} suggestion={suggestion} />
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -192,6 +282,6 @@ export default function Navbar() {
           )}
         </div>
       </div>
-    </nav>
+    </nav >
   );
 }

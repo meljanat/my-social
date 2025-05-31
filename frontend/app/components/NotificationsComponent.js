@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import "../styles/Notifications.css";
 import NotificationCard from "../components/NotificationCard";
 import { useRouter } from 'next/navigation';
-import { addToListeners, removeFromListeners } from "../websocket/ws.js";
 
 const NotificationsComponent = () => {
   const [notifications, setNotifications] = useState([]);

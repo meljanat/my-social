@@ -6,8 +6,27 @@ export default function StoriesComponent({ users = [] }) {
   const [storyUsers, setStoryUsers] = useState(
     users.length > 0
       ? users.map((user) => ({
-          ...user,
-          hasUnseenStory: Math.random() > 0.5,
+        ...user,
+        hasUnseenStory: Math.random() > 0.5,
+        stories: [
+          {
+            id: 1,
+            image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
+            duration: 5000,
+          },
+          {
+            id: 2,
+            image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
+            duration: 5000,
+          },
+        ],
+      }))
+      : [
+        {
+          id: 1,
+          username: "mdinani",
+          avatar: "/api/placeholder/72/72",
+          hasUnseenStory: true,
           stories: [
             {
               id: 1,
@@ -20,94 +39,75 @@ export default function StoriesComponent({ users = [] }) {
               duration: 5000,
             },
           ],
-        }))
-      : [
-          {
-            id: 1,
-            username: "mdinani",
-            avatar: "/api/placeholder/72/72",
-            hasUnseenStory: true,
-            stories: [
-              {
-                id: 1,
-                image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-                duration: 5000,
-              },
-              {
-                id: 2,
-                image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-                duration: 5000,
-              },
-            ],
-          },
-          {
-            id: 2,
-            username: "abenramd",
-            avatar: "/api/placeholder/72/72",
-            hasUnseenStory: true,
-            stories: [
-              {
-                id: 1,
-                image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-                duration: 5000,
-              },
-            ],
-          },
-          {
-            id: 3,
-            username: "blakraid",
-            avatar: "/api/placeholder/72/72",
-            hasUnseenStory: false,
-            stories: [
-              {
-                id: 1,
-                image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-                duration: 5000,
-              },
-              {
-                id: 2,
-                image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-                duration: 5000,
-              },
-              {
-                id: 3,
-                image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-                duration: 5000,
-              },
-            ],
-          },
-          {
-            id: 4,
-            username: "yolaidi",
-            avatar: "/api/placeholder/72/72",
-            hasUnseenStory: true,
-            stories: [
-              {
-                id: 1,
-                image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-                duration: 5000,
-              },
-              {
-                id: 2,
-                image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-                duration: 5000,
-              },
-            ],
-          },
-          {
-            id: 5,
-            username: "whosthegoat",
-            avatar: "/api/placeholder/72/72",
-            hasUnseenStory: false,
-            stories: [
-              {
-                id: 1,
-                image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-                duration: 5000,
-              },
-            ],
-          },
-        ]
+        },
+        {
+          id: 2,
+          username: "abenramd",
+          avatar: "/api/placeholder/72/72",
+          hasUnseenStory: true,
+          stories: [
+            {
+              id: 1,
+              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
+              duration: 5000,
+            },
+          ],
+        },
+        {
+          id: 3,
+          username: "blakraid",
+          avatar: "/api/placeholder/72/72",
+          hasUnseenStory: false,
+          stories: [
+            {
+              id: 1,
+              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
+              duration: 5000,
+            },
+            {
+              id: 2,
+              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
+              duration: 5000,
+            },
+            {
+              id: 3,
+              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
+              duration: 5000,
+            },
+          ],
+        },
+        {
+          id: 4,
+          username: "yolaidi",
+          avatar: "/api/placeholder/72/72",
+          hasUnseenStory: true,
+          stories: [
+            {
+              id: 1,
+              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
+              duration: 5000,
+            },
+            {
+              id: 2,
+              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
+              duration: 5000,
+            },
+          ],
+        },
+        {
+          id: 5,
+          username: "whosthegoat",
+          avatar: "/api/placeholder/72/72",
+          hasUnseenStory: false,
+          stories: [
+            {
+              id: 1,
+              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
+              duration: 5000,
+            },
+          ],
+        },
+      ]
   );
 
   const [activeStoryIndex, setActiveStoryIndex] = useState(0);
@@ -341,11 +341,10 @@ export default function StoriesComponent({ users = [] }) {
         </div>
 
         {storyUsers.map((user, index) => (
-          <div key={user.user_id} className="story-item">
+          <div key={index} className="story-item">
             <div
-              className={`story-circle ${
-                user.hasUnseenStory ? "unseen-story" : "seen-story"
-              }`}
+              className={`story-circle ${user.hasUnseenStory ? "unseen-story" : "seen-story"
+                }`}
               onClick={() => handleStoryClick(index)}
             >
               <img
@@ -372,8 +371,8 @@ export default function StoriesComponent({ users = [] }) {
                         idx < activeStoryIndex
                           ? "100%"
                           : idx === activeStoryIndex
-                          ? `${progress}%`
-                          : "0%",
+                            ? `${progress}%`
+                            : "0%",
                     }}
                   ></div>
                 </div>

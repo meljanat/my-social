@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
+
 	structs "social-network/data"
 	"social-network/database"
-	"strconv"
 )
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,11 +29,10 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := r.URL.Query().Get("query")
+	query := strings.TrimSpace(r.URL.Query().Get("query"))
 	if query == "" {
 		fmt.Println("Empty search query")
-		response := map[string]string{"error": "Empty search query"}
-		w.WriteHeader(http.StatusBadRequest)
+		response := map[string]string{"message": "Empty search query"}
 		json.NewEncoder(w).Encode(response)
 		return
 	}
@@ -50,18 +51,18 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Type := r.URL.Query().Get("type")
-	if Type == "" {
+	if Type == "all" {
 		usr = true
 		group = true
 		event = true
 		post = true
-	} else if Type == "user" {
+	} else if Type == "users" {
 		usr = true
-	} else if Type == "group" {
+	} else if Type == "groups" {
 		group = true
-	} else if Type == "event" {
+	} else if Type == "events" {
 		event = true
-	} else if Type == "post" {
+	} else if Type == "posts" {
 		post = true
 	} else {
 		fmt.Println("Invalid search type")

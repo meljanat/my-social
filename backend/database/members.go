@@ -22,7 +22,7 @@ func LeaveGroup(user_id, group_id int64) error {
 	return err
 }
 
-func IsMemberGroup(group_id, user_id int64) (bool, error) {
+func IsMemberGroup(user_id, group_id int64) (bool, error) {
 	var count int
 	err := DB.QueryRow("SELECT COUNT(*) FROM group_members WHERE group_id = ? AND user_id = ?", group_id, user_id).Scan(&count)
 	return count > 0, err

@@ -372,6 +372,26 @@
     border-color: #3555F9;
     background-color: white;
   }
+
+  .emoji-section {
+    width: 150px;
+    height: 100px;
+    overflow: auto;
+    scrollbar-width: none;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
+    z-index: 1000;
+  }
+
+  .emoji {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
   
   .send-button {
     background-color: #3555F9;

@@ -57,7 +57,7 @@ func GetConversation(user_id, receiver_id, offset int64) ([]structs.Message, err
 }
 
 func GetGroupConversation(group_id, offset int64) ([]structs.Message, error) {
-	rows, err := DB.Query("SELECT c,id, u.username, u.avatar, c.message, c.chat_image, c.created_at FROM group_chats c JOIN users u ON u.id = c.sender_id WHERE c.group_id = ? ORDER BY c.created_at ASC LIMIT ? OFFSET ?", group_id, 10, offset)
+	rows, err := DB.Query("SELECT c.id, u.username, u.avatar, c.content, c.created_at FROM messages c JOIN users u ON u.id = c.sender_id WHERE c.group_id = ? ORDER BY c.created_at ASC LIMIT ? OFFSET ?", group_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func GetGroupConversation(group_id, offset int64) ([]structs.Message, error) {
 	for rows.Next() {
 		var chat structs.Message
 		var date time.Time
-		if err := rows.Scan(&chat.ID, &chat.Username, &chat.Avatar, &chat.Content, &chat.Image, &date); err != nil {
+		if err := rows.Scan(&chat.ID, &chat.Username, &chat.Avatar, &chat.Content, &date); err != nil {
 			return nil, err
 		}
 

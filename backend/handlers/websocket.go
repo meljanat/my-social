@@ -61,24 +61,8 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 		fmt.Println(err)
 		return
 	}
-	notifs, err := database.GetNotifications(user_id, 0)
-	if err != nil {
-		fmt.Println("Error getting notifications:", err)
-		return
-	}
 
 	for {
-		newNotifs, err := database.GetNotifications(user_id, 0)
-		if err != nil {
-			fmt.Println("Error getting notifications:", err)
-			return
-		}
-
-		if len(notifs) < len(newNotifs) {
-			SendWsMessage(user_id, map[string]interface{}{"type": "notifications", "notifications": newNotifs})
-			notifs = newNotifs
-		}
-
 		var message structs.Message
 		err = conn.ReadJSON(&message)
 		if err != nil {
@@ -108,8 +92,19 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 					fmt.Println(err)
 					return
 				}
+				grpMembers, err := database.GetGroupMembers(user_id, message.GroupID, 0)
+				if err != nil {
+					fmt.Println("Error getting group members:", err)
+					return
+				}
 
-				SendWsMessage(message.GroupID, map[string]interface{}{"type": "message", "id": user.ID, "username": user.Username, "content": message.Content})
+				Mutex.Lock()
+				for i := 0; i < len(grpMembers); i++ {
+					if _, exists := Clients[grpMembers[i].ID]; exists {
+						SendWsMessage(grpMembers[i].ID, map[string]interface{}{"type": "message", "group_id": message.GroupID, "username": user.Username, "content": message.Content})
+					}
+				}
+				Mutex.Unlock()
 			}
 			// } else if message.Type == "typing" {
 			// 	if message.UserID != 0 {

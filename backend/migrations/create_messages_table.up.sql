@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS messages (
     messages_not_read INTEGER DEFAULT 0,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE CASCADE,
-    FOREIGN KEY (receiver_id) REFERENCES users (id) ON DELETE CASCADE,
+    -- FOREIGN KEY (receiver_id) REFERENCES users (id) ON DELETE CASCADE,
     -- FOREIGN KEY (group_id) REFERENCES groups (id) ON DELETE CASCADE
 );

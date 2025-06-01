@@ -150,10 +150,8 @@ export default function MessagesPage() {
 
   const handleUserSelect = (user, offset = 0) => {
     setSelectedUser(user);
-
-
-    let fetchMessages = `id=${user.user_id}&offset=${offset}`;
-    fetch(`http://localhost:8404/chats?${fetchMessages}`, {
+    let fetchMessages = user.group_id ? `chats_group?group_id=${user.group_id}&offset=${offset}` : `chats?id=${user.user_id}&offset=${offset}`;
+    fetch(`http://localhost:8404/${fetchMessages}`, {
       method: "GET",
       credentials: "include",
     })
@@ -235,8 +233,10 @@ export default function MessagesPage() {
       created_at: 'Just now',
     };
 
+    const mssg = selectedUser.group_id ? { type: 'message', group_id: selectedUser.group_id, content: newMessage } : { type: 'message', user_id: selectedUser.user_id, content: newMessage };
+
     setMessages(messages ? [...messages, message] : [message]);
-    websocket.send(JSON.stringify({ type: 'message', content: newMessage, user_id: selectedUser.user_id }));
+    websocket.send(JSON.stringify(mssg));
     setNewMessage("");
   };
 

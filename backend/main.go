@@ -73,7 +73,7 @@ func main() {
 	http.HandleFunc("/notifications/mark_as_read", handlers.MarkNotificationAsReadHandler)
 	http.HandleFunc("/chats", handlers.ChatHandler)
 	http.HandleFunc("/chats_group", handlers.ChatGroupHandler)
-	http.HandleFunc("/message", handlers.SendMessageHandler)
+	// http.HandleFunc("/message", handlers.SendMessageHandler)
 	http.HandleFunc("/ws", handlers.WebSocketHandler)
 	http.HandleFunc("/search", handlers.SearchHandler)
 

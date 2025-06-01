@@ -3,12 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"html"
 	"net/http"
 	"strconv"
-	"strings"
 
-	structs "social-network/data"
 	"social-network/database"
 )
 
@@ -174,74 +171,74 @@ func ChatGroupHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chats)
 }
 
-func SendMessageHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		fmt.Println("Method not allowed", r.Method)
-		response := map[string]string{"error": "Method not allowed"}
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+// func SendMessageHandler(w http.ResponseWriter, r *http.Request) {
+// 	if r.Method != http.MethodPost {
+// 		fmt.Println("Method not allowed", r.Method)
+// 		response := map[string]string{"error": "Method not allowed"}
+// 		w.WriteHeader(http.StatusMethodNotAllowed)
+// 		json.NewEncoder(w).Encode(response)
+// 		return
+// 	}
 
-	user, err := GetUserFromSession(r)
-	if err != nil || user == nil {
-		fmt.Println("Failed to retrieve user", err)
-		response := map[string]string{"error": "Failed to retrieve user"}
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+// 	user, err := GetUserFromSession(r)
+// 	if err != nil || user == nil {
+// 		fmt.Println("Failed to retrieve user", err)
+// 		response := map[string]string{"error": "Failed to retrieve user"}
+// 		w.WriteHeader(http.StatusUnauthorized)
+// 		json.NewEncoder(w).Encode(response)
+// 		return
+// 	}
 
-	var message structs.Message
-	message.UserID, err = strconv.ParseInt(r.FormValue("receiver_id"), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid receiver ID", err)
-		response := map[string]string{"error": "Invalid receiver ID"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-	message.Content = r.FormValue("content")
+// 	var message structs.Message
+// 	message.UserID, err = strconv.ParseInt(r.FormValue("receiver_id"), 10, 64)
+// 	if err != nil {
+// 		fmt.Println("Invalid receiver ID", err)
+// 		response := map[string]string{"error": "Invalid receiver ID"}
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		json.NewEncoder(w).Encode(response)
+// 		return
+// 	}
+// 	message.Content = r.FormValue("content")
 
-	var imagePath string
-	image, header, err := r.FormFile("chat_image")
-	if err != nil && err.Error() != "http: no such file" {
-		fmt.Println("Failed to retrieve image", err)
-		response := map[string]string{"error": "Failed to retrieve image"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+// 	var imagePath string
+// 	image, header, err := r.FormFile("chat_image")
+// 	if err != nil && err.Error() != "http: no such file" {
+// 		fmt.Println("Failed to retrieve image", err)
+// 		response := map[string]string{"error": "Failed to retrieve image"}
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		json.NewEncoder(w).Encode(response)
+// 		return
+// 	}
 
-	if image != nil {
-		imagePath, err = SaveImage(image, header, "../frontend/public/chat/")
-		if err != nil {
-			fmt.Println("Failed to save image", err)
-			response := map[string]string{"error": err.Error()}
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-		newpath := strings.Split(imagePath, "/public")
-		imagePath = newpath[1]
-	}
+// 	if image != nil {
+// 		imagePath, err = SaveImage(image, header, "../frontend/public/chat/")
+// 		if err != nil {
+// 			fmt.Println("Failed to save image", err)
+// 			response := map[string]string{"error": err.Error()}
+// 			w.WriteHeader(http.StatusInternalServerError)
+// 			json.NewEncoder(w).Encode(response)
+// 			return
+// 		}
+// 		newpath := strings.Split(imagePath, "/public")
+// 		imagePath = newpath[1]
+// 	}
 
-	if err := database.SendMessage(user.ID, message.UserID, 0, message.Content, imagePath); err != nil {
-		fmt.Println("Failed to send message", err)
-		response := map[string]string{"error": "Failed to send message"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+// 	if err := database.SendMessage(user.ID, message.UserID, 0, message.Content, imagePath); err != nil {
+// 		fmt.Println("Failed to send message", err)
+// 		response := map[string]string{"error": "Failed to send message"}
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		json.NewEncoder(w).Encode(response)
+// 		return
+// 	}
 
-	newMessage := structs.Message{
-		Username:  user.Username,
-		Avatar:    message.Avatar,
-		Content:   html.EscapeString(message.Content),
-		Image:     imagePath,
-		CreatedAt: "Just now",
-	}
+// 	newMessage := structs.Message{
+// 		Username:  user.Username,
+// 		Avatar:    message.Avatar,
+// 		Content:   html.EscapeString(message.Content),
+// 		Image:     imagePath,
+// 		CreatedAt: "Just now",
+// 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(newMessage)
-}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	json.NewEncoder(w).Encode(newMessage)
+// }

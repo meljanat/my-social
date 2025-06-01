@@ -5,6 +5,10 @@ body {
 
 }
 
+.main-content {
+  margin-top: 80px;
+}
+
 .navbar {
   display: flex;
   align-items: center;
@@ -12,10 +16,28 @@ body {
   background-color: white;
   padding: 0.75rem 2rem;
   border-radius: 0 0 16px 16px;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 100;
   /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); */
+}
+
+.left-sidebar,
+.right-column,
+.center-column,
+.stories-wrapper,
+.group-detail-container,
+.groups-page-container,
+.messages-page-content,
+.post-page-card {
+  margin-top: 60px;
+}
+
+.profile-header {
+  margin-top: 100px;
 }
 
 .navbar-left {

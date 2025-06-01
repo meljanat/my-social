@@ -566,3 +566,15 @@ padding: 4px 14px 4px 14px;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(53, 85, 249, 0.2);
 }
+
+@media (max-width: 900px) {
+  .overall-chat-container {
+    display: none;
+  }
+  .chats-header {
+    display: none;
+  }
+  .chat-box {
+    display: none;
+  }
+}

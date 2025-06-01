@@ -167,3 +167,28 @@ body {
   .retry-button:hover {
     background-color: #2440ca;
   }
+
+  .center-column {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+@media (max-width: 976px) {
+  .grid-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .left-column,
+  .right-column {
+    display: none;
+  }
+
+  .center-column {
+    width: 100%;
+  }
+}

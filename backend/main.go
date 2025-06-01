@@ -1,11 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"sync"
-	"time"
 
 	database "social-network/database"
 	handlers "social-network/handlers"
@@ -46,6 +43,7 @@ func main() {
 	http.HandleFunc("/new_post", handlers.CreatePostHandler)
 	http.HandleFunc("/post", handlers.PostHandler)
 	http.HandleFunc("/story", handlers.CreateStoryHandler)
+	http.HandleFunc("/seen_story", handlers.SeenStory)
 	http.HandleFunc("/categories", handlers.GetTopCategories)
 	http.HandleFunc("/posts_category", handlers.GetPostsByCategory)
 	http.HandleFunc("/comment", handlers.CreateCommentHandler)
@@ -69,8 +67,8 @@ func main() {
 	http.HandleFunc("/reject_invitation_other", handlers.DeclineOtherInvitationHandler)
 	http.HandleFunc("/invitations_groups", handlers.GetInvitationsGroups)
 	http.HandleFunc("/notifications", handlers.NotificationsHandler)
-	http.HandleFunc("/notifications/mark_all_as_read", handlers.MarkNotificationsAsReadHandler)
-	http.HandleFunc("/notifications/mark_as_read", handlers.MarkNotificationAsReadHandler)
+	http.HandleFunc("/mark_notifications_as_read", handlers.MarkNotificationsAsReadHandler)
+	http.HandleFunc("/read_notification", handlers.MarkNotificationsAsReadHandler)
 	http.HandleFunc("/chats", handlers.ChatHandler)
 	http.HandleFunc("/chats_group", handlers.ChatGroupHandler)
 	// http.HandleFunc("/message", handlers.SendMessageHandler)
@@ -78,13 +76,8 @@ func main() {
 	http.HandleFunc("/search", handlers.SearchHandler)
 
 	log.Println("Server started on :8404")
-	fmt.Println("http://localhost:8404//")
 	err := http.ListenAndServe(":8404", c.Handler(http.DefaultServeMux))
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	var wg sync.WaitGroup
-	wg.Add(1)
-	time.Sleep(10 * time.Second)
 }

@@ -39,6 +39,7 @@ type User struct {
 	Online             bool      `json:"online" sqlite:"online"`
 	SessionToken       uuid.UUID `json:"session_token" sqlite:"session_token"`
 	Type               string    `json:"type" sqlite:"type"`
+	Stories            []Stories `json:"stories" sqlite:"stories"`
 }
 
 type Post struct {
@@ -76,9 +77,14 @@ type Comment struct {
 	Image     string `json:"image" sqlite:"image"`
 	CreatedAt string `json:"created_at" sqlite:"created_at"`
 }
+
+type Stories struct {
+	User    User    `json:"user" sqlite:"user"`
+	Stories []Story `json:"stories" sqlite:"stories"`
+}
+
 type Story struct {
 	ID        int64  `json:"story_id" sqlite:"story_id"`
-	User      User   `json:"user" sqlite:"user"`
 	Image     string `json:"image" sqlite:"image"`
 	IsRead    bool   `json:"status" sqlite:"status"`
 	CreatedAt string `json:"created_at" sqlite:"created_at"`

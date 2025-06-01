@@ -54,7 +54,7 @@ func FollowersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	info, err := database.GetProfileInfo(user_id)
+	info, err := database.GetProfileInfo(user_id, nil)
 	if err != nil {
 		fmt.Println("Failed to retrieve profile", err)
 		response := map[string]string{"error": "Failed to retrieve profile"}
@@ -115,7 +115,7 @@ func FollowingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	info, err := database.GetProfileInfo(user_id)
+	info, err := database.GetProfileInfo(user_id, nil)
 	if err != nil {
 		fmt.Println("Failed to retrieve profile", err)
 		response := map[string]string{"error": "Failed to retrieve profile"}
@@ -135,7 +135,7 @@ func FollowingHandler(w http.ResponseWriter, r *http.Request) {
 
 	var following []structs.User
 	if followed || info.Privacy == "public" || user_id == user.ID {
-		following, err = database.GetFollowing(user.ID, offset)
+		following, err = database.GetFollowing(user.ID, offset, 0)
 		if err != nil {
 			fmt.Println("Failed to retrieve following", err)
 			response := map[string]string{"error": "Failed to retrieve following"}

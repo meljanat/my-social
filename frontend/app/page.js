@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import LeftSidebar from "./components/LeftSideBar";
 import ProfileCard from "./components/ProfileCard";
 import TopGroups from "./components/TopGroups";
@@ -16,6 +16,7 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [homeData, setHomeData] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [stories, setStories] = useState([]);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMorePosts, setHasMorePosts] = useState(true);
 
@@ -69,13 +70,16 @@ export default function Home() {
       if (!response.ok) throw new Error("Network response was not ok");
 
       const data = await response.json();
-      console.log("Fetched posts:", data.posts);
 
       if (!data.posts || !Array.isArray(data.posts)) {
         console.error("Posts is not an array or missing", data.posts);
         if (offset === 0) setPosts([]);
         setHasMorePosts(false);
         return [];
+      }
+
+      if (data.stories) {
+        setStories(data.stories);
       }
 
       if (offset === 0) {
@@ -89,7 +93,7 @@ export default function Home() {
       } else {
         setHasMorePosts(true);
       }
-
+      console.log("check home data ===>", data);
       setHomeData(data);
 
       return data.posts;
@@ -159,7 +163,7 @@ export default function Home() {
   if (!isLoggedIn) {
     return <AuthForm onLoginSuccess={handleLoginSuccess} />;
   }
-
+  console.log("homeData", homeData?.user.stories);
   if (isLoggedIn && homeData) {
     return (
       <div className="app-container">
@@ -174,7 +178,7 @@ export default function Home() {
 
             <div className="center-column">
               <div className="stories-section">
-                <StoriesComponent />
+                <StoriesComponent storiesUsers={homeData?.user.stories} />
               </div>
               <PostComponent posts={posts} />
             </div>

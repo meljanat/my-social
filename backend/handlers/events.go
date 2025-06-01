@@ -21,6 +21,10 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !LastTime(w, r, "group_events") {
+		return
+	}
+
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
 		fmt.Println("Failed to retrieve user", err)

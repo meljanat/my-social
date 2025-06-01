@@ -23,6 +23,10 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !LastTime(w, r, "posts") {
+		return
+	}
+
 	switch r.Method {
 	case http.MethodGet:
 		NewPostGet(w, r, user)

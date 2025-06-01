@@ -129,3 +129,21 @@ func GetCountUserGroups(id int64) (int64, error) {
 	err := DB.QueryRow("SELECT COUNT(*) FROM group_members WHERE user_id = ?", id).Scan(&count)
 	return count, err
 }
+
+func GetAllMembers(group_id, user_id int64) ([]int64, error) {
+	var users []int64
+	rows, err := DB.Query("SELECT u.id FROM group_members m JOIN users u ON u.id = m.user_id WHERE m.group_id = ?", group_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user int64
+		err = rows.Scan(&user)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}

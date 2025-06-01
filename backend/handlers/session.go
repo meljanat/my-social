@@ -55,7 +55,7 @@ func CheckTheUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user_info, err := database.GetProfileInfo(user.ID)
+	user_info, err := database.GetProfileInfo(user.ID, nil)
 	if err != nil {
 		fmt.Println("Failed to retrieve user")
 		response := map[string]string{"error": "Failed to retrieve user"}

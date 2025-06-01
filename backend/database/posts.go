@@ -255,3 +255,11 @@ func Almost(user_id, post_id int64) error {
 	_, err := DB.Exec("INSERT INTO post_privacy (user_id, post_id) VALUES (?, ?)", user_id, post_id)
 	return err
 }
+
+func GetLastTime(name_table string) (string, error) {
+	var last_time string
+	query := fmt.Sprintf("SELECT created_at FROM %s ORDER BY created_at DESC LIMIT 1", name_table)
+
+	err := DB.QueryRow(query).Scan(&last_time)
+	return last_time, err
+}

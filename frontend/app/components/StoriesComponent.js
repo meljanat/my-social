@@ -2,114 +2,10 @@
 import { useState, useEffect, useRef, use } from "react";
 import "../styles/StoriesComponent.css";
 
-export default function StoriesComponent({ users = [] }) {
-  const [storyUsers, setStoryUsers] = useState(
-    users.length > 0
-      ? users.map((user) => ({
-        ...user,
-        hasUnseenStory: Math.random() > 0.5,
-        stories: [
-          {
-            id: 1,
-            image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-            duration: 5000,
-          },
-          {
-            id: 2,
-            image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-            duration: 5000,
-          },
-        ],
-      }))
-      : [
-        {
-          id: 1,
-          username: "mdinani",
-          avatar: "/api/placeholder/72/72",
-          hasUnseenStory: true,
-          stories: [
-            {
-              id: 1,
-              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-              duration: 5000,
-            },
-            {
-              id: 2,
-              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-              duration: 5000,
-            },
-          ],
-        },
-        {
-          id: 2,
-          username: "abenramd",
-          avatar: "/api/placeholder/72/72",
-          hasUnseenStory: true,
-          stories: [
-            {
-              id: 1,
-              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-              duration: 5000,
-            },
-          ],
-        },
-        {
-          id: 3,
-          username: "blakraid",
-          avatar: "/api/placeholder/72/72",
-          hasUnseenStory: false,
-          stories: [
-            {
-              id: 1,
-              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-              duration: 5000,
-            },
-            {
-              id: 2,
-              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-              duration: 5000,
-            },
-            {
-              id: 3,
-              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-              duration: 5000,
-            },
-          ],
-        },
-        {
-          id: 4,
-          username: "yolaidi",
-          avatar: "/api/placeholder/72/72",
-          hasUnseenStory: true,
-          stories: [
-            {
-              id: 1,
-              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-              duration: 5000,
-            },
-            {
-              id: 2,
-              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-              duration: 5000,
-            },
-          ],
-        },
-        {
-          id: 5,
-          username: "whosthegoat",
-          avatar: "/api/placeholder/72/72",
-          hasUnseenStory: false,
-          stories: [
-            {
-              id: 1,
-              image: "/avatars/2AC90053-AE56-47C7-8EBC-FF2A64FDBE59.jpg",
-              duration: 5000,
-            },
-          ],
-        },
-      ]
-  );
+export default function StoriesComponent({ storiesUsers }) {
+  console.log("StoriesComponent rendered", storiesUsers);
 
+  const [storyUsers, setStoryUsers] = useState([]);
   const [activeStoryIndex, setActiveStoryIndex] = useState(0);
   const [activeUserIndex, setActiveUserIndex] = useState(null);
   const [progress, setProgress] = useState(0);
@@ -121,18 +17,22 @@ export default function StoriesComponent({ users = [] }) {
   const storyTimeoutRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  useEffect(() => {
+    setStoryUsers(storiesUsers);
+  }, []);
+
   async function storySeenn(userIndex) {
     try {
-      const response = await fetch("http://localhost:8404/story/seen", {
+      const response = await fetch("http://localhost:8404/seen_story", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ user_id: storyUsers[userIndex].user_id }),
+        body: JSON.stringify(storyUsers[userIndex].user.user_id),
       });
-      console.log("User ID:", storyUsers[userIndex].user_id);
-      console.log("User Index:", userIndex);
+      console.log(storyUsers[userIndex].user.user_id);
+
       if (!response.ok) {
         throw new Error("Failed to mark story as seen");
       }
@@ -180,7 +80,7 @@ export default function StoriesComponent({ users = [] }) {
 
       setProgress(0);
 
-      const duration = story.duration;
+      const duration = 5000;
       const interval = 100;
       const steps = duration / interval;
       let currentProgress = 0;
@@ -206,6 +106,7 @@ export default function StoriesComponent({ users = [] }) {
   }, [activeUserIndex, activeStoryIndex, isPaused]);
 
   const handleStoryClick = (userIndex) => {
+    console.log("User Index:", userIndex);
     storySeenn(userIndex);
     setActiveUserIndex(userIndex);
     setActiveStoryIndex(0);
@@ -324,7 +225,7 @@ export default function StoriesComponent({ users = [] }) {
       closeAddStoryModal();
     }
   };
-
+  console.log("dak l index d zeb ", activeUserIndex, activeStoryIndex);
   return (
     <div className="stories-wrapper">
       <div className="stories-header">
@@ -343,13 +244,17 @@ export default function StoriesComponent({ users = [] }) {
         {storyUsers.map((user, index) => (
           <div key={index} className="story-item">
             <div
-              className={`story-circle ${user.hasUnseenStory ? "unseen-story" : "seen-story"
-                }`}
-              onClick={() => handleStoryClick(index)}
+              className={`story-circle ${
+                user.hasUnseenStory ? "unseen-story" : "seen-story"
+              }`}
+              onClick={() => {
+                console.log("Clicked on user:", index);
+                handleStoryClick(index);
+              }}
             >
               <img
-                src={user.avatar || "/api/placeholder/72/72"}
-                alt={user.username}
+                src={user.user.avatar || "/api/placeholder/72/72"}
+                alt={user.user.username}
                 className="avatar"
               />
             </div>
@@ -362,7 +267,7 @@ export default function StoriesComponent({ users = [] }) {
         <div className="story-modal">
           <div className="modal-content story-viewer">
             <div className="story-progress-container">
-              {storyUsers[activeUserIndex].stories.map((story, idx) => (
+              {storyUsers[activeUserIndex]?.stories?.map((story, idx) => (
                 <div key={story.id} className="story-progress-bar">
                   <div
                     className="story-progress"
@@ -371,8 +276,8 @@ export default function StoriesComponent({ users = [] }) {
                         idx < activeStoryIndex
                           ? "100%"
                           : idx === activeStoryIndex
-                            ? `${progress}%`
-                            : "0%",
+                          ? `${progress}%`
+                          : "0%",
                     }}
                   ></div>
                 </div>
@@ -382,12 +287,12 @@ export default function StoriesComponent({ users = [] }) {
             <div className="story-header">
               <div className="story-user-info">
                 <img
-                  src={storyUsers[activeUserIndex].avatar}
-                  alt={storyUsers[activeUserIndex].username}
+                  src={storyUsers[activeUserIndex].user.avatar}
+                  alt={storyUsers[activeUserIndex].user.username}
                   className="story-avatar"
                 />
                 <span className="story-username">
-                  {storyUsers[activeUserIndex].username}
+                  {storyUsers[activeUserIndex].user.username}
                 </span>
               </div>
               <button className="close-button" onClick={closeStoryModal}>

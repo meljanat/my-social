@@ -32,8 +32,11 @@ func GetFollowers(user_id, offset int64) ([]structs.User, error) {
 	return followers, nil
 }
 
-func GetFollowing(user_id, offset int64) ([]structs.User, error) {
-	rows, err := DB.Query("SELECT u.id, u.username, u.avatar FROM users u JOIN follows f ON u.id = f.following_id WHERE f.follower_id = ? LIMIT ? OFFSET ?", user_id, 10, offset)
+func GetFollowing(user_id, offset, limit int64) ([]structs.User, error) {
+	if limit == 0 {
+		limit = 10
+	}
+	rows, err := DB.Query("SELECT u.id, u.username, u.avatar FROM users u JOIN follows f ON u.id = f.following_id WHERE f.follower_id = ? LIMIT ? OFFSET ?", user_id, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -48,6 +51,12 @@ func GetFollowing(user_id, offset int64) ([]structs.User, error) {
 		following = append(following, follower)
 	}
 	return following, nil
+}
+
+func GetCountFollowing(user_id int64) (int64, error) {
+	var count int64
+	err := DB.QueryRow("SELECT COUNT(*) FROM follows WHERE follower_id = ?", user_id).Scan(&count)
+	return count, err
 }
 
 func GetSuggestedUsers(user_id, offset int64) ([]structs.User, error) {

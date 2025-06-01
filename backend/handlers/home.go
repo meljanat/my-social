@@ -45,19 +45,28 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user_info, err := database.GetProfileInfo(user.ID)
+	count_follwing, err := database.GetCountFollowing(user.ID)
 	if err != nil {
-		fmt.Println("Failed to retrieve user", err)
-		response := map[string]string{"error": "Failed to retrieve user"}
+		fmt.Println("Failed to retrieve count following", err)
+		response := map[string]string{"error": "Failed to retrieve count following"}
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	following, err := database.GetFollowing(user.ID, 0)
+	following, err := database.GetFollowing(user.ID, 0, count_follwing)
 	if err != nil {
 		fmt.Println("Failed to retrieve followings", err)
 		response := map[string]string{"error": "Failed to retrieve followings"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	user_info, err := database.GetProfileInfo(user.ID, following)
+	if err != nil {
+		fmt.Println("Failed to retrieve user", err)
+		response := map[string]string{"error": "Failed to retrieve user"}
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response)
 		return
@@ -126,15 +135,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	stories, err := database.GetStories(*user, following)
-	if err != nil {
-		fmt.Println("Failed to retrieve stories", err)
-		response := map[string]string{"error": "Failed to retrieve stories"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
 	var home = struct {
 		User           structs.User       `json:"user"`
 		Posts          []structs.Post     `json:"posts"`
@@ -143,7 +143,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		DiscoverGroups []structs.Group    `json:"discover_groups"`
 		SuggestedUsers []structs.User     `json:"suggested_users"`
 		Connections    []structs.User     `json:"connections"`
-		Stories        [][]structs.Story  `json:"stories"`
 	}{
 		User:           user_info,
 		Posts:          posts,
@@ -152,7 +151,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		DiscoverGroups: suggested_groups,
 		SuggestedUsers: suggested_users,
 		Connections:    connections,
-		Stories:        stories,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

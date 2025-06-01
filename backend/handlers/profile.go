@@ -37,7 +37,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	info, err := database.GetProfileInfo(user_id)
+	info, err := database.GetProfileInfo(user_id, nil)
 	if err != nil {
 		fmt.Println("Error retrieving profile:", err)
 		response := map[string]string{"error": "Failed to retrieve profile"}
@@ -120,7 +120,7 @@ func ProfilePostsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	info, err := database.GetProfileInfo(user_id)
+	info, err := database.GetProfileInfo(user_id, nil)
 	if err != nil {
 		fmt.Println("Error retrieving profile:", err)
 		response := map[string]string{"error": "Failed to retrieve profile"}

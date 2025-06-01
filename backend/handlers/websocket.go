@@ -56,13 +56,29 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 		conn.Close()
 	}()
 
-	user, err := database.GetProfileInfo(user_id)
+	user, err := database.GetProfileInfo(user_id, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	notifs, err := database.GetNotifications(user_id, 0)
+	if err != nil {
+		fmt.Println("Error getting notifications:", err)
+		return
+	}
 
 	for {
+		newNotifs, err := database.GetNotifications(user_id, 0)
+		if err != nil {
+			fmt.Println("Error getting notifications:", err)
+			return
+		}
+
+		if len(notifs) < len(newNotifs) {
+			SendWsMessage(user_id, map[string]interface{}{"type": "notifications", "notifications": newNotifs})
+			notifs = newNotifs
+		}
+
 		var message structs.Message
 		err = conn.ReadJSON(&message)
 		if err != nil {
@@ -72,39 +88,40 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 		fmt.Println("Received message:", message)
 
 		if message.Type == "message" {
-			if message.UserID != 0 {
-				if _, err := database.GetUserById(message.UserID); err != nil {
-					fmt.Println("Error getting user by ID:", err)
-					return
-				}
-				if err = database.SendMessage(user_id, message.UserID, 0, message.Content, ""); err != nil {
-					fmt.Println("Error sending message:", err)
-					return
-				}
-
-				SendWsMessage(message.UserID, map[string]interface{}{"type": "message", "username": user.Username, "content": message.Content})
-			} else if message.GroupID != 0 {
+			var users_ids []int64
+			if message.GroupID != 0 {
 				if _, err := database.GetGroupById(message.GroupID); err != nil {
 					fmt.Println(err)
 					return
 				}
-				if err = database.SendMessage(user.ID, 0, message.GroupID, message.Content, ""); err != nil {
+				if member, err := database.IsMemberGroup(user_id, message.GroupID); err != nil || !member {
 					fmt.Println(err)
 					return
 				}
-				grpMembers, err := database.GetGroupMembers(user_id, message.GroupID, 0)
+				users_ids, err = database.GetAllMembers(message.GroupID, user_id)
 				if err != nil {
-					fmt.Println("Error getting group members:", err)
+					fmt.Println(err)
 					return
 				}
+			} else {
+				users_ids = []int64{message.UserID}
+			}
 
-				Mutex.Lock()
-				for i := 0; i < len(grpMembers); i++ {
-					if _, exists := Clients[grpMembers[i].ID]; exists {
-						SendWsMessage(grpMembers[i].ID, map[string]interface{}{"type": "message", "group_id": message.GroupID, "username": user.Username, "content": message.Content})
-					}
+			for _, id := range users_ids {
+				if _, err := database.GetUserById(id); err != nil {
+					fmt.Println("Error getting user by ID:", err)
+					return
 				}
-				Mutex.Unlock()
+				if err = database.SendMessage(user_id, id, message.GroupID, message.Content, ""); err != nil {
+					fmt.Println("Error sending message:", err)
+					return
+				}
+			}
+
+			if message.UserID != 0 {
+				SendWsMessage(message.UserID, map[string]interface{}{"type": "message", "username": user.Username, "content": message.Content})
+			} else if message.GroupID != 0 {
+				SendWsMessage(message.GroupID, map[string]interface{}{"type": "message", "id": user.ID, "username": user.Username, "content": message.Content})
 			}
 			// } else if message.Type == "typing" {
 			// 	if message.UserID != 0 {

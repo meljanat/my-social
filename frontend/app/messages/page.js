@@ -226,16 +226,16 @@ export default function MessagesPage() {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedUser) return;
-    const message = {
-      id: Date.now(),
-      content: newMessage,
-      username: "me",
-      created_at: 'Just now',
-    };
+    // const message = {
+    //   id: Date.now(),
+    //   content: newMessage,
+    //   username: "me",
+    //   created_at: 'Just now',
+    // };
 
     const mssg = selectedUser.group_id ? { type: 'message', group_id: selectedUser.group_id, content: newMessage } : { type: 'message', user_id: selectedUser.user_id, content: newMessage };
 
-    setMessages(messages ? [...messages, message] : [message]);
+    // setMessages(messages ? [...messages, message] : [message]);
     websocket.send(JSON.stringify(mssg));
     setNewMessage("");
   };
@@ -351,9 +351,9 @@ export default function MessagesPage() {
 
               <div className="conversation-messages"
                 onScroll={handleScroll}>
-                {messages && messages.length > 0 ? messages.map((message) => (
+                {messages && messages.length > 0 ? messages.map((message, index) => (
                   <Message
-                    key={message.message_id}
+                    key={index}
                     message={message}
                     isSent={message.username !== selectedUser.username}
                   />

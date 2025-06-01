@@ -241,7 +241,7 @@ export default function StoriesComponent({ storiesUsers }) {
           <p className="username">Add Story</p>
         </div>
 
-        {storyUsers.map((user, index) => (
+        {storyUsers?.map((user, index) => (
           <div key={index} className="story-item">
             <div
               className={`story-circle ${

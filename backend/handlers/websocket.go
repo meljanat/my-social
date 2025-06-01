@@ -42,7 +42,7 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	Clients[user.ID] = append(Clients[user.ID], conn)
 	Mutex.Unlock()
 
-	// NotifyUsers(user.ID, "online")
+	NotifyUsers(user.ID, "online")
 
 	fmt.Println("Connected to user:", user.Username)
 	ListenForMessages(conn, user.ID)
@@ -51,8 +51,7 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 func ListenForMessages(conn *websocket.Conn, user_id int64) {
 	defer func() {
 		RemoveClient(conn, user_id)
-		// NotifyUsers(user_id, "offline")
-		// delete(Clients, user_id)
+		NotifyUsers(user_id, "offline")
 		conn.Close()
 	}()
 
@@ -61,24 +60,8 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 		fmt.Println(err)
 		return
 	}
-	notifs, err := database.GetNotifications(user_id, 0)
-	if err != nil {
-		fmt.Println("Error getting notifications:", err)
-		return
-	}
 
 	for {
-		newNotifs, err := database.GetNotifications(user_id, 0)
-		if err != nil {
-			fmt.Println("Error getting notifications:", err)
-			return
-		}
-
-		if len(notifs) < len(newNotifs) {
-			SendWsMessage(user_id, map[string]interface{}{"type": "notifications", "notifications": newNotifs})
-			notifs = newNotifs
-		}
-
 		var message structs.Message
 		err = conn.ReadJSON(&message)
 		if err != nil {
@@ -87,49 +70,42 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 		}
 		fmt.Println("Received message:", message)
 
+		msgType := ""
 		if message.Type == "message" {
-			var users_ids []int64
-			if message.GroupID != 0 {
-				if _, err := database.GetGroupById(message.GroupID); err != nil {
-					fmt.Println(err)
-					return
-				}
-				if member, err := database.IsMemberGroup(user_id, message.GroupID); err != nil || !member {
-					fmt.Println(err)
-					return
-				}
-				users_ids, err = database.GetAllMembers(message.GroupID, user_id)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-			} else {
-				users_ids = []int64{message.UserID}
+			msgType = "message"
+		} else if message.Type == "typing" {
+			msgType = "typing"
+		}
+		var users_ids []int64
+		if message.GroupID != 0 {
+			if _, err := database.GetGroupById(message.GroupID); err != nil {
+				fmt.Println(err)
+				return
+			}
+			if member, err := database.IsMemberGroup(user_id, message.GroupID); err != nil || !member {
+				fmt.Println(err)
+				return
+			}
+			users_ids, err = database.GetAllMembers(message.GroupID, user_id)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		} else {
+			users_ids = []int64{message.UserID, user_id}
+		}
+
+		for _, id := range users_ids {
+			if _, err := database.GetUserById(id); err != nil {
+				fmt.Println("Error getting user by ID:", err)
+				return
+			}
+			if err = database.SendMessage(user_id, id, message.GroupID, message.Content, ""); err != nil {
+				fmt.Println("Error sending message:", err)
+				return
 			}
 
-			for _, id := range users_ids {
-				if _, err := database.GetUserById(id); err != nil {
-					fmt.Println("Error getting user by ID:", err)
-					return
-				}
-				if err = database.SendMessage(user_id, id, message.GroupID, message.Content, ""); err != nil {
-					fmt.Println("Error sending message:", err)
-					return
-				}
-			}
-
-			if message.UserID != 0 {
-				SendWsMessage(message.UserID, map[string]interface{}{"type": "message", "username": user.Username, "content": message.Content})
-			} else if message.GroupID != 0 {
-				SendWsMessage(message.GroupID, map[string]interface{}{"type": "message", "id": user.ID, "username": user.Username, "content": message.Content})
-			}
-			// } else if message.Type == "typing" {
-			// 	if message.UserID != 0 {
-			// 		SendWsMessage(message.UserID, map[string]interface{}{"type": "typing", "id": user.ID, "username": user.Username})
-			// 	} else if message.GroupID != 0 {
-			// SendWsMessage(message.GroupID, map[string]interface{}{"type": "typing", "id": user.ID, "username": user.Username})
-			// 	}
-			// }
+			SendWsMessage(id, map[string]interface{}{"type": msgType, "user_id": user.ID, "username": user.Username, "content": message.Content})
 		}
 	}
 }
@@ -141,16 +117,16 @@ func NotifyUsers(user_id int64, statu string) {
 		return
 	}
 
-	for _, connection := range connections {
-		if connection.ID == user_id {
+	for i := 0; i < len(connections); i++ {
+		if connections[i].ID == user_id {
 			continue
 		}
 		Mutex.Lock()
-		if _, ok := Clients[connection.ID]; ok {
+		if _, ok := Clients[connections[i].ID]; ok {
 			if statu == "online" {
-				SendWsMessage(connection.ID, map[string]interface{}{"type": "new_connection", "user_id": user_id})
+				SendWsMessage(connections[i].ID, map[string]interface{}{"type": "new_connection", "user_id": user_id})
 			} else if statu == "offline" {
-				SendWsMessage(connection.ID, map[string]interface{}{"type": "disconnection", "user_id": user_id})
+				SendWsMessage(connections[i].ID, map[string]interface{}{"type": "disconnection", "user_id": user_id})
 			}
 		}
 		Mutex.Unlock()
@@ -161,7 +137,6 @@ func SendWsMessage(user_id int64, message map[string]interface{}) {
 	Mutex.Lock()
 	defer Mutex.Unlock()
 	if clients, ok := Clients[user_id]; ok {
-		fmt.Println(ok, user_id, Clients)
 		for _, client := range clients {
 			err := client.WriteJSON(message)
 			if err != nil {

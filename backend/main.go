@@ -46,7 +46,7 @@ func main() {
 	http.HandleFunc("/seen_story", handlers.SeenStory)
 	http.HandleFunc("/categories", handlers.GetTopCategories)
 	http.HandleFunc("/posts_category", handlers.GetPostsByCategory)
-	http.HandleFunc("/comment", handlers.CreateCommentHandler)
+	// http.HandleFunc("/comment", handlers.CreateCommentHandler)
 	http.HandleFunc("/like", handlers.LikeHandler)
 	http.HandleFunc("/save", handlers.SaveHandler)
 	http.HandleFunc("/follow", handlers.InvitationsHandler)

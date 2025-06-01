@@ -36,7 +36,6 @@ export default function AllUsersPage() {
         } else if (type === "received") {
           setReceivedRequests(data);
         }
-        setLoading(false);
       } else {
         console.error("Failed to fetch users");
       }
@@ -44,6 +43,46 @@ export default function AllUsersPage() {
       console.error("Error fetching users:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAcceptRequest = async (userId) => {
+    try {
+      await handelAccept(userId, 0);
+
+      setReceivedRequests(receivedRequests.filter(user => user.user_id !== userId));
+    } catch (error) {
+      console.error("Error accepting request:", error);
+    }
+  };
+
+  const handleRejectRequest = async (userId) => {
+    try {
+      await handleReject(userId, 0);
+
+      setReceivedRequests(receivedRequests.filter(user => user.user_id !== userId));
+    } catch (error) {
+      console.error("Error rejecting request:", error);
+    }
+  };
+
+  const handleCancelRequest = async (userId) => {
+    try {
+      await handleFollow(userId, 0);
+      setPendingRequests(prev => prev.filter(user => user.user_id !== userId));
+    } catch (error) {
+      console.error("Error canceling request:", error);
+      alert("Failed to cancel request. Please try again.");
+    }
+  };
+
+  const handleFollowUser = async (userId) => {
+    try {
+      await handleFollow(userId, 0);
+      setSuggestedUsers(prev => prev.filter(user => user.user_id !== userId));
+    } catch (error) {
+      console.error("Error following user:", error);
+      alert("Failed to follow user. Please try again.");
     }
   };
 
@@ -85,8 +124,8 @@ export default function AllUsersPage() {
           Received Requests
           {receivedRequests
             ? receivedRequests.length > 0 && (
-                <span className="tab-count">{receivedRequests.length}</span>
-              )
+              <span className="tab-count">{receivedRequests.length}</span>
+            )
             : null}
         </button>
       </div>
@@ -128,7 +167,7 @@ export default function AllUsersPage() {
                   </div>
                   <button
                     className="follow-button"
-                    onClick={() => handleFollow(user.user_id)}
+                    onClick={() => handleFollowUser(user.user_id)}
                   >
                     Follow
                   </button>
@@ -167,7 +206,7 @@ export default function AllUsersPage() {
                   <div className="request-actions">
                     <button
                       className="reject-button"
-                      onClick={() => handleFollow(request.user_id, 0)}
+                      onClick={() => handleCancelRequest(request.user_id)}
                     >
                       Cancel Request
                     </button>
@@ -207,13 +246,13 @@ export default function AllUsersPage() {
                   <div className="request-actions">
                     <button
                       className="follow-button"
-                      onClick={() => handelAccept(request.user_id, 0)}
+                      onClick={() => handleAcceptRequest(request.user_id)}
                     >
                       Accept
                     </button>
                     <button
                       className="reject-button"
-                      onClick={() => handleReject(request.user_id, 0)}
+                      onClick={() => handleRejectRequest(request.user_id)}
                     >
                       Reject
                     </button>

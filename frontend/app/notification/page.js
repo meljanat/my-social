@@ -2,42 +2,44 @@
 import React, { useState, useEffect } from "react";
 import "../styles/NotificationPage.css";
 import NotificationCard from "../components/NotificationCard";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 import { useRef } from "react";
+import useInfiniteScroll from "../components/useInfiniteScroll";
 
 export default function NotificationPage() {
   const [notifications, setNotifications] = useState([]);
-  const container = useRef(null);
-  const router = useRouter();
-  let noMoreNotifs = false;
+  const [hasMoreNotifications, setHasMoreNotifications] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
   const fetchNotifications = async (offset = 0) => {
-    if (noMoreNotifs) return;
     try {
-      const response = await fetch(`http://localhost:8404/notifications?offset=${offset}`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:8404/notifications?offset=${offset}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to fetch notifications");
 
       const data = await response.json();
-      console.log("Raw notifications from server:", data);
 
       if (Array.isArray(data)) {
-        if (data.length < 10) {
-          noMoreNotifs = true;
+        if (offset === 0) {
+          setNotifications(data);
+        } else {
+          setNotifications((prev) => [...prev, ...data]);
         }
-        setNotifications((prev) => [...prev, ...data]);
       }
     } catch (error) {
       console.error("Error fetching notifications:", error.message);
     }
   };
-
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
 
   const markAllAsRead = async () => {
     try {
@@ -56,12 +58,34 @@ export default function NotificationPage() {
     }
   };
 
+  useInfiniteScroll({
+    fetchMoreCallback: async () => {
+      if (!hasMoreNotifications) return;
+      setIsFetchingMore(true);
+
+      const currentLength = notifications.length;
+      const newNotifications = await fetchNotifications(currentLength);
+
+      if (newNotifications.length === 0) {
+        console.log("No more notifications to fetch");
+        setHasMoreNotifications(false);
+      }
+
+      setIsFetchingMore(false);
+    },
+    offset: notifications.length,
+    isFetching: isFetchingMore,
+  });
+
   const markAsRead = async (notification) => {
     try {
-      const response = await fetch(`http://localhost:8404/notifications/mark_as_read?id=${notification.notification_id}`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:8404/notifications/mark_as_read?id=${notification.notification_id}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to mark notification as read");
 
@@ -73,16 +97,19 @@ export default function NotificationPage() {
         )
       );
       if (notification.type_notification === "invitation") {
-        router.push('/profile/' + notification.user.user_id);
-      } else if (notification.type_notification === "like" || notification.type_notification === "comment") {
-        router.push('/post/' + notification.post_id);
+        router.push("/profile/" + notification.user.user_id);
+      } else if (
+        notification.type_notification === "like" ||
+        notification.type_notification === "comment"
+      ) {
+        router.push("/post/" + notification.post_id);
       } else if (notification.type_notification === "event") {
-        router.push('/groups');
+        router.push("/groups");
       }
     } catch (error) {
       console.error("Error marking notification as read:", error.message);
     }
-  }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -106,17 +133,22 @@ export default function NotificationPage() {
     <div className="notification-container">
       <div className="notification-card">
         <div className="notification-header">
-          <h1 className="notification-title">Notifications
-          </h1>
+          <h1 className="notification-title">Notifications</h1>
           <button className="mark-read-button" onClick={markAllAsRead}>
             Mark all as read
           </button>
         </div>
 
         <div className="notification-list" ref={container}>
-          {notifications.length ? notifications.map((notification, index) => (
-            <NotificationCard key={index} notification={notification} onClick={() => markAsRead(notification)} />
-          )) : ''}
+          {notifications.length
+            ? notifications.map((notification, index) => (
+                <NotificationCard
+                  key={index}
+                  notification={notification}
+                  onClick={() => markAsRead(notification)}
+                />
+              ))
+            : ""}
         </div>
       </div>
     </div>

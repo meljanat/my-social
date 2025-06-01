@@ -5,6 +5,7 @@ import Navbar from "../components/NavBar";
 import EventCard from "../components/EventCard";
 import EventFormModal from "../components/EventFormModal";
 import "../styles/EventsPage.css";
+import useInfiniteScroll from "../components/useInfiniteScroll";
 
 export default function EventsPage() {
   const router = useRouter();
@@ -12,8 +13,8 @@ export default function EventsPage() {
   const [showEventForm, setShowEventForm] = useState(false);
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const [filteredEvents, setFilteredEvents] = useState([]);
-
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [hasMoreEvents, setHasMoreEvents] = useState(true);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -43,7 +44,7 @@ export default function EventsPage() {
   const fetchEvents = async (type) => {
     try {
       const response = await fetch(
-        `http://localhost:8404/events?type=${type}`,
+        `http://localhost:8404/events?type=${type}&offset=${offset}`,
         {
           method: "GET",
           credentials: "include",
@@ -52,16 +53,37 @@ export default function EventsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
-
-        setEvents(data);
-        // setFilteredEvents(data);
+        if (offset === 0) {
+          setEvents(data);
+        } else {
+          setEvents((prev) => [...prev, ...data]);
+        }
       }
     } catch (error) {
       console.error("Error fetching events:", error);
     }
   };
-  
+
+
+useInfiniteScroll({
+  fetchMoreCallback: async () => {
+    if (!selectedType || !hasMoreEvents) return;
+
+    setIsFetchingMore(true);
+    const currentEvents = events || [];
+    const newEvents = await fetchEvents(selectedType, currentEvents.length);
+
+    if (!newEvents || newEvents.length === 0) {
+      console.log("No more events to fetch");
+      setHasMoreEvents(false); 
+    }
+
+    setIsFetchingMore(false);
+  },
+  offset: events?.length || 0,
+  isFetching: isFetchingMore,
+  hasMore: hasMoreEvents,
+});
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -163,7 +185,6 @@ export default function EventsPage() {
             All Events
           </button> */}
         </div>
-
 
         <div className="events-grid">
           {events?.length > 0 ? (

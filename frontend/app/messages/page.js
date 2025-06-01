@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import "../../styles/MessagesPage.css";
 import { addToListeners, removeFromListeners } from "../websocket/ws.js";
-import { websocket } from "../websocket/ws.js"
+import { websocket } from "../websocket/ws.js";
 import EmojiSection from "../components/EmojiSection";
 
 const Message = ({ message, isSent }) => {
@@ -27,7 +27,11 @@ const Message = ({ message, isSent }) => {
 const UserCard = ({ user, isActive, onClick }) => {
   useEffect(() => {
     const handleMessage = (msg) => {
-      if ((user.total_messages || user.total_messages === 0) && msg.type === "message" && msg.username === user.username) {
+      if (
+        (user.total_messages || user.total_messages === 0) &&
+        msg.type === "message" &&
+        msg.username === user.username
+      ) {
         user.total_messages++;
       }
     };
@@ -43,6 +47,7 @@ const UserCard = ({ user, isActive, onClick }) => {
     <li
       className={`user-item ${isActive ? "active-user" : ""}`}
       onClick={onClick}
+      data-id={user.user_id || user.group_id}
     >
       <img
         src={user.avatar || user.image}
@@ -60,8 +65,8 @@ const UserCard = ({ user, isActive, onClick }) => {
             {user.username
               ? `@${user.username}`
               : user.total_members
-                ? `(${user.total_members}) Members`
-                : ""}
+              ? `(${user.total_members}) Members`
+              : ""}
           </p>
         </div>
         {user.message && user.message.total_messages > 0 ? (
@@ -86,22 +91,31 @@ export default function MessagesPage() {
   const [onlineUsers, setOnlineUsers] = useState(null);
   const [groups, setGroups] = useState([]);
   const [openEmojiSection, setOpenEmojiSection] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [limit, setLimit] = useState(10);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const conversationRef = useRef(null);
+  const usersListRef = useRef(null);
+  const sidebarRef = useRef(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:8404/connections", {
-          method: "GET",
-          credentials: "include",
-        });
+        const response = await fetch(
+          `http://localhost:8404/connections?offset=${offset}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
         const data = await response.json();
         console.log(data);
-
 
         setUsers(data);
 
         const onlineUsers = data
-          .filter(user => user.online)
+          .filter((user) => user.online)
           .reduce((acc, user) => {
             acc[user.id] = true;
             return acc;
@@ -119,7 +133,7 @@ export default function MessagesPage() {
     const fetchGroups = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8404/groups?type=joined&offset=0",
+          `http://localhost:8404/groups?type=joined&offset=${offset}`,
           {
             method: "GET",
             credentials: "include",
@@ -140,17 +154,44 @@ export default function MessagesPage() {
     }
   }, [messages]);
 
-
   const handleScroll = () => {
-    if (MessagesPage.scrollY >= MessagesPage.innerHeight) {
-      fetchMoreMessages(selectedUser, messages.length);
+    if (conversationRef.current) {
+      const { scrollTop } = conversationRef.current;
+      if (scrollTop === 0) {
+        fetchMoreMessages(selectedUser, messages.length);
+      }
     }
-    console.log(MessagesPage.scrollY, MessagesPage.innerHeight);
-  }
+  };
+
+  const handleSidebarScroll = () => {
+    if (!sidebarRef.current) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = sidebarRef.current;
+
+    if (scrollHeight - (scrollTop + clientHeight) < 50 && !isLoading) {
+      loadMoreUsersOrGroups();
+    }
+  };
+
+  useEffect(() => {
+    if (selectedUser && usersListRef.current) {
+      const selectedElement = usersListRef.current.querySelector(
+        `.user-item[data-id="${selectedUser.user_id || selectedUser.group_id}"]`
+      );
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }
+    }
+  }, [selectedUser]);
 
   const handleUserSelect = (user, offset = 0) => {
     setSelectedUser(user);
-    let fetchMessages = user.group_id ? `chats_group?group_id=${user.group_id}&offset=${offset}` : `chats?id=${user.user_id}&offset=${offset}`;
+    let fetchMessages = user.group_id
+      ? `chats_group?group_id=${user.group_id}&offset=${offset}`
+      : `chats?id=${user.user_id}&offset=${offset}`;
     fetch(`http://localhost:8404/${fetchMessages}`, {
       method: "GET",
       credentials: "include",
@@ -177,26 +218,25 @@ export default function MessagesPage() {
       })
       .catch((error) => {
         console.error("Error fetching messages:", error);
-        setMessages([]);
       });
-  }
+  };
 
   useEffect(() => {
     const handleMessage = (msg) => {
-      if (msg.type === 'message') {
+      if (msg.type === "message") {
         setMessages((prevMessages) => [
           ...prevMessages,
           {
             id: Date.now(),
             content: msg.content,
             username: msg.username,
-            created_at: 'Just now',
+            created_at: "Just now",
           },
         ]);
       }
     };
     const handleNewConnection = (msg) => {
-      if (msg.type === 'new_connection') {
+      if (msg.type === "new_connection") {
         setOnlineUsers((prevOnlineUsers) => ({
           ...prevOnlineUsers,
           [msg.user_id]: true,
@@ -204,7 +244,7 @@ export default function MessagesPage() {
       }
     };
     const handleDisconnection = (msg) => {
-      if (msg.type === 'disconnection') {
+      if (msg.type === "disconnection") {
         setOnlineUsers((prevOnlineUsers) => ({
           ...prevOnlineUsers,
           [msg.user_id]: false,
@@ -212,14 +252,14 @@ export default function MessagesPage() {
       }
     };
 
-    addToListeners('message', handleMessage);
-    addToListeners('new_connection', handleNewConnection);
-    addToListeners('disconnection', handleDisconnection);
+    addToListeners("message", handleMessage);
+    addToListeners("new_connection", handleNewConnection);
+    addToListeners("disconnection", handleDisconnection);
 
     return () => {
-      removeFromListeners('message', handleMessage);
-      removeFromListeners('new_connection', handleNewConnection);
-      removeFromListeners('disconnection', handleDisconnection);
+      removeFromListeners("message", handleMessage);
+      removeFromListeners("new_connection", handleNewConnection);
+      removeFromListeners("disconnection", handleDisconnection);
     };
   }, []);
 
@@ -233,7 +273,17 @@ export default function MessagesPage() {
     //   created_at: 'Just now',
     // };
 
-    const mssg = selectedUser.group_id ? { type: 'message', group_id: selectedUser.group_id, content: newMessage } : { type: 'message', user_id: selectedUser.user_id, content: newMessage };
+    const mssg = selectedUser.group_id
+      ? {
+          type: "message",
+          group_id: selectedUser.group_id,
+          content: newMessage,
+        }
+      : {
+          type: "message",
+          user_id: selectedUser.user_id,
+          content: newMessage,
+        };
 
     // setMessages(messages ? [...messages, message] : [message]);
     websocket.send(JSON.stringify(mssg));
@@ -254,15 +304,17 @@ export default function MessagesPage() {
 
           <div className="messages-tabs">
             <button
-              className={`tab-button ${activeTab === "friends" ? "active-tab" : ""
-                }`}
+              className={`tab-button ${
+                activeTab === "friends" ? "active-tab" : ""
+              }`}
               onClick={() => setActiveTab("friends")}
             >
               Friends
             </button>
             <button
-              className={`tab-button ${activeTab === "groups" ? "active-tab" : ""
-                }`}
+              className={`tab-button ${
+                activeTab === "groups" ? "active-tab" : ""
+              }`}
               onClick={() => setActiveTab("groups")}
             >
               Groups
@@ -277,28 +329,41 @@ export default function MessagesPage() {
             />
           </div>
 
-          <div className="users-list-container">
+          <div
+            className="users-list-container"
+            ref={sidebarRef}
+            onScroll={handleSidebarScroll}
+            style={{ overflowY: "auto", maxHeight: "calc(100vh - 180px)" }}
+          >
             <ul className="users-list">
               {activeTab === "friends"
-                ? users ? users.map((user) => (
-                  <UserCard
-                    key={user.user_id}
-                    user={user}
-                    isActive={selectedUser && selectedUser.user_id === user.user_id}
-                    onClick={() => {
-                      handleUserSelect(user)
-                      user.total_messages = 0;
-                    }}
-                  />
-                )) : ''
-                : groups ? groups.map((group) => (
-                  <UserCard
-                    key={group.group_id}
-                    user={group}
-                    isActive={selectedUser && selectedUser.id === group.group_id}
-                    onClick={() => handleUserSelect(group)}
-                  />
-                )) : ''}
+                ? users
+                  ? users.map((user) => (
+                      <UserCard
+                        key={user.user_id}
+                        user={user}
+                        isActive={
+                          selectedUser && selectedUser.user_id === user.user_id
+                        }
+                        onClick={() => {
+                          handleUserSelect(user);
+                          user.total_messages = 0;
+                        }}
+                      />
+                    ))
+                  : ""
+                : groups
+                ? groups.map((group) => (
+                    <UserCard
+                      key={group.group_id}
+                      user={group}
+                      isActive={
+                        selectedUser && selectedUser.id === group.group_id
+                      }
+                      onClick={() => handleUserSelect(group)}
+                    />
+                  ))
+                : ""}
             </ul>
           </div>
         </div>
@@ -321,8 +386,20 @@ export default function MessagesPage() {
                     </h3>
                     {selectedUser.username && (
                       <p className="conversation-user-status">
-                        <span className={`status-dot ${selectedUser.user_id ? (onlineUsers[selectedUser.user_id] ? 'online' : 'offline') : 'offline'}`}></span>
-                        {selectedUser.user_id ? (onlineUsers[selectedUser.user_id] ? 'Online' : 'Offline') : 'Offline'}
+                        <span
+                          className={`status-dot ${
+                            selectedUser.user_id
+                              ? onlineUsers[selectedUser.user_id]
+                                ? "online"
+                                : "offline"
+                              : "offline"
+                          }`}
+                        ></span>
+                        {selectedUser.user_id
+                          ? onlineUsers[selectedUser.user_id]
+                            ? "Online"
+                            : "Offline"
+                          : "Offline"}
                       </p>
                     )}
                   </div>
@@ -349,15 +426,21 @@ export default function MessagesPage() {
                 </div>
               </div>
 
-              <div className="conversation-messages"
-                onScroll={handleScroll}>
-                {messages && messages.length > 0 ? messages.map((message, index) => (
-                  <Message
-                    key={index}
-                    message={message}
-                    isSent={message.username !== selectedUser.username}
-                  />
-                )) : ''}
+              <div
+                className="conversation-messages"
+                ref={conversationRef}
+                onScroll={handleScroll}
+                style={{ overflowY: "auto", maxHeight: "calc(100vh - 200px)" }}
+              >
+                {messages && messages.length > 0
+                  ? messages.map((message, index) => (
+                      <Message
+                        key={index}
+                        message={message}
+                        isSent={message.username !== selectedUser.username}
+                      />
+                    ))
+                  : ""}
                 <div ref={messagesEndRef} />
               </div>
 
@@ -380,9 +463,13 @@ export default function MessagesPage() {
                   </svg>
                 </button>
                 <div className="emoji-toggle">
-                  <button onClick={() => {
-                    toggleEmojiSection()
-                  }}>😄</button>
+                  <button
+                    onClick={() => {
+                      toggleEmojiSection();
+                    }}
+                  >
+                    😄
+                  </button>
                 </div>
                 <input
                   type="text"
@@ -409,7 +496,8 @@ export default function MessagesPage() {
                   <EmojiSection
                     onEmojiSelect={(emoji) => {
                       setNewMessage((prev) => prev + emoji);
-                    }} />
+                    }}
+                  />
                 )}
               </form>
             </>

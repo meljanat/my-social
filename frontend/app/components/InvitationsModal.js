@@ -1,4 +1,5 @@
 import "../style/InvitationsModal.css";
+import { useEffect, useState } from "react";
 
 export default function InvitationsModal({
   invitations = [],
@@ -7,6 +8,14 @@ export default function InvitationsModal({
   onReject,
 }) {
   const hasInvitations = invitations && invitations.length > 0;
+  const [invit, setInvit] = useState([]);
+
+  useEffect(() => {
+    const showInvit = () => {
+      setInvit(invitations);
+    };
+    showInvit();
+  }, [invitations]);
   return (
     <div className="modal-overlay">
       <div className="invitation-modal-content">
@@ -18,8 +27,8 @@ export default function InvitationsModal({
         </div>
         {hasInvitations ? (
           <ul className="invitations-list">
-            {invitations.map((invitation) => (
-              <li key={invitation.id} className="invitation-item">
+            {invit.map((invitation) => (
+              <li key={invitation.invitation_id} className="invitation-item">
                 <div className="invitation-info">
                   <div className="invitation-avatar">
                     {invitation.user?.avatar && (
@@ -38,17 +47,33 @@ export default function InvitationsModal({
                 <div className="invitation-actions">
                   <button
                     className="accept-button"
-                    onClick={() =>
-                      onAccept(invitation.user.user_id, invitation.group.group_id)
-                    }
+                    onClick={() => {
+                      onAccept(
+                        invitation.user.user_id,
+                        invitation.group.group_id
+                      );
+                      setInvit(
+                        invit.filter(
+                          (el) => el.invitation_id != invitation.invitation_id
+                        )
+                      );
+                    }}
                   >
                     Accept
                   </button>
                   <button
                     className="decline-btn"
-                    onClick={() =>
-                      onReject(invitation.user.user_id, invitation.group.group_id)
-                    }
+                    onClick={() => {
+                      onReject(
+                        invitation.user.user_id,
+                        invitation.group.group_id
+                      );
+                      setInvit(
+                        invit.filter(
+                          (el) => el.invitation_id != invitation.invitation_id
+                        )
+                      );
+                    }}
                   >
                     Decline
                   </button>

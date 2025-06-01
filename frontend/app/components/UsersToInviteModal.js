@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import "../styles/InviteUsersModal.css";
 
 export default function InviteUsersModal({
@@ -6,9 +7,22 @@ export default function InviteUsersModal({
   onInvite,
   groupId,
 }) {
-  const hasUsers = users && users.length > 0;
+  const [localUsers, setLocalUsers] = useState(users);
 
-  console.log("Users to invite:", users);
+  useEffect(() => {
+    setLocalUsers(users);
+  }, [users]);
+
+  const handleInvite = async (userId) => {
+    try {
+      await onInvite(userId, groupId);
+      setLocalUsers(prevUsers =>
+        prevUsers.filter(user => user.user_id !== userId)
+      );
+    } catch (err) {
+      console.error("Error inviting user:", err);
+    }
+  };
 
   return (
     <div className="modal-overlay">
@@ -19,9 +33,10 @@ export default function InviteUsersModal({
             &times;
           </span>
         </div>
-        {hasUsers ? (
+
+        {localUsers && localUsers.length > 0 ? (
           <ul className="users-list">
-            {users.map((user) => (
+            {localUsers.map((user) => (
               <li key={user.user_id} className="user-item">
                 <div className="user-info">
                   <div className="user-avatar">
@@ -40,7 +55,7 @@ export default function InviteUsersModal({
                 <div className="user-actions">
                   <button
                     className="invite-button"
-                    onClick={() => onInvite(user.user_id, groupId)}
+                    onClick={() => handleInvite(user.user_id)}
                   >
                     Invite
                   </button>

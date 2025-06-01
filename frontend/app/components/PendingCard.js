@@ -1,16 +1,33 @@
 import { handleFollow } from "../functions/user";
 import "../styles/PendingGroupRequestCard.css";
-export default function PendingGroupRequestCard({
-  group,
-  onClick,
-}) {
+import { useState } from "react";
+export default function PendingGroupRequestCard({ group, onClick, onCancel }) {
+  const [isRemoved, setIsRemoved] = useState(false);
+
+  const handleCancel = async (e) => {
+    e.stopPropagation();
+    try {
+      await handleFollow(group.admin_id, group.group_id);
+      setIsRemoved(true);
+      if (onCancel) {
+        onCancel(group.group_id);
+      }
+    } catch (error) {
+      console.error("Error canceling group request:", error);
+    }
+  };
+
+  if (isRemoved) {
+    return null;
+  }
+
   return (
     <div className="pending-group-card" onClick={onClick}>
       <div className="pending-group-content">
         <div className="pending-group-header">
           <div className="pending-group-info">
             <img
-              src={`.${group.image}`}
+              src={group.image}
               alt={group.name}
               className="pending-group-avatar"
             />
@@ -21,11 +38,7 @@ export default function PendingGroupRequestCard({
                 <span>Request Pending</span>
                 <div>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-
-                      handleFollow(group.admin_id, group.group_id);
-                    }}
+                    onClick={handleCancel}
                     className="pending-group-cancel-btn"
                   >
                     Cancel

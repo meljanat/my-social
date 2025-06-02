@@ -81,10 +81,10 @@ export default function WebSocketManager() {
         if (isLoggedIn) {
             connectWebSocket();
         } else {
-            if (pathname !== "/") {
-                router.push("/");
-                console.log("Redirecting to home page due to not logged in.");
-            }
+            // if (pathname !== "/") {
+            //     router.push("/");
+            //     console.log("Redirecting to home page due to not logged in.");
+            // }
         }
     }, [isLoggedIn])
 

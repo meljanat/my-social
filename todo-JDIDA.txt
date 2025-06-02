@@ -1,6 +1,20 @@
 //home
-follow khdama ms makat'afficher walo mora ma dirha
-categories filter
-scroll m7wiiiiiii
-create event khssha tkhtar chmn grp
-chatWIdget
+    follow khdama ms makat'afficher walo mora ma dirha
+    categories filter
+    scroll m7wiiiiiii
+    create event khssha tkhtar chmn grp
+    chatWIdget
+
+//groups
+    create chimrat katcree eadi w chi mrat katcree w makadkhlch luser lgrp
+    leave w delete makhdamach
+    join khdama ms machi real time
+    invitations makhdaminch
+
+//profile
+    follow makhdamach
+    khs yban luse wch rah mfollowik wla mrequesti
+    svg makhdaminch
+
+//messages
+    khss ta lusers li public t9dr tsiftlhum msg wkha mamfollowihumch w ychufoh

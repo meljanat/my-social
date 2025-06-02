@@ -83,7 +83,6 @@ export default function WebSocketManager() {
         } else {
             if (pathname !== "/") {
                 router.push("/");
-                pathname = "/";
                 console.log("Redirecting to home page due to not logged in.");
             }
         }

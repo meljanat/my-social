@@ -45,14 +45,15 @@ export default function StoriesComponent({ storiesUsers }) {
   }
 
   async function createNewStory() {
+    const formData = new FormData();
+    if (postFormInput.storyImage) {
+      formData.append("story", postFormInput.storyImage);
+    }
     try {
       const response = await fetch("http://localhost:8404/story", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         credentials: "include",
-        body: JSON.stringify({ image: selectedImage }),
+        body: formData,
       });
       if (!response.ok) {
         throw new Error("Failed to upload story");

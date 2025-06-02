@@ -48,6 +48,12 @@ func CreateStoryHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		newpath := strings.Split(imagePath, "/public")
 		imagePath = newpath[1]
+	} else {
+		fmt.Println("No image provided")
+		response := map[string]string{"error": "No image provided"}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
 	}
 
 	if err := database.CreateStory(imagePath, user.ID); err != nil {

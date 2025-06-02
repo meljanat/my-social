@@ -78,8 +78,8 @@ export default function Home() {
         return [];
       }
 
-      if (data.stories) {
-        setStories(data.stories);
+      if (data.user.stories) {
+        setStories(data.user.stories);
       }
 
       if (offset === 0) {

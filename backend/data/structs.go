@@ -84,10 +84,10 @@ type Stories struct {
 }
 
 type Story struct {
-	ID        int64  `json:"story_id" sqlite:"story_id"`
-	Image     string `json:"image" sqlite:"image"`
-	IsRead    bool   `json:"status" sqlite:"status"`
-	CreatedAt string `json:"created_at" sqlite:"created_at"`
+	ID        int64     `json:"story_id" sqlite:"story_id"`
+	Image     string    `json:"image" sqlite:"image"`
+	IsRead    bool      `json:"status" sqlite:"status"`
+	CreatedAt time.Time `json:"created_at" sqlite:"created_at"`
 }
 
 type Category struct {

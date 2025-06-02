@@ -92,7 +92,6 @@ type Story struct {
 
 type Category struct {
 	ID         int64  `json:"category_id" sqlite:"category_id"`
-	User       User   `json:"user" sqlite:"user"`
 	Name       string `json:"name" sqlite:"name"`
 	Color      string `json:"color" sqlite:"color"`
 	Background string `json:"background" sqlite:"background"`

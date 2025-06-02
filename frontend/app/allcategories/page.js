@@ -9,6 +9,7 @@ export default function AllCategories() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       });
 
       if (response.ok) {

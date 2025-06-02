@@ -106,6 +106,7 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (!isLoggedIn) return;
     const handleScroll = () => {
       const nearBottom =
         window.innerHeight + window.scrollY >= document.body.offsetHeight - 500;
@@ -178,7 +179,7 @@ export default function Home() {
 
             <div className="center-column">
               <div className="stories-section">
-                <StoriesComponent storiesUsers={homeData?.user.stories} />
+                <StoriesComponent storiesUsers={stories} />
               </div>
               <PostComponent posts={posts} />
             </div>

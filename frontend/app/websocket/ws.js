@@ -1,6 +1,5 @@
 'use client';
-
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 export let websocket;
@@ -51,6 +50,7 @@ export const removeFromListeners = (event, callback) => {
 };
 
 export default function WebSocketManager() {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -68,19 +68,26 @@ export default function WebSocketManager() {
                 if (!res.ok) throw new Error("Not logged in");
 
                 const data = await res.json();
-                if (data) {
-                    connectWebSocket();
-                } else {
-                    if (pathname !== "/") router.push("/");
-                }
+                setIsLoggedIn(data)
             } catch (err) {
-                console.error("Auth check failed:", err);
-                if (pathname !== "/") router.push("/");
+                console.log("Auth check failed:", err);
             }
         }
 
         checkAuth();
-    }, []);
+    }, [isLoggedIn]);
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            connectWebSocket();
+        } else {
+            if (pathname !== "/") {
+                router.push("/");
+                pathname = "/";
+                console.log("Redirecting to home page due to not logged in.");
+            }
+        }
+    }, [isLoggedIn])
 
     return null;
 }

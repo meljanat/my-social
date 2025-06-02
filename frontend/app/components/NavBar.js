@@ -1,5 +1,5 @@
 "use client";
-import { act, use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import "../styles/NavBar.css";
 import NotificationsComponent from "./NotificationsComponent";
@@ -45,6 +45,7 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (!user) return;
     const handleNotifications = (msg) => {
       if (msg.type === 'notifications') {
         setUser((prevUser) => ({
@@ -118,6 +119,7 @@ export default function Navbar() {
   }
 
   useEffect(() => {
+    if (!user) return;
     setSuggestions([]);
     fetchSuggestions();
   }, [searchQuery, activeSugTab]);

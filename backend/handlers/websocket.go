@@ -100,7 +100,7 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 				fmt.Println("Error getting user by ID:", err)
 				return
 			}
-			if err = database.SendMessage(user_id, id, message.GroupID, message.Content, ""); err != nil {
+			if err = database.SendMessage(user_id, id, message.GroupID, message.Content, ""); err != nil && user_id != id {
 				fmt.Println("Error sending message:", err)
 				return
 			}

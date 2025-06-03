@@ -109,7 +109,9 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		ID:        id,
 		PostID:    comment.PostID,
 		Content:   html.EscapeString(comment.Content),
-		User:      *user,
+		UserID:    user.ID,
+		Username:  user.Username,
+		Avatar:    user.Avatar,
 		CreatedAt: "Just Now",
 		Image:     imagePath,
 	}

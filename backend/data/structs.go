@@ -70,7 +70,9 @@ type Post struct {
 
 type Comment struct {
 	ID        int64  `json:"comment_id" sqlite:"comment_id"`
-	User      User   `json:"user" sqlite:"user"`
+	UserID    int64  `json:"user_id" sqlite:"user_id"`
+	Avatar    string `json:"avatar" sqlite:"avatar"`
+	Username  string `json:"username" sqlite:"username"`
 	PostID    int64  `json:"post_id" sqlite:"post_id"`
 	GroupID   int64  `json:"group_id" sqlite:"group_id"`
 	Content   string `json:"content" sqlite:"content"`
@@ -101,7 +103,6 @@ type Category struct {
 type Group struct {
 	ID            int64  `json:"group_id" sqlite:"group_id"`
 	Name          string `json:"name" sqlite:"name"`
-	User          User   `json:"user" sqlite:"user"`
 	Image         string `json:"image" sqlite:"image"`
 	Cover         string `json:"cover" sqlite:"cover"`
 	Description   string `json:"description" sqlite:"description"`
@@ -137,7 +138,9 @@ type Message struct {
 
 type Notification struct {
 	ID               int64  `json:"notification_id" sqlite:"notification_id"`
-	User             User   `json:"user" sqlite:"user"`
+	UserID           int64  `json:"user_id" sqlite:"user_id"`
+	Username         string `json:"username" sqlite:"username"`
+	Avatar           string `json:"avatar" sqlite:"avatar"`
 	Content          string `json:"content" sqlite:"content"`
 	PostID           int64  `json:"post_id" sqlite:"post_id"`
 	GroupID          int64  `json:"group_id" sqlite:"group_id"`
@@ -156,8 +159,11 @@ type Invitation struct {
 
 type Event struct {
 	ID           int64     `json:"event_id" sqlite:"event_id"`
-	User         User      `json:"user" sqlite:"user"`
-	Group        Group     `json:"group" sqlite:"group"`
+	UserID       int64     `json:"user_id" sqlite:"user_id"`
+	Username     string    `json:"username" sqlite:"username"`
+	Avatar       string    `json:"avatar" sqlite:"avatar"`
+	GroupID      int64     `json:"group_id" sqlite:"group_id"`
+	GroupName    string    `json:"group_name" sqlite:"group_name"`
 	Name         string    `json:"name" sqlite:"name"`
 	Description  string    `json:"description" sqlite:"description"`
 	Image        string    `json:"image" sqlite:"image"`

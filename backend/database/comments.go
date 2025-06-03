@@ -30,7 +30,7 @@ func GetPostComments(post_id, offset int64) ([]structs.Comment, error) {
 	for rows.Next() {
 		var comment structs.Comment
 		var date time.Time
-		err = rows.Scan(&comment.ID, &comment.Content, &comment.User.ID, &comment.User.Username, &comment.User.Avatar, &date, &comment.Image)
+		err = rows.Scan(&comment.ID, &comment.Content, &comment.UserID, &comment.Username, &comment.Avatar, &date, &comment.Image)
 		if err != nil && !strings.Contains(err.Error(), `name "image": converting NULL to string`) {
 			return nil, err
 		}

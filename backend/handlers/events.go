@@ -38,7 +38,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 	event.Name = r.FormValue("name")
 	event.Description = r.FormValue("description")
 	event.Location = r.FormValue("location")
-	event.Group.ID, err = strconv.ParseInt(r.FormValue("group_id"), 10, 64)
+	event.GroupID, err = strconv.ParseInt(r.FormValue("group_id"), 10, 64)
 	if err != nil {
 		fmt.Println("Error parsing group ID:", err)
 		response := map[string]string{"error": "Invalid group ID"}
@@ -65,7 +65,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	group, err := database.GetGroupById(event.Group.ID)
+	group, err := database.GetGroupById(event.GroupID)
 	if err != nil {
 		fmt.Println("Error retrieving group:", err)
 		response := map[string]string{"error": "Failed to retrieve group"}
@@ -74,7 +74,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if member, err := database.IsMemberGroup(event.Group.ID, user.ID); err != nil || !member {
+	if member, err := database.IsMemberGroup(event.GroupID, user.ID); err != nil || !member {
 		fmt.Println("User is not a member of the group", err)
 		response := map[string]string{"error": "User is not a member of the group"}
 		w.WriteHeader(http.StatusUnauthorized)
@@ -118,7 +118,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 		imagePath = "/inconnu/event.jpg"
 	}
 
-	id, err := database.CreateEvent(user.ID, event.Name, event.Description, event.Location, event.StartDate, event.EndDate, event.Group.ID, imagePath)
+	id, err := database.CreateEvent(user.ID, event.Name, event.Description, event.Location, event.StartDate, event.EndDate, event.GroupID, imagePath)
 	if err != nil {
 		fmt.Println("Error creating event:", err)
 		response := map[string]string{"error": "Failed to create event"}
@@ -128,7 +128,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	members, err := database.GetGroupMembers(user.ID, event.Group.ID, group.TotalMembers)
+	members, err := database.GetGroupMembers(user.ID, event.GroupID, group.TotalMembers)
 	if err != nil {
 		fmt.Println("Error retrieving group members:", err)
 		response := map[string]string{"error": "Failed to retrieve group members"}
@@ -139,7 +139,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	for _, member := range members {
 		if member.ID != user.ID {
-			if err = database.CreateNotification(user.ID, member.ID, 0, event.Group.ID, id, "event_created"); err != nil {
+			if err = database.CreateNotification(user.ID, member.ID, 0, event.GroupID, id, "event_created"); err != nil {
 				fmt.Println("Error creating notification:", err)
 				response := map[string]string{"error": "Failed to create notification"}
 				w.WriteHeader(http.StatusInternalServerError)
@@ -156,7 +156,8 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 		Location:    event.Location,
 		StartDate:   event.StartDate,
 		EndDate:     event.EndDate,
-		Group:       group,
+		GroupID:     event.GroupID,
+		GroupName:   group.Name,
 		Image:       imagePath,
 	}
 

@@ -44,7 +44,7 @@ func GetNotifications(notified_id, offset int64) ([]structs.Notification, error)
 	for rows.Next() {
 		var notification structs.Notification
 		var date time.Time
-		err = rows.Scan(&notification.ID, &notification.User.ID, &notification.User.Username, &notification.User.Avatar, &notification.PostID, &notification.GroupID, &notification.EventID, &notification.TypeNotification, &notification.Read, &date)
+		err = rows.Scan(&notification.ID, &notification.UserID, &notification.Username, &notification.Avatar, &notification.PostID, &notification.GroupID, &notification.EventID, &notification.TypeNotification, &notification.Read, &date)
 		if err != nil {
 			return nil, err
 		}

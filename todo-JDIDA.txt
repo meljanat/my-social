@@ -18,3 +18,11 @@
 
 //messages
     khss ta lusers li public t9dr tsiftlhum msg wkha mamfollowihumch w ychufoh
+
+
+
+//abdo
+
+    allusers, sereach, notification/page.js, 
+    See Profile/messages, message home/scroll + messages, 
+    invitations, trothel scrolle, stories, Events,

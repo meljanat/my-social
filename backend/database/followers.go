@@ -32,6 +32,24 @@ func GetFollowers(user_id, offset int64) ([]structs.User, error) {
 	return followers, nil
 }
 
+func GetAllFollowers(user_id int64) ([]int64, error) {
+	rows, err := DB.Query("SELECT u.id FROM users u JOIN follows f ON u.id = f.follower_id WHERE f.following_id = ?", user_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var followers []int64
+	for rows.Next() {
+		var follower int64
+		err = rows.Scan(&follower)
+		if err != nil {
+			return nil, err
+		}
+		followers = append(followers, follower)
+	}
+	return followers, nil
+}
+
 func GetFollowing(user_id, offset, limit int64) ([]structs.User, error) {
 	if limit == 0 {
 		limit = 10

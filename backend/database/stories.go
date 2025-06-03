@@ -7,9 +7,22 @@ import (
 	structs "social-network/data"
 )
 
-func CreateStory(image string, user_id int64) error {
-	_, err := DB.Exec("INSERT INTO stories (user_id, image) VALUES (?, ?)", user_id, image)
-	return err
+func CreateStory(image string, user_id int64) (int64, error) {
+	result, err := DB.Exec("INSERT INTO stories (user_id, image) VALUES (?, ?)", user_id, image)
+	if err != nil {
+		return 0, err
+	}
+
+	lastID, err := result.LastInsertId()
+	return lastID, err
+}
+
+func StoryStatus(story_id int64, followers []int64) error {
+	for _, follower := range followers {
+		_, err := DB.Exec("INSERT INTO stories_status (story_id, user_id, read) VALUES (?, ?, ?)", story_id, follower, true)
+		return err
+	}
+	return nil
 }
 
 func GetStories(following []structs.User) ([]structs.Stories, error) {
@@ -18,7 +31,8 @@ func GetStories(following []structs.User) ([]structs.Stories, error) {
 	for _, usr := range following {
 		var user_stories structs.Stories
 		user_stories.User = usr
-		rows, err := DB.Query("SELECT s.id, s.image, ss.read, s.created_at FROM stories s JOIN stories_status ss ON s.id == ss.story_id WHERE s.user_id = ?", usr.ID)
+		fmt.Println("user_id", usr.ID)
+		rows, err := DB.Query("SELECT s.id, s.image, ss.read, s.created_at FROM stories s LEFT JOIN stories_status ss ON s.id == ss.story_id WHERE s.user_id = ?", usr.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -28,6 +42,7 @@ func GetStories(following []structs.User) ([]structs.Stories, error) {
 			if err := rows.Scan(&story.ID, &story.Image, &story.IsRead, &story.CreatedAt); err != nil {
 				return nil, err
 			}
+			fmt.Println("story", story)
 			if time.Since(story.CreatedAt) > 24*time.Hour {
 				stories_ids = append(stories_ids, story.ID)
 				continue

@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
+	structs "social-network/data"
 	"social-network/database"
 )
 
 func CreateStoryHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
+	if r.Method != http.MethodPost {
 		fmt.Println("Method not allowed", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -56,7 +58,8 @@ func CreateStoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := database.CreateStory(imagePath, user.ID); err != nil {
+	story_id, err := database.CreateStory(imagePath, user.ID)
+	if err != nil {
 		fmt.Println("Failed to create story", err)
 		response := map[string]string{"error": "Failed to create story"}
 		w.WriteHeader(http.StatusInternalServerError)
@@ -64,8 +67,37 @@ func CreateStoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(story)
+	followers, err := database.GetAllFollowers(user.ID)
+	if err != nil {
+		fmt.Println("Failed to retrieve followers", err)
+		response := map[string]string{"error": "Failed to retrieve followers"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if database.StoryStatus(story_id, followers) != nil {
+		fmt.Println("Failed to update story status", err)
+		response := map[string]string{"error": "Failed to update story status"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	stories := []structs.Story{}
+	stories = append(stories, structs.Story{
+		ID:        story_id,
+		Image:     imagePath,
+		IsRead:    false,
+		CreatedAt: time.Now(),
+	})
+
+	data := structs.Stories{}
+	data.Stories = stories
+	data.User = *user
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
 }
 
 func SeenStory(w http.ResponseWriter, r *http.Request) {

@@ -3,19 +3,19 @@ import { useState, useEffect, useRef, use } from "react";
 import "../styles/StoriesComponent.css";
 
 export default function StoriesComponent({ storiesUsers }) {
-  console.log("StoriesComponent rendered", storiesUsers);
-
   const [storyUsers, setStoryUsers] = useState([]);
   const [activeStoryIndex, setActiveStoryIndex] = useState(0);
   const [activeUserIndex, setActiveUserIndex] = useState(null);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [addingStory, setAddingStory] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
 
   const progressIntervalRef = useRef(null);
   const storyTimeoutRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [storyFormInput, setStoryFormInput] = useState({
+    storyImage: null,
+  });
 
   useEffect(() => {
     setStoryUsers(storiesUsers);
@@ -46,10 +46,11 @@ export default function StoriesComponent({ storiesUsers }) {
 
   async function createNewStory() {
     const formData = new FormData();
-    if (postFormInput.storyImage) {
-      formData.append("story", postFormInput.storyImage);
+    if (storyFormInput.storyImage) {
+      formData.append("storyImage", storyFormInput.storyImage);
     }
     try {
+      console.log("Form data:", formData);
       const response = await fetch("http://localhost:8404/story", {
         method: "POST",
         credentials: "include",
@@ -154,12 +155,12 @@ export default function StoriesComponent({ storiesUsers }) {
 
   const handleAddStory = () => {
     setAddingStory(true);
-    setSelectedImage(null);
+    setStoryFormInput(null);
   };
 
   const closeAddStoryModal = () => {
     setAddingStory(false);
-    setSelectedImage(null);
+    setStoryFormInput(null);
   };
 
   const handleMouseDown = () => {
@@ -178,22 +179,21 @@ export default function StoriesComponent({ storiesUsers }) {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setSelectedImage(event.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
+    setStoryFormInput({
+      ...storyFormInput,
+      storyImage: file,
+    });
   };
 
   const handleShareStory = () => {
-    if (selectedImage) {
+    console.log("Sharing story...");
+    
+    if (storyFormInput.storyImage) {
       createNewStory();
 
       const newStory = {
         id: Date.now(),
-        image: selectedImage,
+        image: storyFormInput.storyImage,
         duration: 5000,
       };
 
@@ -202,7 +202,7 @@ export default function StoriesComponent({ storiesUsers }) {
       ) || {
         id: Date.now(),
         username: "You",
-        avatar: selectedImage,
+        avatar: storyFormInput.avatar,
         hasUnseenStory: true,
         stories: [],
       };
@@ -226,7 +226,6 @@ export default function StoriesComponent({ storiesUsers }) {
       closeAddStoryModal();
     }
   };
-  console.log("dak l index d zeb ", activeUserIndex, activeStoryIndex);
   return (
     <div className="stories-wrapper">
       <div className="stories-header">
@@ -342,7 +341,7 @@ export default function StoriesComponent({ storiesUsers }) {
                 Create New Story
               </h3>
 
-              {!selectedImage ? (
+              {!storyFormInput?.storyImage ? (
                 <div className="upload-area">
                   <div className="upload-box" onClick={handleFileSelect}>
                     <div className="upload-icon">+</div>
@@ -351,6 +350,7 @@ export default function StoriesComponent({ storiesUsers }) {
                       type="file"
                       ref={fileInputRef}
                       accept="image/*"
+                      name="storyImage"
                       onChange={handleFileChange}
                       style={{ display: "none" }}
                     />
@@ -359,7 +359,7 @@ export default function StoriesComponent({ storiesUsers }) {
               ) : (
                 <div className="upload-area" style={{ padding: "0" }}>
                   <img
-                    src={selectedImage}
+                    src={storyFormInput?.storyImage}
                     alt="Selected"
                     style={{
                       width: "100%",
@@ -374,10 +374,10 @@ export default function StoriesComponent({ storiesUsers }) {
               <button
                 className="share-button"
                 onClick={handleShareStory}
-                disabled={!selectedImage}
+                disabled={!storyFormInput?.storyImage}
                 style={{
-                  opacity: selectedImage ? 1 : 0.6,
-                  cursor: selectedImage ? "pointer" : "not-allowed",
+                  opacity: storyFormInput?.storyImage ? 1 : 0.6,
+                  cursor: storyFormInput?.storyImage ? "pointer" : "not-allowed",
                 }}
               >
                 Share Story

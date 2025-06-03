@@ -69,13 +69,10 @@ export default function PostFormModal({
 
     const formData = new FormData();
     formData.append("group_id", group_id);
-
     formData.append("title", postFormInput.title);
     formData.append("content", postFormInput.content);
     formData.append("privacy", postFormInput.privacy);
-
     formData.append("category", postFormInput.categoryId.toString());
-
     if (postFormInput.postImage) {
       formData.append("postImage", postFormInput.postImage);
     }

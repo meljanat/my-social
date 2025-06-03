@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	structs "social-network/data"
 )
 
@@ -46,7 +45,6 @@ func GetProfileInfo(user_id int64, following []structs.User) (structs.User, erro
 		if err != nil {
 			return user, err
 		}
-		fmt.Println("following", user.Stories)
 	}
 	return user, err
 }

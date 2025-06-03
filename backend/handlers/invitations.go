@@ -179,7 +179,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		isMember, err := database.IsMemberGroup(invitation.Group, user.ID)
+		isMember, err := database.IsMemberGroup(user.ID, invitation.Group)
 		if err != nil {
 			fmt.Println("Failed to check if user is member", err)
 			response := map[string]string{"error": "Failed to check if user is member"}

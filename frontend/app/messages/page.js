@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import "../../styles/MessagesPage.css";
 import { addToListeners, removeFromListeners } from "../websocket/ws.js";
 import { websocket } from "../websocket/ws.js";
@@ -65,8 +66,8 @@ const UserCard = ({ user, isActive, onClick }) => {
             {user.username
               ? `@${user.username}`
               : user.total_members
-              ? `(${user.total_members}) Members`
-              : ""}
+                ? `(${user.total_members}) Members`
+                : ""}
           </p>
         </div>
         {user.message && user.message.total_messages > 0 ? (
@@ -98,6 +99,18 @@ export default function MessagesPage() {
   const conversationRef = useRef(null);
   const usersListRef = useRef(null);
   const sidebarRef = useRef(null);
+  const router = useRouter();
+
+  const handleSeeProfile = () => {
+  if (!selectedUser) return;
+
+  if (selectedUser.user_id) {
+    router.push(`/profile/${selectedUser.user_id}`);
+  }
+  else if (selectedUser.group_id) {
+    router.push(`/group/${selectedUser.group_id}`);
+  }
+};
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -275,15 +288,15 @@ export default function MessagesPage() {
 
     const mssg = selectedUser.group_id
       ? {
-          type: "message",
-          group_id: selectedUser.group_id,
-          content: newMessage,
-        }
+        type: "message",
+        group_id: selectedUser.group_id,
+        content: newMessage,
+      }
       : {
-          type: "message",
-          user_id: selectedUser.user_id,
-          content: newMessage,
-        };
+        type: "message",
+        user_id: selectedUser.user_id,
+        content: newMessage,
+      };
 
     // setMessages(messages ? [...messages, message] : [message]);
     websocket.send(JSON.stringify(mssg));
@@ -304,17 +317,15 @@ export default function MessagesPage() {
 
           <div className="messages-tabs">
             <button
-              className={`tab-button ${
-                activeTab === "friends" ? "active-tab" : ""
-              }`}
+              className={`tab-button ${activeTab === "friends" ? "active-tab" : ""
+                }`}
               onClick={() => setActiveTab("friends")}
             >
               Friends
             </button>
             <button
-              className={`tab-button ${
-                activeTab === "groups" ? "active-tab" : ""
-              }`}
+              className={`tab-button ${activeTab === "groups" ? "active-tab" : ""
+                }`}
               onClick={() => setActiveTab("groups")}
             >
               Groups
@@ -339,21 +350,21 @@ export default function MessagesPage() {
               {activeTab === "friends"
                 ? users
                   ? users.map((user) => (
-                      <UserCard
-                        key={user.user_id}
-                        user={user}
-                        isActive={
-                          selectedUser && selectedUser.user_id === user.user_id
-                        }
-                        onClick={() => {
-                          handleUserSelect(user);
-                          user.total_messages = 0;
-                        }}
-                      />
-                    ))
+                    <UserCard
+                      key={user.user_id}
+                      user={user}
+                      isActive={
+                        selectedUser && selectedUser.user_id === user.user_id
+                      }
+                      onClick={() => {
+                        handleUserSelect(user);
+                        user.total_messages = 0;
+                      }}
+                    />
+                  ))
                   : ""
                 : groups
-                ? groups.map((group) => (
+                  ? groups.map((group) => (
                     <UserCard
                       key={group.group_id}
                       user={group}
@@ -363,7 +374,7 @@ export default function MessagesPage() {
                       onClick={() => handleUserSelect(group)}
                     />
                   ))
-                : ""}
+                  : ""}
             </ul>
           </div>
         </div>
@@ -387,13 +398,12 @@ export default function MessagesPage() {
                     {selectedUser.username && (
                       <p className="conversation-user-status">
                         <span
-                          className={`status-dot ${
-                            selectedUser.user_id
+                          className={`status-dot ${selectedUser.user_id
                               ? onlineUsers[selectedUser.user_id]
                                 ? "online"
                                 : "offline"
                               : "offline"
-                          }`}
+                            }`}
                         ></span>
                         {selectedUser.user_id
                           ? onlineUsers[selectedUser.user_id]
@@ -405,7 +415,10 @@ export default function MessagesPage() {
                   </div>
                 </div>
                 <div className="conversation-actions">
-                  <button className="action-button">
+                  <button
+                    className="action-button"
+                    onClick={handleSeeProfile}
+                  >
                     <svg
                       width="20"
                       height="20"
@@ -434,12 +447,12 @@ export default function MessagesPage() {
               >
                 {messages && messages.length > 0
                   ? messages.map((message, index) => (
-                      <Message
-                        key={index}
-                        message={message}
-                        isSent={message.username !== selectedUser.username}
-                      />
-                    ))
+                    <Message
+                      key={index}
+                      message={message}
+                      isSent={message.username !== selectedUser.username}
+                    />
+                  ))
                   : ""}
                 <div ref={messagesEndRef} />
               </div>

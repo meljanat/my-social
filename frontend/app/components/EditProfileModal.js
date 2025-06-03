@@ -29,7 +29,7 @@ export default function EditProfileModal({ user, onClose, onSave }) {
     setError(null);
 
     const UpdateData = new FormData();
-    UpdateData.append("id", formData.user_id);
+    UpdateData.append("id", formData.id);
     UpdateData.append("username", formData.username);
     UpdateData.append("privacy", formData.privacy);
     UpdateData.append("aboutMe", formData.bio);

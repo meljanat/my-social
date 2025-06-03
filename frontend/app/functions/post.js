@@ -1,4 +1,4 @@
-async function handleLike(postId) {
+async function handleLike(postId, setPosts) {
   try {
     const response = await fetch("http://localhost:8404/like", {
       method: "POST",

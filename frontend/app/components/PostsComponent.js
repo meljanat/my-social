@@ -1,7 +1,8 @@
 import "../styles/ProfilePage.css";
 import { handleLike } from "../functions/post";
 
-export default function PostsComponent({ post}) {
+export default function PostsComponent({ post, setPosts}) {
+
 
   return (
     <div key={post.id} className="post-card-modern">
@@ -53,7 +54,7 @@ export default function PostsComponent({ post}) {
 
       <div className="post-card-footer">
         <div className="post-engagement">
-          <div className="post-stat" onClick={() => handleLike(post.post_id)}>
+          <div className="post-stat" onClick={() => handleLike(post.post_id, setPosts)}>
             <img src="/icons/like.svg" alt="Like" />
             <span>{post.total_likes}</span>
           </div>

@@ -44,6 +44,7 @@ export default function ProfilePage() {
       ...updatedData,
     });
   };
+
   async function handleFollow(user_id) {
     console.log(`Following user Id: ${user_id}`);
     try {
@@ -52,19 +53,69 @@ export default function ProfilePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(parseInt(user_id)),
+        body: JSON.stringify({
+          user_id: parseInt(user_id)
+        }),
         credentials: "include",
       });
 
       if (response.ok) {
-        console.log("Followed successfully");
+        const data = await response.json();
+        const actionType = data;
+        const type = document.querySelector(".request-cancel-btn")?.textContent;
+
+        setUserData(prev => {
+          let newFollowers = prev.total_followers;
+
+          if (actionType === "follow") {
+            newFollowers -= 1;
+          } else if (actionType === "unfollow" && type !== "Pending") {
+            newFollowers += 1;
+          }
+
+          return {
+            ...prev,
+            type: actionType,
+            total_followers: newFollowers
+          };
+        });
+
+      //   setUserData((prev) => {
+      //   let newFollowers = prev.total_followers;
+      //   let isFollowing = prev.is_following;
+      //   let isPending = prev.is_pending;
+
+      //   if (actionType === "follow") {
+      //     isFollowing = true;
+      //     isPending = false;
+      //     newFollowers += 1;
+      //   } else if (actionType === "unfollow") {
+      //     isFollowing = false;
+      //     isPending = false;
+      //     newFollowers -= 1;
+      //   } else if (actionType === "cancel") {
+      //     isPending = false;
+      //   }
+
+      //   return {
+      //     ...prev,
+      //     type: actionType,
+      //     is_following: isFollowing,
+      //     is_pending: isPending,
+      //     total_followers: newFollowers,
+      //   };
+      // });
+
+        console.log("Follow action successful:", actionType);
       }
-      const data = await response.json();
-      console.log("Followed user:", data);
+
+      fetchUserPosts();
+
     } catch (error) {
       console.error("Error following user:", error);
     }
   }
+
   async function fetchSavedPosts(type) {
     try {
       const response = await fetch(
@@ -82,7 +133,7 @@ export default function ProfilePage() {
         const data = await response.json();
         console.log("saved posts data", data);
         setIsLoadingSavedPosts(false);
-        setSavedPosts(data || []);
+        setSavedPostsis_follower(data || []);
       } else {
         console.error("Failed to fetch saved posts");
       }
@@ -461,9 +512,8 @@ export default function ProfilePage() {
                     <span className="status-offline">Offline</span>
                   )}
                 </div>
-                <h1 className="profile-name">{`${userData.first_name || ""} ${
-                  userData.last_name || ""
-                }`}</h1>
+                <h1 className="profile-name">{`${userData.first_name || ""} ${userData.last_name || ""
+                  }`}</h1>
                 <p className="profile-username">
                   @{userData.username || "username"}
                   {userData.privacy === "private" && (
@@ -528,37 +578,20 @@ export default function ProfilePage() {
                   <button
                     className={
                       userData.is_following
-                        ? "unfollow-btn"
+                        ? "unfollow-btn" 
                         : userData.is_pending
-                        ? "request-cancel-btn"
-                        : "follow-btn"
+                          ? "request-cancel-btn"
+                          : "follow-btn"
                     }
-                    onClick={() => {
-                      handleFollow(id);
-
-                      console.log("Follow");
-                    }}
+                    onClick={() => handleFollow(id)}
                   >
-                    {/* <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      width="18"
-                      height="18"
-                      fill="currentColor"
-                    >
-                      <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                    </svg> */}
-                    {userData.is_follower && !userData.is_following
-                      ? "Follow Back"
-                      : userData.is_following
+                    {userData.is_following
                       ? "Unfollow"
-                      : userData.pending
-                      ? "Pending"
                       : userData.is_pending
-                      ? "Pending"
-                      : "Follow"}
-                    {/* Follow */}
+                        ? "Pending"
+                        : "Follow"}
                   </button>
+
                 )}
               </div>
             </div>
@@ -615,26 +648,23 @@ export default function ProfilePage() {
               About
             </button>
             <button
-              className={`tab-button ${
-                activeTab === "followers" ? "active" : ""
-              }`}
+              className={`tab-button ${activeTab === "followers" ? "active" : ""
+                }`}
               onClick={() => handleTabChange("followers")}
             >
               Followers
             </button>
             <button
-              className={`tab-button ${
-                activeTab === "following" ? "active" : ""
-              }`}
+              className={`tab-button ${activeTab === "following" ? "active" : ""
+                }`}
               onClick={() => handleTabChange("following")}
             >
               Following
             </button>
             {isOwnProfile && (
               <button
-                className={`tab-button ${
-                  activeTab === "saved" ? "active" : ""
-                }`}
+                className={`tab-button ${activeTab === "saved" ? "active" : ""
+                  }`}
                 onClick={() => handleTabChange("saved")}
               >
                 Saved Posts
@@ -652,7 +682,7 @@ export default function ProfilePage() {
               ) : userPosts && userPosts.length > 0 ? (
                 <div className="posts-modern-layout">
                   {userPosts.map((post) => (
-                    <PostsComponent key={post.post_id} post={post} />
+                    <PostsComponent key={post.post_id} post={post} setPosts={setUserPosts} />
                   ))}
                 </div>
               ) : (
@@ -672,9 +702,8 @@ export default function ProfilePage() {
                   <div className="about-item-content">
                     <div className="info-row">
                       <span className="info-label">Full Name</span>
-                      <span className="info-value">{`${
-                        userData.first_name || ""
-                      } ${userData.last_name || ""}`}</span>
+                      <span className="info-value">{`${userData.first_name || ""
+                        } ${userData.last_name || ""}`}</span>
                     </div>
                     <div className="info-row">
                       <span className="info-label">Username</span>
@@ -705,7 +734,7 @@ export default function ProfilePage() {
                       <span className="info-value">
                         {userData.privacy
                           ? userData.privacy.charAt(0).toUpperCase() +
-                            userData.privacy.slice(1)
+                          userData.privacy.slice(1)
                           : "Public"}
                       </span>
                     </div>
@@ -765,9 +794,8 @@ export default function ProfilePage() {
               <div className="saved-content-container">
                 <div className="saved-tabs">
                   <button
-                    className={`saved-tab-button ${
-                      activeSubTab === "posts" ? "active" : ""
-                    }`}
+                    className={`saved-tab-button ${activeSubTab === "posts" ? "active" : ""
+                      }`}
                     onClick={() => {
                       fetchSavedPosts("post");
 
@@ -777,9 +805,8 @@ export default function ProfilePage() {
                     Saved Posts
                   </button>
                   <button
-                    className={`saved-tab-button ${
-                      activeSubTab === "group-posts" ? "active" : ""
-                    }`}
+                    className={`saved-tab-button ${activeSubTab === "group-posts" ? "active" : ""
+                      }`}
                     onClick={() => {
                       fetchSavedPosts("group");
                       setActiveSubTab("group-posts");
@@ -798,7 +825,7 @@ export default function ProfilePage() {
                   ) : savedPosts.length > 0 ? (
                     <div className="posts-container">
                       {savedPosts.map((post) => (
-                        <PostsComponent key={post.post_id} post={post} />
+                        <PostsComponent key={post.post_id} post={post} setPosts={setUserPosts} />
                       ))}
                     </div>
                   ) : (
@@ -992,5 +1019,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-// /////////////////////////////////////////////////////////////////////////////////////////

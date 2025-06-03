@@ -1,22 +1,12 @@
 // pages/post/[id].js
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import "../styles/PostPage.css";
 
 export default function PostPage() {
-  //   const router = useRouter();
-  let { id, group_id } = useParams();
-  const post_id = parseInt(id);
-  group_id = parseInt(group_id);
-  // const router = useRouter();
-  // const { id, group_id } = router.query;
-  const router = useRouter();
-
-  const goToHome = () => {
-    router.push("/");
-  };
+  const searchParams = useSearchParams();
+  const post_id = searchParams.get("id");
 
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -28,12 +18,6 @@ export default function PostPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [posts, setPosts] = useState([]);
   const [postSaved, setPostSaved] = useState();
-
-  // const [commentText, setCommentText] = useState("");
-  // const [imageFile, setImageFile] = useState(null);
-
-  const params = useParams();
-  const postId = params.id;
 
   async function handleSave() {
     try {
@@ -62,13 +46,11 @@ export default function PostPage() {
     }
   }
   useEffect(() => {
-    if (!id) return;
-
     const fetchPost = async () => {
       setIsLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:8404/post?post_id=${id}&offset=0`,
+          `http://localhost:8404/post?post_id=${post_id}&offset=0`,
           {
             method: "GET",
             credentials: "include",
@@ -81,11 +63,6 @@ export default function PostPage() {
 
         const data = await response.json();
         setPost(data);
-        console.log(data);
-        if (post) {
-          console.log(data);
-        }
-
         setComments(data.comments || []);
       } catch (err) {
         console.log("Error fetching post:", err);
@@ -95,15 +72,15 @@ export default function PostPage() {
       }
     };
 
-    fetchPost();
-  }, [id]);
+    fetchPost(post_id);
+  }, []);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
     const formData = new FormData();
-    formData.append("post_id", postId);
+    formData.append("post_id", post_id);
 
     formData.append("content", newComment);
     if (groupImage) {
@@ -381,12 +358,12 @@ export default function PostPage() {
                     <div key={key} className="comment-item">
                       <div className="comment-header">
                         <img
-                          src={comment.user.avatar}
-                          alt={comment.user.username}
+                          src={comment.avatar}
+                          alt={comment.username}
                           className="comment-avatar"
                         />
                         <div className="comment-author-info">
-                          <h4 className="comment-author">{comment.user.username}</h4>
+                          <h4 className="comment-author">{comment.username}</h4>
                           <p className="comment-time">{comment.created_at}</p>
                         </div>
                       </div>

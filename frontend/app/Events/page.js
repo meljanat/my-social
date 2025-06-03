@@ -30,7 +30,7 @@ export default function EventsPage() {
       if (response.ok) {
         const data = await response.json();
         console.log(data);
-        
+
         if (offset === 0) {
           setEvents(data);
         } else {
@@ -132,6 +132,37 @@ export default function EventsPage() {
       </div>
     );
   }
+
+  const handleInterestedClick = async (eventId, groupId) => {
+    console.log(groupId, eventId);
+    
+    try {
+      const response = await fetch("http://localhost:8404/join_to_event", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          group_id: groupId,
+          event_id: eventId,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed");
+
+      setEvents((prev) =>
+        prev.map((e) =>
+          e.event_id === eventId ? { ...e, is_attending: !e.is_attending } : e
+        )
+      );
+    } catch (err) {
+      console.error("Error joining/leaving event:", err.message);
+    }
+  };
+  console.log(events);
+  
 
   return (
     <div className="events-page-container">
@@ -306,10 +337,20 @@ export default function EventsPage() {
                           Attending
                         </button>
                       ) : (
-                        <button className="event-action-btn">Interested</button>
+                        <button
+                          className={`event-action-btn ${event.is_attending ? "attending" : ""}`}
+                          onClick={() => handleInterestedClick(event.event_id, event.group.group_id)}
+                        >
+                          {event.is_attending ? "Attending" : "Interested"}
+                        </button>
+
+
                       )}
 
-                      <button className="event-details-btn">
+                      <button
+                        className="event-details-btn"
+                        onClick={() => router.push(`/event/${event.event_id}`)}
+                      >
                         View Details
                       </button>
                     </div>

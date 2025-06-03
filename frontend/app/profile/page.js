@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import PostsComponent from "@/app/components/PostsComponent";
 import EditProfileModal from "@/app/components/EditProfileModal";
 
@@ -11,7 +11,6 @@ export default function ProfilePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isFollowing, setIsFollowing] = useState();
   const [isLoading, setIsLoading] = useState(true);
-  const { id } = useParams();
   const [showEditModal, setShowEditModal] = useState(false);
   const [savedPosts, setSavedPosts] = useState([]);
   const [isLoadingSavedPosts, setIsLoadingSavedPosts] = useState(false);
@@ -33,6 +32,8 @@ export default function ProfilePage() {
     useState(false);
   const [activeTab, setActiveTab] = useState("posts");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
   console.log("Welcome:", id);
 
   function togglePicPreview(type = null) {
@@ -54,7 +55,7 @@ export default function ProfilePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: parseInt(user_id)
+          user_id: parseInt(user_id),
         }),
         credentials: "include",
       });
@@ -64,7 +65,7 @@ export default function ProfilePage() {
         const actionType = data;
         const type = document.querySelector(".request-cancel-btn")?.textContent;
 
-        setUserData(prev => {
+        setUserData((prev) => {
           let newFollowers = prev.total_followers;
 
           if (actionType === "follow") {
@@ -76,41 +77,40 @@ export default function ProfilePage() {
           return {
             ...prev,
             type: actionType,
-            total_followers: newFollowers
+            total_followers: newFollowers,
           };
         });
 
-      //   setUserData((prev) => {
-      //   let newFollowers = prev.total_followers;
-      //   let isFollowing = prev.is_following;
-      //   let isPending = prev.is_pending;
+        //   setUserData((prev) => {
+        //   let newFollowers = prev.total_followers;
+        //   let isFollowing = prev.is_following;
+        //   let isPending = prev.is_pending;
 
-      //   if (actionType === "follow") {
-      //     isFollowing = true;
-      //     isPending = false;
-      //     newFollowers += 1;
-      //   } else if (actionType === "unfollow") {
-      //     isFollowing = false;
-      //     isPending = false;
-      //     newFollowers -= 1;
-      //   } else if (actionType === "cancel") {
-      //     isPending = false;
-      //   }
+        //   if (actionType === "follow") {
+        //     isFollowing = true;
+        //     isPending = false;
+        //     newFollowers += 1;
+        //   } else if (actionType === "unfollow") {
+        //     isFollowing = false;
+        //     isPending = false;
+        //     newFollowers -= 1;
+        //   } else if (actionType === "cancel") {
+        //     isPending = false;
+        //   }
 
-      //   return {
-      //     ...prev,
-      //     type: actionType,
-      //     is_following: isFollowing,
-      //     is_pending: isPending,
-      //     total_followers: newFollowers,
-      //   };
-      // });
+        //   return {
+        //     ...prev,
+        //     type: actionType,
+        //     is_following: isFollowing,
+        //     is_pending: isPending,
+        //     total_followers: newFollowers,
+        //   };
+        // });
 
         console.log("Follow action successful:", actionType);
       }
 
       fetchUserPosts();
-
     } catch (error) {
       console.error("Error following user:", error);
     }
@@ -432,7 +432,6 @@ export default function ProfilePage() {
   return (
     <div className="app-container">
       <div className="profile-container">
-
         <div className="profile-header">
           {picturePreview && (
             <div
@@ -512,8 +511,9 @@ export default function ProfilePage() {
                     <span className="status-offline">Offline</span>
                   )}
                 </div>
-                <h1 className="profile-name">{`${userData.first_name || ""} ${userData.last_name || ""
-                  }`}</h1>
+                <h1 className="profile-name">{`${userData.first_name || ""} ${
+                  userData.last_name || ""
+                }`}</h1>
                 <p className="profile-username">
                   @{userData.username || "username"}
                   {userData.privacy === "private" && (
@@ -578,20 +578,19 @@ export default function ProfilePage() {
                   <button
                     className={
                       userData.is_following
-                        ? "unfollow-btn" 
+                        ? "unfollow-btn"
                         : userData.is_pending
-                          ? "request-cancel-btn"
-                          : "follow-btn"
+                        ? "request-cancel-btn"
+                        : "follow-btn"
                     }
                     onClick={() => handleFollow(id)}
                   >
                     {userData.is_following
                       ? "Unfollow"
                       : userData.is_pending
-                        ? "Pending"
-                        : "Follow"}
+                      ? "Pending"
+                      : "Follow"}
                   </button>
-
                 )}
               </div>
             </div>
@@ -648,23 +647,26 @@ export default function ProfilePage() {
               About
             </button>
             <button
-              className={`tab-button ${activeTab === "followers" ? "active" : ""
-                }`}
+              className={`tab-button ${
+                activeTab === "followers" ? "active" : ""
+              }`}
               onClick={() => handleTabChange("followers")}
             >
               Followers
             </button>
             <button
-              className={`tab-button ${activeTab === "following" ? "active" : ""
-                }`}
+              className={`tab-button ${
+                activeTab === "following" ? "active" : ""
+              }`}
               onClick={() => handleTabChange("following")}
             >
               Following
             </button>
             {isOwnProfile && (
               <button
-                className={`tab-button ${activeTab === "saved" ? "active" : ""
-                  }`}
+                className={`tab-button ${
+                  activeTab === "saved" ? "active" : ""
+                }`}
                 onClick={() => handleTabChange("saved")}
               >
                 Saved Posts
@@ -682,7 +684,11 @@ export default function ProfilePage() {
               ) : userPosts && userPosts.length > 0 ? (
                 <div className="posts-modern-layout">
                   {userPosts.map((post) => (
-                    <PostsComponent key={post.post_id} post={post} setPosts={setUserPosts} />
+                    <PostsComponent
+                      key={post.post_id}
+                      post={post}
+                      setPosts={setUserPosts}
+                    />
                   ))}
                 </div>
               ) : (
@@ -702,8 +708,9 @@ export default function ProfilePage() {
                   <div className="about-item-content">
                     <div className="info-row">
                       <span className="info-label">Full Name</span>
-                      <span className="info-value">{`${userData.first_name || ""
-                        } ${userData.last_name || ""}`}</span>
+                      <span className="info-value">{`${
+                        userData.first_name || ""
+                      } ${userData.last_name || ""}`}</span>
                     </div>
                     <div className="info-row">
                       <span className="info-label">Username</span>
@@ -734,7 +741,7 @@ export default function ProfilePage() {
                       <span className="info-value">
                         {userData.privacy
                           ? userData.privacy.charAt(0).toUpperCase() +
-                          userData.privacy.slice(1)
+                            userData.privacy.slice(1)
                           : "Public"}
                       </span>
                     </div>
@@ -794,8 +801,9 @@ export default function ProfilePage() {
               <div className="saved-content-container">
                 <div className="saved-tabs">
                   <button
-                    className={`saved-tab-button ${activeSubTab === "posts" ? "active" : ""
-                      }`}
+                    className={`saved-tab-button ${
+                      activeSubTab === "posts" ? "active" : ""
+                    }`}
                     onClick={() => {
                       fetchSavedPosts("post");
 
@@ -805,8 +813,9 @@ export default function ProfilePage() {
                     Saved Posts
                   </button>
                   <button
-                    className={`saved-tab-button ${activeSubTab === "group-posts" ? "active" : ""
-                      }`}
+                    className={`saved-tab-button ${
+                      activeSubTab === "group-posts" ? "active" : ""
+                    }`}
                     onClick={() => {
                       fetchSavedPosts("group");
                       setActiveSubTab("group-posts");
@@ -825,7 +834,11 @@ export default function ProfilePage() {
                   ) : savedPosts.length > 0 ? (
                     <div className="posts-container">
                       {savedPosts.map((post) => (
-                        <PostsComponent key={post.post_id} post={post} setPosts={setUserPosts} />
+                        <PostsComponent
+                          key={post.post_id}
+                          post={post}
+                          setPosts={setUserPosts}
+                        />
                       ))}
                     </div>
                   ) : (

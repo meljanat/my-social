@@ -2,10 +2,9 @@ import { useRouter } from 'next/navigation';
 
 export default function SuggestionCard({ suggestion }) {
     const router = useRouter();
-    console.log("suggestion", suggestion);
     
-
     const handleClick = () => {
+        console.log("suggestion", suggestion.user_id);
         if (suggestion.username) {
             router.push(`/profile?id=${suggestion.user_id}`);
         } else if (suggestion.group_id) {

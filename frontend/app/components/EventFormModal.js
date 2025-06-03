@@ -68,25 +68,27 @@ export default function EventFormModal({
       }
 
       const responseData = await response.json();
+      console.log(responseData);
+      
 
-      //   const newEvent = {
-      //     id: responseData.id || Date.now(),
-      //     name: eventFormInput.name,
-      //     description: eventFormInput.description,
-      //     start_date: eventFormInput.start_date,
-      //     end_date: eventFormInput.end_date,
-      //     location: eventFormInput.location,
-      //     creator: `${user.first_name} ${user.last_name}`,
-      //     creator_id: user.id,
-      //     created_at: "Just now",
-      //     image: eventFormInput.eventImage
-      //       ? URL.createObjectURL(eventFormInput.eventImage)
-      //       : null,
-      //   };
+        const newEvent = {
+          event_id: responseData.id || Date.now(),
+          name: eventFormInput.name,
+          description: eventFormInput.description,
+          start_date: eventFormInput.start_date,
+          end_date: eventFormInput.end_date,
+          location: eventFormInput.location,
+          creator: `${user.first_name} ${user.last_name}`,
+          creator_id: user.id,
+          created_at: "Just now",
+          image: eventFormInput.eventImage
+            ? URL.createObjectURL(eventFormInput.eventImage)
+            : null,
+        };
 
-      //   if (onEventCreated) {
-      //     onEventCreated(newEvent);
-      //   }
+        if (onEventCreated) {
+          onEventCreated(newEvent);
+        }
 
       onClose();
     } catch (error) {

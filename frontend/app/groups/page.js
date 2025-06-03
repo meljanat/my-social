@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef } from "react";
 // import { useRouter } from "next/navigation";
 
 import Navbar from "../components/NavBar";
@@ -14,11 +14,17 @@ import PostsComponent from "../components/PostsComponent";
 import EventFormModal from "../components/EventFormModal";
 import PendingGroupRequestCard from "../components/PendingCard";
 import GroupFormModal from "../components/GroupFromModal";
-// import { leaveGroup } from "../functions/group";
+import { leaveGroup } from "../functions/group";
 import RemoveGroupModal from "../components/RemoveGroupModal";
 import InvitationsModal from "../components/InvitationsModal";
 import InviteUsersModal from "../components/UsersToInviteModal";
-import {handleFollow, handelAccept, handleReject, handelAcceptOtherGroup, handleRejectOtherGroup} from "../functions/user";
+import {
+  handleFollow,
+  handelAccept,
+  handleReject,
+  handelAcceptOtherGroup,
+  handleRejectOtherGroup
+} from "../functions/user";
 
 function removeGroup(group_id, user_id) {
   leaveGroup(group_id, user_id);
@@ -45,98 +51,6 @@ async function sendInvitation(userId, groupId) {
     console.log(err);
   }
 }
-// function handleEventSelect(event) {
-//   console.log("Interested: ", event);
-// }
-// const router = useRouter();
-
-// const goToHome = () => {
-//   router.push("/");
-// };
-
-//   return (
-//     <div className="event-card">
-//       <div className="event-date">
-//         <span className="event-month">
-//           {new Date(event.start_date).toLocaleString("default", {
-//             month: "short",
-//           })}
-//         </span>
-//         <span className="event-day">
-//           {new Date(event.start_date).getDate()}
-//         </span>
-//       </div>
-//       <div className="event-details">
-//         <h3>{event.title}</h3>
-//         <p className="event-location">
-//           <svg
-//             width="16"
-//             height="16"
-//             viewBox="0 0 24 24"
-//             fill="none"
-//             xmlns="http://www.w3.org/2000/svg"
-//           >
-//             <path
-//               d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"
-//               stroke="currentColor"
-//               strokeWidth="2"
-//               strokeLinecap="round"
-//               strokeLinejoin="round"
-//             />
-//             <circle
-//               cx="12"
-//               cy="10"
-//               r="3"
-//               stinroke="currentColor"
-//               strokeWidth="2"
-//               strokeLinecap="round"
-//               strokeLinejoin="round"
-//             />
-//           </svg>
-//           {event.location}
-//         </p>
-//         <p className="event-time">
-//           <svg
-//             width="16"
-//             height="16"
-//             viewBox="0 0 24 24"
-//             fill="none"
-//             xmlns="http://www.w3.org/2000/svg"
-//           >
-//             <circle
-//               cx="12"
-//               cy="12"
-//               r="10"
-//               stroke="currentColor"
-//               strokeWidth="2"
-//               strokeLinecap="round"
-//               strokeLinejoin="round"
-//             />
-//             <path
-//               d="M12 6v6l4 2"
-//               stroke="currentColor"
-//               strokeWidth="2"
-//               strokeLinecap="round"
-//               strokeLinejoin="round"
-//             />
-//           </svg>
-//           {new Date(event.start_date).toLocaleTimeString([], {
-//             hour: "2-digit",
-//             minute: "2-digit",
-//           })}{" "}
-//           -
-//           {new Date(event.end_date).toLocaleTimeString([], {
-//             hour: "2-digit",
-//             minute: "2-digit",
-//           })}
-//         </p>
-//         <button className="event-action-btn" onClick={handleEventSelect(event)}>
-//           Interested
-//         </button>
-//       </div>
-//     </div>
-//   );
-// };
 
 const Message = ({ message, isSent }) => {
   return (
@@ -158,32 +72,7 @@ const Message = ({ message, isSent }) => {
 };
 
 export default function GroupsPage() {
-  function handleCreatePost() {
-    setShowPostForm(true);
-  }
-
-  async function InvitUsers(group_id) {
-    try {
-      const response = await fetch(
-        `http://localhost:8404/add_members?group_id=${group_id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch group data");
-      }
-      const data = await response.json();
-      setUsersToInvite(data);
-      console.log(`Group Members Data:`, data);
-    } catch (err) {
-      console.log(err);
-    }
-  }
+  // State declarations
   const [activeTab, setActiveTab] = useState("discover");
   const [groupData, setGroupData] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -211,23 +100,17 @@ export default function GroupsPage() {
   const [showInvitationsModal, setShowInvitationsModal] = useState(false);
   const [showUsersToInviteModal, setShowUsersToInviteModal] = useState(false);
   const [usersToInvite, setUsersToInvite] = useState([]);
-  const [groups, setGroups] = useState([]);
-
-  const [eventName, setEventName] = useState("");
-  const [eventDescription, setEventDescription] = useState("");
-  const [eventLocation, setEventLocation] = useState("");
-  const [eventStartDate, setEventStartDate] = useState("");
-  const [eventEndDate, setEventEndDate] = useState("");
-  const [eventImage, setEventImage] = useState(null);
-  const [eventTitle, setEventTitle] = useState("");
   const [showGroupForm, setShowGroupForm] = useState(false);
-
-  const [eventDate, setEventDate] = useState("");
+  const [groups, setGroups] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [invitations, setInvitations] = useState([]);
 
-  // const [showPostForm, setShowPostForm] = useState(false);
-  // const [showEventForm, setShowEventForm] = useState(false)
+  // Handler functions
+  function handleCreatePost() {
+    setShowPostForm(true);
+  }
 
   function handleCreateGroup() {
     setShowGroupForm(true);
@@ -237,46 +120,40 @@ export default function GroupsPage() {
     setMyGroups([newGroup, ...myGroups]);
     setShowGroupForm(false);
   }
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data === true) {
-            setIsLoggedIn(true);
-          } else {
-            setIsLoggedIn(false);
-          }
-        }
-      } catch (error) {
-        setError(true);
-        console.error("Error checking login status:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLoginStatus();
-  }, []);
 
   const addNewPost = (newPost) => {
     setPosts((prevPosts) => [newPost, ...prevPosts]);
   };
 
+  async function InvitUsers(group_id) {
+    try {
+      const response = await fetch(
+        `http://localhost:8404/add_members?group_id=${group_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch group data");
+      }
+      const data = await response.json();
+      setUsersToInvite(data);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   async function fetchGroupDetails(type, groupId) {
     try {
+      console.log(`Fetching group details for group ID: ${groupId}`, type);
+
       setIsLoading(true);
       const response = await fetch(
         `http://localhost:8404/group_details?group_id=${groupId}&type=${type}&offset=0`,
-
         {
           method: "GET",
           credentials: "include",
@@ -287,15 +164,23 @@ export default function GroupsPage() {
       }
       const data = await response.json();
       console.log(`Group ${type} Data:`, data);
-      setSelectedGroup((prev) => ({
-        ...prev,
 
-        [type]: data,
-      }));
+      if (type === "posts") {
+        setPosts(data);
+        setSelectedGroup(prev => ({ ...prev, posts: data }));
+      } else if (type === "events") {
+        setEvents(data);
+        setSelectedGroup(prev => ({ ...prev, events: data }));
+      } else if (type === "members") {
+        setMembers(data);
+        setSelectedGroup(prev => ({ ...prev, members: data }));
+      } else if (type === "invitations") {
+        setInvitations(data);
+        setSelectedGroup(prev => ({ ...prev, invitations: data }));
+      }
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching group data:", error);
-      // setSelectedGroup([]);
       setIsLoading(false);
     }
   }
@@ -318,7 +203,6 @@ export default function GroupsPage() {
         setMyGroups(data);
       }
       setGroupData(data);
-      console.log(`Data:`, data);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching group data:", error);
@@ -326,6 +210,7 @@ export default function GroupsPage() {
       setIsLoading(false);
     }
   }
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
 
@@ -384,10 +269,6 @@ export default function GroupsPage() {
       const selected = {
         ...data,
         id: data.group_id,
-        // posts: data.Posts || [],
-        // events: data.Events || [],
-        // members: data.Members || [],
-        // invitations: data.Invitations || [],
         cover: data.cover,
         created_at: data.created_at,
         image: data.image,
@@ -397,21 +278,10 @@ export default function GroupsPage() {
 
       setSelectedGroup(selected);
       fetchGroupDetails("posts", group.group_id);
-
-      // console.log("Selected Group: ", selected);
-      // console.log("Selected Group ID: ", selected.id);
-
-      // setShowPostForm(false);
-      // setShowEventForm(false);
-
-      // console.log("Group Data: ", selected);
     } catch (error) {
       console.error("Error fetching group details:", error);
     }
   };
-  useEffect(() => {
-    fetchGroupData("suggested");
-  }, []);
 
   const handlePostSubmit = async (groupId) => {
     console.log(groupId);
@@ -453,22 +323,10 @@ export default function GroupsPage() {
       }
       console.log("Post created:", data);
 
-      // setSelectedGroup((prev) => ({
-      //   ...prev,
-      //   posts: [...prev.posts, data],
-      // }));
-
-      // setSelectedGroup((prev) => ({
-      //   ...prev,
-      //   posts: [...(prev.posts || []), data],
-      // }));
-
       setSelectedGroup((prev) => {
         const updatedPosts = [...(prev.posts || []), data];
-
         console.log("Before update:", prev.posts);
         console.log("Updated posts:", updatedPosts);
-
         return {
           ...prev,
           posts: updatedPosts,
@@ -489,6 +347,14 @@ export default function GroupsPage() {
     return eventDate.toLocaleString();
   }
 
+  // Effect hooks
+  useEffect(() => {
+    fetchGroupData("suggested");
+  }, []);
+
+  console.log(groupView);
+  console.log(members);
+
   return (
     <div className="groups-page-container">
       <div className="groups-page-content">
@@ -503,6 +369,7 @@ export default function GroupsPage() {
             />
           </div>
         )}
+
         {showUsersToInviteModal && (
           <div className="modal-overlay">
             <InviteUsersModal
@@ -513,6 +380,7 @@ export default function GroupsPage() {
             />
           </div>
         )}
+
         {!selectedGroup ? (
           <div>
             <div className="groups-header">
@@ -521,43 +389,35 @@ export default function GroupsPage() {
                 + Create Group
               </button>
             </div>
+
             {showGroupForm && (
               <GroupFormModal
                 onClose={() => setShowGroupForm(false)}
-                // user={homeData.user}
                 onGroupCreated={handleGroupCreated}
               />
             )}
 
             <div className="groups-tabs">
               <button
-                className={`tab-button ${
-                  activeTab === "my-groups" ? "active-tab" : ""
-                }`}
+                className={`tab-button ${activeTab === "my-groups" ? "active-tab" : ""}`}
                 onClick={() => handleTabChange("my-groups")}
               >
                 My Groups
               </button>
               <button
-                className={`tab-button ${
-                  activeTab === "discover" ? "active-tab" : ""
-                }`}
+                className={`tab-button ${activeTab === "discover" ? "active-tab" : ""}`}
                 onClick={() => handleTabChange("discover")}
               >
                 Discover
               </button>
               <button
-                className={`tab-button ${
-                  activeTab === "pending-groups" ? "active-tab" : ""
-                }`}
+                className={`tab-button ${activeTab === "pending-groups" ? "active-tab" : ""}`}
                 onClick={() => handleTabChange("pending-groups")}
               >
                 Pending Groups
               </button>
               <button
-                className={`tab-button ${
-                  activeTab === "invitations" ? "active-tab" : ""
-                }`}
+                className={`tab-button ${activeTab === "invitations" ? "active-tab" : ""}`}
                 onClick={() => handleTabChange("invitations")}
               >
                 Invitations
@@ -580,43 +440,41 @@ export default function GroupsPage() {
                   (invitationsGroups || []).map((invitation) => {
                     console.log("hadi heya", invitation);
 
-                    {
-                      invitation.user.username == invitation.group.admin ? (
-                        <InvitationCard
-                          key={invitation.invitation_id}
-                          invitation={invitation}
-                          onAccept={() => {
-                            handelAcceptOtherGroup(
-                              invitation.user.user_id,
-                              invitation.group.group_id
-                            );
-                          }}
-                          onDecline={() => {
-                            handleRejectOtherGroup(
-                              invitation.user.user_id,
-                              invitation.group.group_id
-                            );
-                          }}
-                        />
-                      ) : (
-                        <InvitationCard
-                          key={invitation.invitation_id}
-                          invitation={invitation}
-                          onAccept={() => {
-                            handelAccept(
-                              invitation.user.user_id,
-                              invitation.group.group_id
-                            );
-                          }}
-                          onDecline={() => {
-                            handleReject(
-                              invitation.user.user_id,
-                              invitation.group.group_id
-                            );
-                          }}
-                        />
-                      );
-                    }
+                    return invitation.user.username === invitation.group.admin ? (
+                      <InvitationCard
+                        key={invitation.invitation_id}
+                        invitation={invitation}
+                        onAccept={() => {
+                          handelAcceptOtherGroup(
+                            invitation.user.user_id,
+                            invitation.group.group_id
+                          );
+                        }}
+                        onDecline={() => {
+                          handleRejectOtherGroup(
+                            invitation.user.user_id,
+                            invitation.group.group_id
+                          );
+                        }}
+                      />
+                    ) : (
+                      <InvitationCard
+                        key={invitation.invitation_id}
+                        invitation={invitation}
+                        onAccept={() => {
+                          handelAccept(
+                            invitation.user.user_id,
+                            invitation.group.group_id
+                          );
+                        }}
+                        onDecline={() => {
+                          handleReject(
+                            invitation.user.user_id,
+                            invitation.group.group_id
+                          );
+                        }}
+                      />
+                    );
                   })
                 ) : (
                   <div className="no-invitations-message">
@@ -663,23 +521,17 @@ export default function GroupsPage() {
                   ))
                 ) : (
                   <div className="no-groups-message">
-                    <p>You haven't joined any groups yet.</p>
+                    <p>No groups available for discovery.</p>
                     <button
-                      className="discover-groups-btn"
-                      onClick={() => handleTabChange("discover")}
+                      className="create-group-btn"
+                      onClick={() => setShowForm(true)}
                     >
-                      Discover Groups
+                      Create a Group
                     </button>
                   </div>
                 )
               ) : (groupData || []).length > 0 ? (
                 (groupData || []).map((group) => (
-                  // <GroupCard
-                  //   key={group.id}
-                  //   group={group}
-                  //   isJoined={false}
-                  //   onClick={() => handleGroupSelect(group)}
-                  // />
                   <PendingGroupRequestCard
                     key={group.group_id}
                     group={group}
@@ -694,19 +546,7 @@ export default function GroupsPage() {
                 ))
               ) : (
                 <div className="no-groups-message">
-                  {activeTab === "discover" ? (
-                    <>
-                      <p>No groups available for discovery.</p>
-                      <button
-                        className="create-group-btn"
-                        onClick={() => setShowForm(true)}
-                      >
-                        Create a Group
-                      </button>
-                    </>
-                  ) : (
-                    <p>No pending group requests.</p>
-                  )}
+                  <p>No pending group requests.</p>
                 </div>
               )}
             </div>
@@ -964,15 +804,13 @@ export default function GroupsPage() {
                     </div>
                   ) : (
                     <button
-                      className={` ${
-                        selectedGroup.role === "member" ||
+                      className={`${selectedGroup.role === "member" ||
                         activeTab === "pending-groups"
-                          ? "leave-group-btn"
-                          : "admin-action-btn"
-                      }`}
+                        ? "leave-group-btn"
+                        : "admin-action-btn"
+                        }`}
                       onClick={() => {
                         console.log(selectedGroup);
-                        
                         handleFollow(selectedGroup.admin_id, selectedGroup.group_id);
                         if (activeTab === "my-groups") {
                           setSelectedGroup(null);
@@ -1012,16 +850,17 @@ export default function GroupsPage() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                      {selectedGroup.role == "member"
+                      {selectedGroup.role === "member"
                         ? "Leave Group"
                         : activeTab === "pending-groups"
-                        ? "Cancel"
-                        : "Join Group"}
+                          ? "Cancel"
+                          : "Join Group"}
                     </button>
                   )}
                 </div>
               </div>
             </div>
+
             {showInvitationsModal && (
               <InvitationsModal
                 invitations={selectedGroup.invitations || []}
@@ -1030,11 +869,10 @@ export default function GroupsPage() {
                 onReject={handleReject}
               />
             )}
+
             <div className="group-detail-tabs">
               <button
-                className={`tab-button ${
-                  groupView === "posts" ? "active-tab" : ""
-                }`}
+                className={`tab-button ${groupView === "posts" ? "active-tab" : ""}`}
                 onClick={() => {
                   fetchGroupDetails("posts", selectedGroup.group_id);
                   setGroupView("posts");
@@ -1043,9 +881,7 @@ export default function GroupsPage() {
                 Posts
               </button>
               <button
-                className={`tab-button ${
-                  groupView === "members" ? "active-tab" : ""
-                }`}
+                className={`tab-button ${groupView === "members" ? "active-tab" : ""}`}
                 onClick={() => {
                   fetchGroupDetails("members", selectedGroup.group_id);
                   setGroupView("members");
@@ -1054,9 +890,7 @@ export default function GroupsPage() {
                 Members
               </button>
               <button
-                className={`tab-button ${
-                  groupView === "events" ? "active-tab" : ""
-                }`}
+                className={`tab-button ${groupView === "events" ? "active-tab" : ""}`}
                 onClick={() => {
                   fetchGroupDetails("events", selectedGroup.group_id);
                   setGroupView("events");
@@ -1066,170 +900,298 @@ export default function GroupsPage() {
               </button>
             </div>
 
-            <div className="profile-actions">
-              {/* <button
-                onClick={handleCreatePost}
-                className="action-btn primary-button"
-              >
-                <img src="/icons/create.svg" alt="" />
-                <span>Create post</span>
-              </button> */}
-            </div>
             <div className="group-detail-content">
               {groupView === "posts" && (
                 <div className="group-posts-container">
                   {selectedGroup.role === "guest" &&
-                  selectedGroup.privacy === "private" ? (
+                    selectedGroup.privacy === "private" ? (
                     <div className="empty-state">
                       <img src="/icons/no-posts.svg" alt="" />
                       <p>You are not allowed to see Posts</p>
                     </div>
                   ) : (
                     <div>
-                      {activeTab === "my-groups" && (
-                        <button
-                          disabled={
-                            selectedGroup.role !== "admin" &&
-                            selectedGroup.role !== "member"
-                          }
-                          onClick={handleCreatePost}
-                          className="create-post-action-btn"
-                        >
-                          <img src="/icons/create.svg" alt="" />
-                          <span>Create post</span>
-                          {/* <span>Create post</span> */}
-                        </button>
-                      )}
-                      {/* )} */}
-
-                      {(selectedGroup.posts || []).length > 0 ? (
-                        (selectedGroup.posts || []).map((post) => (
-                          <PostsComponent
-                            post={post}
-                            key={post.post_id}
-                            groupId={selectedGroup.group_id}
-                          />
-                        ))
-                      ) : (
-                        <div className="empty-state">
-                          <p className="empty-title">No post available</p>
-                          {/* <p className="empty-description">
-                      Create yout first post
-                    </p> */}
+                      {activeTab !== "pending-groups" && (
+                        <div className="create-post-section">
+                          <button
+                            className="create-post-btn"
+                            onClick={handleCreatePost}
+                          >
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M12 5v14M5 12h14"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            Create Post
+                          </button>
                         </div>
                       )}
 
                       {showPostForm && (
                         <PostFormModal
                           onClose={() => setShowPostForm(false)}
-                          // user={user}
-                          onPostCreated={addNewPost}
-                          group_id={selectedGroup.group_id}
+                          onSubmit={handlePostSubmit}
+                          groupId={selectedGroup.group_id}
+                          postTitle={postTitle}
+                          setPostTitle={setPostTitle}
+                          postContent={postContent}
+                          setPostContent={setPostContent}
+                          postCategory={postCategory}
+                          setPostCategory={setPostCategory}
+                          postImage={postImage}
+                          setPostImage={setPostImage}
+                          categories={categories}
                         />
                       )}
 
-                      {selectedGroup.posts &&
-                        selectedGroup.posts.length > 0 && <div></div>}
-                    </div>
-                  )}
-                  {groupView === "members" && (
-                    <div className="group-members-container">
-                      <div className="members-header">
-                        <h3>Members ({selectedGroup.members?.length})</h3>
+                      <div className="group-posts-list">
+                        {isLoading ? (
+                          <div className="loading-message">Loading posts...</div>
+                        ) : posts && posts.length > 0 ? (
+                          posts.map((post) => (
+                            <PostCard
+                              key={post.post_id}
+                              post={post}
+                              groupId={selectedGroup.group_id}
+                              userRole={selectedGroup.role}
+                            />
+                          ))
+                        ) : (
+                          <div className="empty-state">
+                            <img src="/icons/no-posts.svg" alt="" />
+                            <p>No posts yet in this group</p>
+                            {activeTab !== "pending-groups" && (
+                              <button
+                                className="create-first-post-btn"
+                                onClick={handleCreatePost}
+                              >
+                                Create the first post
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      {selectedGroup.role === "guest" &&
-                      selectedGroup.privacy === "private" ? (
-                        <div className="empty-state">
-                          <p className="empty-title">
-                            You are not allowed to see Members
-                          </p>
-                        </div>
-                      ) : (
-                        <div>
-                          {selectedGroup.members?.length === 0 && (
-                            <div className="empty-state">
-                              <p className="empty-title">
-                                No members available
-                              </p>
-                              {/* <p className="empty-description">
-                      Create yout first post
-                    </p> */}
-                            </div>
-                          )}
-
-                          {selectedGroup.members &&
-                            selectedGroup.members.length > 0 && (
-                              <div className="members-grid">
-                                {selectedGroup.members.map((member) => (
-                                  <MemberCard
-                                    key={member.user_id}
-                                    member={member}
-                                  />
-                                ))}
-                              </div>
-                            )}
-                        </div>
-                      )}
-
-                      {/* <div className="members-grid">
-                    {selectedGroup.members?.map((member) => (
-                      <MemberCard key={member.user_id} member={member} />
-                    ))}
-                  </div> */}
                     </div>
                   )}
+                </div>
+              )}
 
-                  {groupView === "events" && (
-                    <div className="group-events-container">
-                      {selectedGroup.role === "guest" &&
-                      selectedGroup.privacy === "private" ? (
-                        <div className="empty-state">
-                          <p className="empty-title">
-                            You are not allowed to see Events
-                          </p>
+              {groupView === "members" && (
+                <div className="group-members-container">
+                  {isLoading ? (
+                    <div className="loading-message">Loading members...</div>
+                  ) : members && members.length > 0 ? (
+                    <div className="members-grid">
+                      {members.map((member) => (
+                        <MemberCard
+                          key={member.user_id}
+                          member={member}
+                          currentUserRole={selectedGroup.role}
+                          groupId={selectedGroup.group_id}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="empty-state">
+                      <img src="/icons/no-members.svg" alt="" />
+                      <p>No members found</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {groupView === "events" && (
+                <div className="group-events-container">
+                  {selectedGroup.role === "guest" &&
+                    selectedGroup.privacy === "private" ? (
+                    <div className="empty-state">
+                      <img src="/icons/no-events.svg" alt="" />
+                      <p>You are not allowed to see Events</p>
+                    </div>
+                  ) : (
+                    <div>
+                      {activeTab !== "pending-groups" && (
+                        <div className="create-event-section">
+                          <button
+                            className="create-event-btn"
+                            onClick={() => setShowEventForm(true)}
+                          >
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect
+                                x="3"
+                                y="4"
+                                width="18"
+                                height="18"
+                                rx="2"
+                                ry="2"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              />
+                              <line
+                                x1="16"
+                                y1="2"
+                                x2="16"
+                                y2="6"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              />
+                              <line
+                                x1="8"
+                                y1="2"
+                                x2="8"
+                                y2="6"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              />
+                              <line
+                                x1="3"
+                                y1="10"
+                                x2="21"
+                                y2="10"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              />
+                              <path
+                                d="M12 14v4M10 16h4"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            Create Event
+                          </button>
                         </div>
-                      ) : (
-                        <>
-                          <div className="events-header">
-                            <h3>Upcoming Events</h3>
-                            {selectedGroup.role === "admin" ||
-                              (selectedGroup.role === "member" && (
-                                <button
-                                  className="create-event-btn"
-                                  onClick={() => setShowEventForm(true)}
-                                >
-                                  Create Event
-                                  {/* {showEventForm ? "Cancel" : "Create Event"} */}
-                                </button>
-                              ))}
-                          </div>
-
-                          <div className="events-list">
-                            {selectedGroup.events?.length === 0 && (
-                              <div className="empty-state">
-                                <p className="empty-title">
-                                  No events available
-                                </p>
-                                {/* <p className="empty-description">
-                        Create yout first post
-                      </p> */}
-                              </div>
-                            )}
-                            {selectedGroup.events?.map((event) => (
-                              <EventCard key={event.event_id} event={event} />
-                            ))}
-                          </div>
-                        </>
                       )}
+
                       {showEventForm && (
                         <EventFormModal
-                          onClose={() => setShowEventForm((prev) => !prev)}
-                          // user={}
-                          group={selectedGroup}
+                          onClose={() => setShowEventForm(false)}
+                          groupId={selectedGroup.group_id}
+                          onEventCreated={(newEvent) => {
+                            setEvents([newEvent, ...events]);
+                            setShowEventForm(false);
+                          }}
                         />
                       )}
+
+                      <div className="group-events-list">
+                        {isLoading ? (
+                          <div className="loading-message">Loading events...</div>
+                        ) : events && events.length > 0 ? (
+                          events.map((event) => (
+                            <EventCard
+                              key={event.event_id}
+                              event={event}
+                              groupId={selectedGroup.group_id}
+                              userRole={selectedGroup.role}
+                              formatDate={formatEventDate}
+                            />
+                          ))
+                        ) : (
+                          <div className="empty-state">
+                            <img src="/icons/no-events.svg" alt="" />
+                            <p>No events yet in this group</p>
+                            {activeTab !== "pending-groups" && (
+                              <button
+                                className="create-first-event-btn"
+                                onClick={() => setShowEventForm(true)}
+                              >
+                                Create the first event
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {groupView === "chat" && (
+                <div className="group-chat-container">
+                  <div className="chat-messages">
+                    {messages.map((message, index) => (
+                      <Message
+                        key={index}
+                        message={message}
+                        isSent={message.isSent}
+                      />
+                    ))}
+                  </div>
+                  <div className="chat-input-container">
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Type a message..."
+                      className="chat-input"
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter" && newMessage.trim()) {
+                          const message = {
+                            content: newMessage,
+                            isSent: true,
+                            created_at: new Date().toLocaleTimeString(),
+                          };
+                          setMessages([...messages, message]);
+                          setNewMessage("");
+                        }
+                      }}
+                    />
+                    <button
+                      className="send-message-btn"
+                      onClick={() => {
+                        if (newMessage.trim()) {
+                          const message = {
+                            content: newMessage,
+                            isSent: true,
+                            created_at: new Date().toLocaleTimeString(),
+                          };
+                          setMessages([...messages, message]);
+                          setNewMessage("");
+                        }
+                      }}
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M22 2L11 13"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M22 2l-7 20-4-9-9-4 20-7z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

@@ -31,7 +31,6 @@ func GetStories(following []structs.User) ([]structs.Stories, error) {
 	for _, usr := range following {
 		var user_stories structs.Stories
 		user_stories.User = usr
-		fmt.Println("user_id", usr.ID)
 		rows, err := DB.Query("SELECT s.id, s.image, ss.read, s.created_at FROM stories s LEFT JOIN stories_status ss ON s.id == ss.story_id WHERE s.user_id = ?", usr.ID)
 		if err != nil {
 			return nil, err
@@ -42,7 +41,6 @@ func GetStories(following []structs.User) ([]structs.Stories, error) {
 			if err := rows.Scan(&story.ID, &story.Image, &story.IsRead, &story.CreatedAt); err != nil {
 				return nil, err
 			}
-			fmt.Println("story", story)
 			if time.Since(story.CreatedAt) > 24*time.Hour {
 				stories_ids = append(stories_ids, story.ID)
 				continue

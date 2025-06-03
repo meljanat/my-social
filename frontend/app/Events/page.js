@@ -15,31 +15,7 @@ export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMoreEvents, setHasMoreEvents] = useState(true);
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedIn(data === true);
-        }
-      } catch (error) {
-        console.error("Error checking login status:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLoginStatus();
-  }, []);
+  let offset = 0;
 
   const fetchEvents = async (type) => {
     try {
@@ -53,37 +29,46 @@ export default function EventsPage() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log(data);
+        
         if (offset === 0) {
           setEvents(data);
         } else {
           setEvents((prev) => [...prev, ...data]);
         }
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Error fetching events:", error);
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchEvents("my-events");
+  }, []);
 
-useInfiniteScroll({
-  fetchMoreCallback: async () => {
-    if (!selectedType || !hasMoreEvents) return;
 
-    setIsFetchingMore(true);
-    const currentEvents = events || [];
-    const newEvents = await fetchEvents(selectedType, currentEvents.length);
 
-    if (!newEvents || newEvents.length === 0) {
-      console.log("No more events to fetch");
-      setHasMoreEvents(false); 
-    }
+  useInfiniteScroll({
+    fetchMoreCallback: async () => {
+      if (!selectedType || !hasMoreEvents) return;
 
-    setIsFetchingMore(false);
-  },
-  offset: events?.length || 0,
-  isFetching: isFetchingMore,
-  hasMore: hasMoreEvents,
-});
+      setIsFetchingMore(true);
+      const currentEvents = events || [];
+      const newEvents = await fetchEvents(selectedType, currentEvents.length);
+
+      if (!newEvents || newEvents.length === 0) {
+        console.log("No more events to fetch");
+        setHasMoreEvents(false);
+      }
+
+      setIsFetchingMore(false);
+    },
+    offset: events?.length || 0,
+    isFetching: isFetchingMore,
+    hasMore: hasMoreEvents,
+  });
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -163,17 +148,15 @@ useInfiniteScroll({
 
         <div className="events-tabs">
           <button
-            className={`tab-button ${
-              activeTab === "my-events" ? "active-tab" : ""
-            }`}
+            className={`tab-button ${activeTab === "my-events" ? "active-tab" : ""
+              }`}
             onClick={() => handleTabChange("my-events")}
           >
             My Events
           </button>
           <button
-            className={`tab-button ${
-              activeTab === "discover" ? "active-tab" : ""
-            }`}
+            className={`tab-button ${activeTab === "discover" ? "active-tab" : ""
+              }`}
             onClick={() => handleTabChange("discover")}
           >
             Discover
@@ -189,7 +172,7 @@ useInfiniteScroll({
         <div className="events-grid">
           {events?.length > 0 ? (
             events.map((event) => (
-              <div key={event.id} className="event-card-container">
+              <div key={event.event_id} className="event-card-container">
                 <div className="event-card-wrapper">
                   {/* <div className="event-date-badge">
             <span className="event-month">

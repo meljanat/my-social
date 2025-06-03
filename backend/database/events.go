@@ -39,7 +39,13 @@ func GetEvents(user_id, offset int64, Type string) ([]structs.Event, error) {
 			return nil, err
 		}
 		event.CreatedAt = TimeAgo(date)
-		events = append(events, event)
+		member, err := IsMemberGroup(user_id, event.Group.ID)
+		if err != nil {
+			return nil, err
+		}
+		if member {
+			events = append(events, event)
+		}
 	}
 	return events, nil
 }

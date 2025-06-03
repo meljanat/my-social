@@ -43,12 +43,10 @@ func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	Mutex.Unlock()
 
 	NotifyUsers(user.ID, "online")
-
-	fmt.Println("Connected to user:", user.Username)
-	ListenForMessages(conn, user.ID)
+	ListenForMessages(conn, user.ID, w, r)
 }
 
-func ListenForMessages(conn *websocket.Conn, user_id int64) {
+func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		RemoveClient(conn, user_id)
 		NotifyUsers(user_id, "offline")
@@ -76,6 +74,11 @@ func ListenForMessages(conn *websocket.Conn, user_id int64) {
 		} else if message.Type == "typing" {
 			msgType = "typing"
 		}
+
+		if !LastTime(w, r, "messages") {
+			return
+		}
+
 		var users_ids []int64
 		if message.GroupID != 0 {
 			if _, err := database.GetGroupById(message.GroupID); err != nil {

@@ -28,6 +28,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !LastTime(w, r, "users") {
+		return
+	}
+
 	var login structs.User
 	err := json.NewDecoder(r.Body).Decode(&login)
 	if err != nil {
@@ -115,6 +119,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if !LastTime(w, r, "users") {
 		return
 	}
 

@@ -38,7 +38,6 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CheckTheUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	if r.Method != http.MethodGet {
 		fmt.Println("Method not allowed")
 		response := map[string]string{"error": "Method not allowed"}
@@ -64,6 +63,7 @@ func CheckTheUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user_info)
 }
 

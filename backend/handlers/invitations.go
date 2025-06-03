@@ -10,12 +10,15 @@ import (
 )
 
 func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("InvitationsHandler called")
 	if r.Method != http.MethodPost {
 		fmt.Println("Method not allowed", r.Method)
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if !LastTime(w, r, "invitations") {
 		return
 	}
 
@@ -322,6 +325,12 @@ func AcceptInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !LastTime(w, r, "follows") {
+		return
+	} else if !LastTime(w, r, "group_members") {
+		return
+	}
+
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
 		fmt.Println("Failed to retrieve user", err)
@@ -457,6 +466,12 @@ func DeclineInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if !LastTime(w, r, "follows") {
+		return
+	} else if !LastTime(w, r, "group_members") {
 		return
 	}
 
@@ -598,6 +613,10 @@ func AcceptOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !LastTime(w, r, "group_members") {
+		return
+	}
+
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
 		fmt.Println("Failed to retrieve user", err)
@@ -711,6 +730,10 @@ func DeclineOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if !LastTime(w, r, "group_members") {
 		return
 	}
 

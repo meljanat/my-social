@@ -20,6 +20,10 @@ func CreateStoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !LastTime(w, r, "stories") {
+		return
+	}
+
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
 		fmt.Println("Failed to retrieve user", err)
@@ -106,6 +110,10 @@ func SeenStory(w http.ResponseWriter, r *http.Request) {
 		response := map[string]string{"error": "Method not allowed"}
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if !LastTime(w, r, "stories") {
 		return
 	}
 

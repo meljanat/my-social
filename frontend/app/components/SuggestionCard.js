@@ -2,20 +2,20 @@ import { useRouter } from 'next/navigation';
 
 export default function SuggestionCard({ suggestion }) {
     const router = useRouter();
+    console.log("suggestion", suggestion);
+    
 
     const handleClick = () => {
         if (suggestion.username) {
-            router.push(`/profile/${suggestion.user_id}`);
+            router.push(`/profile?id=${suggestion.user_id}`);
         } else if (suggestion.group_id) {
             router.push(`/group/${suggestion.group_id}`);
         } else if (suggestion.post_id) {
-            router.push(`/post/${suggestion.post_id}`);
+            router.push(`/post?id=${suggestion.post_id}`);
         } else if (suggestion.event_id) {
             router.push(`/event/${suggestion.event_id}`);
         }
     };
-
-    console.log("SuggestionCard rendered with suggestion:", suggestion);
 
     return (
         <div className="suggestion-card" onClick={handleClick}>

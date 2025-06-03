@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import "../../styles/PostPage.css";
+import "../styles/PostPage.css";
 
 export default function PostPage() {
   //   const router = useRouter();

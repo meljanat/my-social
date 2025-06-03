@@ -70,9 +70,9 @@ const NotificationsComponent = () => {
         )
       );
       if (notification.type_notification === "invitation") {
-        router.push('/profile/' + notification.user.user_id);
+        router.push('/profile?id=' + notification.user.user_id);
       } else if (notification.type_notification === "like" || notification.type_notification === "comment") {
-        router.push('/post/' + notification.post_id);
+        router.push('/post?id=' + notification.post_id);
       } else if (notification.type_notification === "event") {
         router.push('/groups');
       }

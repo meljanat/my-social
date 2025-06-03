@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import PostsComponent from "@/app/components/PostsComponent";
 import EditProfileModal from "@/app/components/EditProfileModal";
 
-import "../../styles/ProfilePage.css";
+import "../styles/ProfilePage.css";
 
 export default function ProfilePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

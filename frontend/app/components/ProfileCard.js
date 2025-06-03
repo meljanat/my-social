@@ -40,7 +40,7 @@ export default function ProfileCard({ user, onPostCreated, my_groups }) {
       </div>
 
       <div className="profile-info">
-        <a href={`/profile/${user.user_id}`} className="profile-link">
+        <a href={`/profile?id=${user.user_id}`} className="profile-link">
           <h2 className="profile-name">{`${user.first_name} ${user.last_name}`}</h2>
         </a>
         <p className="profile-username">@{user.username || "username"}</p>

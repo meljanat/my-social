@@ -1,8 +1,7 @@
 import "../styles/ProfilePage.css";
 import { handleLike } from "../functions/post";
 
-export default function PostsComponent({ post, setPosts}) {
-
+export default function PostsComponent({ post }) {
 
   return (
     <div key={post.id} className="post-card-modern">
@@ -17,7 +16,7 @@ export default function PostsComponent({ post, setPosts}) {
             <h4
               className="post-author-name"
               onClick={() => {
-                window.location.href = `/profile/${post.user_id}`;
+                window.location.href = `/profile?id=${post.user.user_id}`;
               }}
             >
               {post.author}
@@ -54,7 +53,7 @@ export default function PostsComponent({ post, setPosts}) {
 
       <div className="post-card-footer">
         <div className="post-engagement">
-          <div className="post-stat" onClick={() => handleLike(post.post_id, setPosts)}>
+          <div className="post-stat" onClick={() => handleLike(post.post_id)}>
             <img src="/icons/like.svg" alt="Like" />
             <span>{post.total_likes}</span>
           </div>
@@ -66,7 +65,7 @@ export default function PostsComponent({ post, setPosts}) {
         <button
           className="post-view-button"
           onClick={() => {
-            window.location.href = `/post/${post.post_id}`;
+            window.location.href = `/post?id=${post.post_id}`;
           }}
         >
           View Post

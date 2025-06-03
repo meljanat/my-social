@@ -7,7 +7,7 @@ export default function UserCard({ user, action, onClick }) {
   return (
     <li
       className="user-item"
-    // onClick={}
+      onClick={onClick}
     >
       <img
         src={user.avatar || user.image}
@@ -15,8 +15,10 @@ export default function UserCard({ user, action, onClick }) {
         alt={user.username || user.name}
       />
       <div className="user-details">
-        <div className="user-info">
-          {/* <a key={user.id} href={`/profile/${user.id}`} className="user-link"> */}
+        <div className="user-info"
+          onClick={() => {
+            window.location.href = `/profile?id=${post.user.user_id}`;
+          }}>
           <h4 className="user-name">
             {user.first_name
               ? `${user.first_name} ${user.last_name}`

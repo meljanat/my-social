@@ -3,7 +3,7 @@ package database
 import structs "social-network/data"
 
 func SearchUsers(query string, offset int64) ([]structs.User, error) {
-	rows, err := DB.Query(`SELECT u.id, u.username, u.avatar FROM users u WHERE u.username LIKE ? LIMIT 5 OFFSET ?`, query+"%", offset)
+	rows, err := DB.Query(`SELECT u.id, u.username, u.avatar, u.firstname, u.lastname, u.privacy FROM users u WHERE u.username LIKE ? LIMIT 5 OFFSET ?`, query+"%", offset)
 	if err != nil {
 		return nil, err
 	}
@@ -11,7 +11,7 @@ func SearchUsers(query string, offset int64) ([]structs.User, error) {
 	var users []structs.User
 	for rows.Next() {
 		var user structs.User
-		err = rows.Scan(&user.ID, &user.Username, &user.Avatar)
+		err = rows.Scan(&user.ID, &user.Username, &user.Avatar, &user.FirstName, &user.LastName, &user.Privacy)
 		if err != nil {
 			return nil, err
 		}

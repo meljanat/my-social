@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import "../styles/NavBar.css";
 import NotificationsComponent from "./NotificationsComponent";
@@ -15,6 +16,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState(null);
   const [user, setUser] = useState();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -205,9 +207,17 @@ export default function Navbar() {
       </div>
 
       <div className="search-bar">
-        <div className="search-input-container" onClick={toggleSearchSuggestions}>
+        <form className="search-input-container" onSubmit={(e) => {
+          e.preventDefault();
+          if (searchQuery.trim() !== "") {
+            router.push(`/search-results?query=${encodeURIComponent(searchQuery)}`);
+            setSearchQuery("");
+            setSuggestions(null);
+            setShowSearchSuggestions(false);
+          }
+        }}>
           <img src="./icons/search.svg" alt="Search" className="search-icon" />
-          <input type="text" placeholder="What's on your mind?" onChange={(e) => setSearchQuery(e.target.value)} />
+          <input type="text" placeholder="What's on your mind?" value={searchQuery} onFocus={() => setShowSearchSuggestions(true)} onChange={(e) => setSearchQuery(e.target.value)} />
           {showSearchSuggestions && (
             <div className="search-suggestions">
               <div className="nav-links">
@@ -217,16 +227,16 @@ export default function Navbar() {
                 <button className={`nav-link ${activeSugTab === "events" ? "active" : ""}`} onClick={() => setActiveSugTab("events")}>Events</button>
                 <button className={`nav-link ${activeSugTab === "posts" ? "active" : ""}`} onClick={() => setActiveSugTab("posts")}>Posts</button>
               </div>
-              {Object.values(suggestions).flat().length === 0 ? (
+              {suggestions && Object.values(suggestions).flat()?.length === 0 ? (
                 <div className="no-suggestions">No suggestions found</div>
               ) : (
-                Object.values(suggestions).flat().map((suggestion, index) => (
+                suggestions && Object.values(suggestions).flat()?.map((suggestion, index) => (
                   <SuggestionCard key={index} suggestion={suggestion} />
                 ))
               )}
             </div>
           )}
-        </div>
+        </form>
       </div>
 
       <div className="user-actions">
@@ -272,7 +282,7 @@ export default function Navbar() {
 
           {showProfileMenu && (
             <div className="profile-menu">
-              <a href={`/profile/${user.user_id}`} className="menu-item">
+              <a href={`/profile?id=${user.user_id}`} className="menu-item">
                 <img src="./icons/user.svg" alt="Profile" />
                 <span>My Profile</span>
               </a>

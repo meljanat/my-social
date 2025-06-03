@@ -25,7 +25,7 @@ export default function MemberCard({ member }) {
       <button
         className="view-profile-button"
         onClick={() => {
-          window.location.href = `/profile/${member.user_id}`;
+          window.location.href = `/profile?id=${member.user_id}`;
         }}
       >
         View Profile

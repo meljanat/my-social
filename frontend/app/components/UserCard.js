@@ -17,7 +17,7 @@ export default function UserCard({ user, action, onClick }) {
       <div className="user-details">
         <div className="user-info"
           onClick={() => {
-            window.location.href = `/profile?id=${post.user.user_id}`;
+            window.location.href = `/profile?id=${user.user_id}`;
           }}>
           <h4 className="user-name">
             {user.first_name
@@ -35,10 +35,10 @@ export default function UserCard({ user, action, onClick }) {
 
         {action === "follow" && (
           <button
-            className="follow-btn"
             onClick={() => {
               setNewStatus(handleFollow(user.user_id, 0));
             }}
+            className={`follow-btn ${newStatus}`}
           >
             {newStatus}
           </button>

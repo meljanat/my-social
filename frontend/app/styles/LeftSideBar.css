@@ -162,6 +162,11 @@ body {
   transition: all 0.2s ease;
 }
 
+.Cancel, .Unfollow {
+  background-color: #E5E7EB;
+  color: #4B5563;
+}
+
 .follow-btn:hover {
   background-color: #2A41C7;
   box-shadow: 0 2px 4px rgba(53, 85, 249, 0.2);

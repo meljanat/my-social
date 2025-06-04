@@ -102,15 +102,15 @@ export default function MessagesPage() {
   const router = useRouter();
 
   const handleSeeProfile = () => {
-  if (!selectedUser) return;
+    if (!selectedUser) return;
 
-  if (selectedUser.user_id) {
-    router.push(`/profile/${selectedUser.user_id}`);
-  }
-  else if (selectedUser.group_id) {
-    router.push(`/group/${selectedUser.group_id}`);
-  }
-};
+    if (selectedUser.user_id) {
+      router.push(`/profile?id=${selectedUser.user_id}`);
+    }
+    else if (selectedUser.group_id) {
+      router.push(`/group?id=${selectedUser.group_id}`);
+    }
+  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -130,7 +130,7 @@ export default function MessagesPage() {
         const onlineUsers = data
           .filter((user) => user.online)
           .reduce((acc, user) => {
-            acc[user.id] = true;
+            acc[user.user_id] = true;
             return acc;
           }, {});
 
@@ -399,10 +399,10 @@ export default function MessagesPage() {
                       <p className="conversation-user-status">
                         <span
                           className={`status-dot ${selectedUser.user_id
-                              ? onlineUsers[selectedUser.user_id]
-                                ? "online"
-                                : "offline"
+                            ? onlineUsers[selectedUser.user_id]
+                              ? "online"
                               : "offline"
+                            : "offline"
                             }`}
                         ></span>
                         {selectedUser.user_id

@@ -15,7 +15,7 @@ export default function ChatWidget({ users, groups, myData }) {
   // const [receivedMessages, setReceivedMessages] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [openWidget, setOpenWidget] = useState(true);
+  const [openWidget, setOpenWidget] = useState(false);
   const [openChatWidget, setOpenChatWidget] = useState(true);
   const [openEmojiSection, setOpenEmojiSection] = useState(false);
   const [messageSending, setMessageSending] = useState("");

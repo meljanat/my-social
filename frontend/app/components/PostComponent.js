@@ -1,13 +1,14 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import "../styles/PostComponent.css";
 
 export default function PostComponent({ posts: initialPosts }) {
   const [posts, setPosts] = useState(initialPosts);
-  const [savedMessage, setSavedMessage] = useState("");
-  const [commentDiv, setCommentDiv] = useState(false);
+  const [savedMessage, setSavedMessage] = useState(null);
   const [activeLikesPopup, setActiveLikesPopup] = useState(null);
   const popupRef = useRef(null);
+  const router = useRouter();
 
   useEffect(() => {
     setPosts(initialPosts);
@@ -24,40 +25,6 @@ export default function PostComponent({ posts: initialPosts }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  async function handleComment(postId) {
-    try {
-      const response = await fetch("http://localhost:8404/comment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(postId),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        console.log(data);
-      }
-      if (response.ok) {
-        const updatedPost = await response.json();
-
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.post_id === postId
-              ? {
-                  ...post,
-                  total_comments: updatedPost.total_comments,
-                }
-              : post
-          )
-        );
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
 
   async function handleSave(postId) {
     try {
@@ -79,18 +46,33 @@ export default function PostComponent({ posts: initialPosts }) {
           prevPosts.map((post) =>
             post.post_id === postId
               ? {
-                  ...post,
-                  saved: updatedPost.saved,
-                  total_saves: updatedPost.total_saves,
-                }
+                ...post,
+                saved: updatedPost.saved,
+                total_saves: updatedPost.total_saves,
+              }
               : post
           )
+        );
+        setSavedMessage(
+          {
+            postId: postId,
+            message: updatedPost.saved
+              ? "Post saved successfully!"
+              : "Post unsaved successfully!",
+          }
         );
       }
     } catch (error) {
       console.log(error);
     }
   }
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSavedMessage(null);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [savedMessage]);
 
   async function handleLike(postId) {
     try {
@@ -115,11 +97,11 @@ export default function PostComponent({ posts: initialPosts }) {
           prevPosts.map((post) =>
             post.post_id === postId
               ? {
-                  ...post,
-                  total_likes: updatedPost.total_likes,
-                  is_liked: updatedPost.is_liked,
-                  who_liked: updatedPost.who_liked || post.who_liked,
-                }
+                ...post,
+                total_likes: updatedPost.total_likes,
+                is_liked: updatedPost.is_liked,
+                who_liked: updatedPost.who_liked || post.who_liked,
+              }
               : post
           )
         );
@@ -195,9 +177,8 @@ export default function PostComponent({ posts: initialPosts }) {
           <div className="post-actions">
             <div className="like-action-container">
               <button
-                className={`action-button action-like ${
-                  post.is_liked ? "liked" : ""
-                }`}
+                className={`action-button action-like ${post.is_liked ? "liked" : ""
+                  }`}
                 onClick={() => handleLike(post.post_id)}
               >
                 <svg
@@ -243,7 +224,7 @@ export default function PostComponent({ posts: initialPosts }) {
 
             <button
               className="action-button action-comment"
-              onClick={() => setCommentDiv(!commentDiv)}
+              onClick={() => router.push(`/post?id=${post.post_id}`)}
             >
               <svg
                 width="24"
@@ -265,9 +246,8 @@ export default function PostComponent({ posts: initialPosts }) {
             </button>
 
             <button
-              className={`action-button action-save ${
-                post.saved ? "saved" : ""
-              }`}
+              className={`action-button action-save ${post.saved ? "saved" : ""
+                }`}
               onClick={() => handleSave(post.post_id)}
             >
               <svg
@@ -286,54 +266,16 @@ export default function PostComponent({ posts: initialPosts }) {
             </button>
           </div>
 
-          {savedMessage && (
+          {savedMessage?.postId === post.post_id && (
             <div
               className="saved-message"
               style={{ color: "green", paddingLeft: "20px" }}
             >
-              <p style={{ fontSize: "14px" }}>{savedMessage}</p>
+              <p style={{ fontSize: "14px" }}>{savedMessage.message}</p>
             </div>
           )}
 
-          <div
-            className="comment-div"
-            style={{
-              display: commentDiv ? "block" : "none",
-              paddingLeft: "20px",
-              paddingRight: "20px",
-            }}
-          >
-            <input
-              style={{
-                width: "100%",
-                marginBottom: "10px",
-                padding: "10px",
-                borderRadius: "5px",
-                border: "1px solid #ccc",
-              }}
-              type="text"
-              className="comment-input"
-              placeholder="Write a comment..."
-            />
-            <button
-              style={{
-                backgroundColor: "#2563EB",
-                color: "white",
-                padding: "10px 20px",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-                fontSize: "14px",
-                fontWeight: "400",
-              }}
-              className="comment-button"
-              onClick={() => handleComment(post.post_id)}
-            >
-              Comment
-            </button>
-          </div>
-
-          <a href={`/post/${post.post_id}`} className="post-link">
+          <a href={`/post?id=${post.post_id}`} className="post-link">
             <button className="see-post-button">
               See post <span className="arrow">→</span>
             </button>

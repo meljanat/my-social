@@ -1,4 +1,3 @@
-// pages/post/[id].js
 "use client";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
@@ -19,7 +18,7 @@ export default function PostPage() {
   const [posts, setPosts] = useState([]);
   const [postSaved, setPostSaved] = useState();
 
-  async function handleSave() {
+  async function handleSave(post_id) {
     try {
       const response = await fetch(`http://localhost:8404/save`, {
         method: "POST",
@@ -27,7 +26,7 @@ export default function PostPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({post_id: post_id}),
+        body: JSON.stringify({ post_id: post_id }),
       });
 
       if (!response.ok) {
@@ -38,7 +37,7 @@ export default function PostPage() {
         setPost({
           ...post,
           saved: updatedPost.saved,
-                  total_saves: updatedPost.total_saves,
+          total_saves: updatedPost.total_saves,
         });
       }
     } catch (error) {
@@ -46,7 +45,7 @@ export default function PostPage() {
     }
   }
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchPost = async (post_id) => {
       setIsLoading(true);
       try {
         const response = await fetch(
@@ -114,7 +113,7 @@ export default function PostPage() {
     }
   };
 
-  const handleLike = async () => {
+  const handleLike = async (post_id) => {
     try {
       const response = await fetch(`http://localhost:8404/like`, {
         method: "POST",
@@ -122,7 +121,7 @@ export default function PostPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ post_id: post_id}),
+        body: JSON.stringify({ post_id: post_id }),
       });
 
       if (!response.ok) {
@@ -172,7 +171,6 @@ export default function PostPage() {
   if (!post) {
     return (
       <div className="post-page-container">
-        {/* <Navbar /> */}
         <div className="post-page-content">
           <div className="error-message">Post not found</div>
           {/* <button className="back-button" onClick={() => router.push("/")}>
@@ -195,7 +193,7 @@ export default function PostPage() {
                 className="author-avatar"
               />
               <div className="author-details">
-                <a href={`/profile/${post.user_id}`} className="author-link">
+                <a href={`/profile?id=${post.user_id}`} className="author-link">
                   <h4 className="author-name">{post.author}</h4>
                 </a>
                 <div className="timestamp">
@@ -350,9 +348,7 @@ export default function PostPage() {
             <div className="comments-list">
               {comments.length > 0 ? (
                 comments.map((comment) => {
-                  const key = `${comment.comment_id || "defaultID"}-${
-                    comment.created_at || "defaultCreatedAt"
-                  }`;
+                  const key = `${comment.comment_id}`;
 
                   return (
                     <div key={key} className="comment-item">

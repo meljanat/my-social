@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import PostsComponent from "@/app/components/PostsComponent";
 import EditProfileModal from "@/app/components/EditProfileModal";
-
 import "../styles/ProfilePage.css";
 
 export default function ProfilePage() {
@@ -143,32 +142,7 @@ export default function ProfilePage() {
   }
 
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedIn(data === true);
-          return data === true;
-        } else {
-          setIsLoggedIn(false);
-          return false;
-        }
-      } catch (error) {
-        console.error("Error checking login status:", error);
-        setIsLoggedIn(false);
-        return false;
-      }
-    };
-
-    const fetchHomeData = async () => {
+    const fetchUserData = async (id) => {
       try {
         const response = await fetch(
           `http://localhost:8404/profile?user_id=${id}&offset=0`,
@@ -202,19 +176,8 @@ export default function ProfilePage() {
         setIsLoading(false);
       }
     };
-
-    const initPage = async () => {
-      const loggedIn = await checkLoginStatus();
-      if (loggedIn) {
-        await fetchHomeData();
-      } else {
-        router.push("/");
-        setIsLoading(false);
-      }
-    };
-
-    initPage();
-  }, [router]);
+    fetchUserData(id);
+  }, [id]);
 
   // const fetchUserPosts = async () => {
   //   if (userPosts.length > 0) return;
@@ -398,10 +361,6 @@ export default function ProfilePage() {
     );
   }
 
-  if (!isLoggedIn) {
-    return null;
-  }
-
   if (error) {
     return (
       <div className="error-container">
@@ -511,9 +470,8 @@ export default function ProfilePage() {
                     <span className="status-offline">Offline</span>
                   )}
                 </div>
-                <h1 className="profile-name">{`${userData.first_name || ""} ${
-                  userData.last_name || ""
-                }`}</h1>
+                <h1 className="profile-name">{`${userData.first_name || ""} ${userData.last_name
+                  || ""}`}</h1>
                 <p className="profile-username">
                   @{userData.username || "username"}
                   {userData.privacy === "private" && (
@@ -580,16 +538,20 @@ export default function ProfilePage() {
                       userData.is_following
                         ? "unfollow-btn"
                         : userData.is_pending
-                        ? "request-cancel-btn"
-                        : "follow-btn"
+                          ? "request-cancel-btn"
+                          : "follow-btn"
                     }
                     onClick={() => handleFollow(id)}
                   >
-                    {userData.is_following
-                      ? "Unfollow"
-                      : userData.is_pending
-                      ? "Pending"
-                      : "Follow"}
+                    {userData.is_follower && !userData.is_following
+                      ? "Follow Back"
+                      : userData.is_following
+                        ? "Unfollow"
+                        : userData.pending
+                          ? "Pending"
+                          : userData.is_pending
+                            ? "Pending"
+                            : "Follow"}
                   </button>
                 )}
               </div>
@@ -647,26 +609,23 @@ export default function ProfilePage() {
               About
             </button>
             <button
-              className={`tab-button ${
-                activeTab === "followers" ? "active" : ""
-              }`}
+              className={`tab-button ${activeTab === "followers" ? "active" : ""
+                }`}
               onClick={() => handleTabChange("followers")}
             >
               Followers
             </button>
             <button
-              className={`tab-button ${
-                activeTab === "following" ? "active" : ""
-              }`}
+              className={`tab-button ${activeTab === "following" ? "active" : ""
+                }`}
               onClick={() => handleTabChange("following")}
             >
               Following
             </button>
             {isOwnProfile && (
               <button
-                className={`tab-button ${
-                  activeTab === "saved" ? "active" : ""
-                }`}
+                className={`tab-button ${activeTab === "saved" ? "active" : ""
+                  }`}
                 onClick={() => handleTabChange("saved")}
               >
                 Saved Posts
@@ -687,7 +646,6 @@ export default function ProfilePage() {
                     <PostsComponent
                       key={post.post_id}
                       post={post}
-                      setPosts={setUserPosts}
                     />
                   ))}
                 </div>
@@ -708,9 +666,8 @@ export default function ProfilePage() {
                   <div className="about-item-content">
                     <div className="info-row">
                       <span className="info-label">Full Name</span>
-                      <span className="info-value">{`${
-                        userData.first_name || ""
-                      } ${userData.last_name || ""}`}</span>
+                      <span className="info-value">{`${userData.first_name || ""
+                        } ${userData.last_name || ""}`}</span>
                     </div>
                     <div className="info-row">
                       <span className="info-label">Username</span>
@@ -741,7 +698,7 @@ export default function ProfilePage() {
                       <span className="info-value">
                         {userData.privacy
                           ? userData.privacy.charAt(0).toUpperCase() +
-                            userData.privacy.slice(1)
+                          userData.privacy.slice(1)
                           : "Public"}
                       </span>
                     </div>
@@ -801,9 +758,8 @@ export default function ProfilePage() {
               <div className="saved-content-container">
                 <div className="saved-tabs">
                   <button
-                    className={`saved-tab-button ${
-                      activeSubTab === "posts" ? "active" : ""
-                    }`}
+                    className={`saved-tab-button ${activeSubTab === "posts" ? "active" : ""
+                      }`}
                     onClick={() => {
                       fetchSavedPosts("post");
 
@@ -813,9 +769,8 @@ export default function ProfilePage() {
                     Saved Posts
                   </button>
                   <button
-                    className={`saved-tab-button ${
-                      activeSubTab === "group-posts" ? "active" : ""
-                    }`}
+                    className={`saved-tab-button ${activeSubTab === "group-posts" ? "active" : ""
+                      }`}
                     onClick={() => {
                       fetchSavedPosts("group");
                       setActiveSubTab("group-posts");
@@ -837,7 +792,6 @@ export default function ProfilePage() {
                         <PostsComponent
                           key={post.post_id}
                           post={post}
-                          setPosts={setUserPosts}
                         />
                       ))}
                     </div>
@@ -910,7 +864,7 @@ export default function ProfilePage() {
                           <p className="user-username">@{follower.username}</p>
                         </div>
                         <a
-                          href={`/profile/${follower.user_id}`}
+                          href={`/profile?id=${follower.user_id}`}
                           className="profile-link"
                         >
                           <button className="view-profile-btn">
@@ -956,7 +910,7 @@ export default function ProfilePage() {
                           <p className="user-username">@{user.username}</p>
                         </div>
                         <a
-                          href={`/profile/${user.user_id}`}
+                          href={`/profile?id=${user.user_id}`}
                           className="profile-link"
                         >
                           <button className="view-profile-btn">

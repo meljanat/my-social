@@ -15,6 +15,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(null);
   const [homeData, setHomeData] = useState(null);
+
   const [posts, setPosts] = useState([]);
   const [stories, setStories] = useState([]);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -93,7 +94,6 @@ export default function Home() {
       } else {
         setHasMorePosts(true);
       }
-      console.log("check home data ===>", data);
       setHomeData(data);
 
       return data.posts;
@@ -164,7 +164,7 @@ export default function Home() {
   if (!isLoggedIn) {
     return <AuthForm onLoginSuccess={handleLoginSuccess} />;
   }
-  console.log("homeData", homeData?.user.stories);
+
   if (isLoggedIn && homeData) {
     return (
       <div className="app-container">

@@ -152,25 +152,25 @@ func AddMembers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	group_id, err := strconv.ParseInt(r.URL.Query().Get("group_id"), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid group ID", err)
-		response := map[string]string{"error": "Invalid group ID"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-	fmt.Println("group_id", group_id)
-	_, err = database.GetGroupById(group_id)
-	if err != nil {
-		fmt.Println("Failed to retrieve group", err)
-		response := map[string]string{"error": "Failed to retrieve group"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
 	if r.Method == http.MethodGet {
+		group_id, err := strconv.ParseInt(r.URL.Query().Get("group_id"), 10, 64)
+		if err != nil {
+			fmt.Println("Invalid group ID", err)
+			response := map[string]string{"error": "Invalid group ID"}
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		_, err = database.GetGroupById(group_id)
+		if err != nil {
+			fmt.Println("Failed to retrieve group", err)
+			response := map[string]string{"error": "Failed to retrieve group"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
 		users, err := database.GetMembers(user.ID, group_id)
 		if err != nil {
 			log.Printf("Error retrieving users: %v", err)
@@ -183,32 +183,52 @@ func AddMembers(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(users)
 	} else {
-		users := strings.Split(r.FormValue("users"), ",")
-		for _, usr := range users {
-			usr_id, err := strconv.ParseInt(usr, 10, 64)
-			if err != nil {
-				fmt.Println("Invalid user", err)
-				response := map[string]string{"error": "Invalid user"}
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(response)
-				return
-			}
+		type IDS struct {
+			UserID  int64 `json:"user_id"`
+			GroupID int64 `json:"group_id"`
+		}
 
-			if _, err = database.GetUserById(usr_id); err != nil {
-				fmt.Println("Invalid user", err)
-				response := map[string]string{"error": "Invalid user"}
-				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(response)
-				return
-			}
+		var ids IDS
+		err := json.NewDecoder(r.Body).Decode(&ids)
+		if err != nil {
+			fmt.Println("Failed to decode request body", err)
+			response := map[string]string{"error": "Failed to decode request body"}
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
 
-			if err = database.CreateInvitation(user.ID, usr_id, group_id); err != nil {
-				fmt.Println("Failed to send invitation to this user", err)
-				response := map[string]string{"error": "Failed to send invitation to this user"}
-				w.WriteHeader(http.StatusInternalServerError)
-				json.NewEncoder(w).Encode(response)
-				return
-			}
+		_, err = database.GetGroupById(ids.GroupID)
+		if err != nil {
+			fmt.Println("Failed to retrieve group", err)
+			response := map[string]string{"error": "Failed to retrieve group"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		if _, err = database.GetUserById(ids.UserID); err != nil {
+			fmt.Println("Invalid user", err)
+			response := map[string]string{"error": "Invalid user"}
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		if isMember, err := database.IsMemberGroup(ids.UserID, ids.GroupID); err != nil || isMember {
+			fmt.Println("User is already a member of the group", err)
+			response := map[string]string{"error": "User is already a member of the group"}
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		if err = database.CreateInvitation(user.ID, ids.UserID, ids.GroupID); err != nil {
+			fmt.Println("Failed to send invitation to this user", err)
+			response := map[string]string{"error": "Failed to send invitation to this user"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
 		}
 	}
 }

@@ -19,6 +19,8 @@ async function joinGroup(group_id) {
 }
 
 async function InvitUsers(group_id) {
+  console.log("group_id", group_id);
+  
   try {
     const response = await fetch(
       `http://localhost:8404/add_members?group_id=${group_id}`,
@@ -35,6 +37,7 @@ async function InvitUsers(group_id) {
     }
     const data = await response.json();
     console.log(`Group Members Data:`, data);
+    setUsersToInvite(data);
   } catch (err) {
     console.log(err);
   }

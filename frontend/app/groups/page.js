@@ -18,36 +18,40 @@ import { leaveGroup } from "../functions/group";
 import RemoveGroupModal from "../components/RemoveGroupModal";
 import InvitationsModal from "../components/InvitationsModal";
 import InviteUsersModal from "../components/UsersToInviteModal";
-import { handleFollow, handelAccept, handleReject, handelAcceptOtherGroup, handleRejectOtherGroup } from "../functions/user";
+import {
+  handleFollow,
+  handelAccept,
+  handleReject,
+  handelAcceptOtherGroup,
+  handleRejectOtherGroup,
+} from "../functions/user";
 import useInfiniteScroll from "../components/useInfiniteScroll";
 
-
 const removeGroup = (groupId) => {
-  setGroups(groups.filter(g => g.group_id !== groupId));
+  setGroups(groups.filter((g) => g.group_id !== groupId));
 };
-
 
 async function sendInvitation(userId, groupId) {
   try {
-    const response = await fetch(
-      `http://localhost:8404/invite?user_id=${userId}&group_id=${groupId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      }
-    );
+    const response = await fetch(`http://localhost:8404/add_members`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: parseInt(userId),
+        group_id: parseInt(groupId),
+      }),
+      credentials: "include",
+    });
     if (!response.ok) {
       throw new Error("Failed to fetch group data");
     }
-    const data = await response.json();
-    console.log(`Data:`, data);
   } catch (err) {
     console.log(err);
   }
 }
+
 // function handleEventSelect(event) {
 //   console.log("Interested: ", event);
 // }
@@ -141,27 +145,7 @@ async function sendInvitation(userId, groupId) {
 //   );
 // };
 
-const Message = ({ message, isSent }) => {
-  return (
-    <div className={`message ${isSent ? "sent" : "received"}`}>
-      {!isSent && (
-        <div className="message-user-header">
-          <img
-            className="message-user-avatar"
-            src={message.avatar}
-            alt={message.username}
-          />
-          <p>{message.username}</p>
-        </div>
-      )}
-      <p className="message-content">{message.content}</p>
-      <span className="message-time">{message.created_at}</span>
-    </div>
-  );
-};
-
 export default function GroupsPage() {
-
   function handleCreatePost() {
     setShowPostForm(true);
   }
@@ -182,8 +166,8 @@ export default function GroupsPage() {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
-      setUsersToInvite(data);
       console.log(`Group Members Data:`, data);
+      setUsersToInvite(data);
     } catch (err) {
       console.log(err);
     }
@@ -232,7 +216,6 @@ export default function GroupsPage() {
 
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMorePosts, setHasMorePosts] = useState(true);
-
 
   function handleCreateGroup() {
     setShowGroupForm(true);
@@ -508,28 +491,34 @@ export default function GroupsPage() {
   }
 
   const handleDeleteGroup = (groupId) => {
-    setMyGroups(prevGroups => prevGroups.filter(group => group.group_id !== groupId));
-    setGroupData(prevGroups => prevGroups.filter(group => group.group_id !== groupId));
+    setMyGroups((prevGroups) =>
+      prevGroups.filter((group) => group.group_id !== groupId)
+    );
+    setGroupData((prevGroups) =>
+      prevGroups.filter((group) => group.group_id !== groupId)
+    );
     setSelectedGroup(null);
   };
 
   const handleJoinGroup = (group) => {
-
-    setGroupData(prev => prev.filter(g => g.group_id !== group.group_id));
-    setMyGroups(prev => [...prev, { ...group, is_joined: true }]);
+    setGroupData((prev) => prev.filter((g) => g.group_id !== group.group_id));
+    setMyGroups((prev) => [...prev, { ...group, is_joined: true }]);
   };
 
   const handleLeaveGroup = (group) => {
-
-    setMyGroups(prev => prev.filter(g => g.group_id !== group.group_id));
-    setGroupData(prev => [...prev, { ...group, is_joined: false }]);
+    setMyGroups((prev) => prev.filter((g) => g.group_id !== group.group_id));
+    setGroupData((prev) => [...prev, { ...group, is_joined: false }]);
   };
 
   const handleCancelRequest = (groupId) => {
-    setPendingGroups(prev => prev.filter(group => group.group_id !== groupId));
+    setPendingGroups((prev) =>
+      prev.filter((group) => group.group_id !== groupId)
+    );
   };
   const LeaveGroup = (groupId) => {
-    setMyGroups(prevGroups => prevGroups.filter(group => group.group_id !== groupId));
+    setMyGroups((prevGroups) =>
+      prevGroups.filter((group) => group.group_id !== groupId)
+    );
     handleFollow(groupId);
   };
 
@@ -575,29 +564,33 @@ export default function GroupsPage() {
 
             <div className="groups-tabs">
               <button
-                className={`tab-button ${activeTab === "my-groups" ? "active-tab" : ""
-                  }`}
+                className={`tab-button ${
+                  activeTab === "my-groups" ? "active-tab" : ""
+                }`}
                 onClick={() => handleTabChange("my-groups")}
               >
                 My Groups
               </button>
               <button
-                className={`tab-button ${activeTab === "discover" ? "active-tab" : ""
-                  }`}
+                className={`tab-button ${
+                  activeTab === "discover" ? "active-tab" : ""
+                }`}
                 onClick={() => handleTabChange("discover")}
               >
                 Discover
               </button>
               <button
-                className={`tab-button ${activeTab === "pending-groups" ? "active-tab" : ""
-                  }`}
+                className={`tab-button ${
+                  activeTab === "pending-groups" ? "active-tab" : ""
+                }`}
                 onClick={() => handleTabChange("pending-groups")}
               >
                 Pending Groups
               </button>
               <button
-                className={`tab-button ${activeTab === "invitations" ? "active-tab" : ""
-                  }`}
+                className={`tab-button ${
+                  activeTab === "invitations" ? "active-tab" : ""
+                }`}
                 onClick={() => handleTabChange("invitations")}
               >
                 Invitations
@@ -617,7 +610,7 @@ export default function GroupsPage() {
                 <div className="loading-message">Loading...</div>
               ) : activeTab === "invitations" ? (
                 (groupData || []).length > 0 ? (
-                  (groupData || []).map((invitation) => (
+                  (groupData || []).map((invitation) =>
                     invitation.user.username === invitation.group.admin ? (
                       <InvitationCard
                         key={invitation.invitation_id}
@@ -653,7 +646,7 @@ export default function GroupsPage() {
                         }}
                       />
                     )
-                  ))
+                  )
                 ) : (
                   <div className="no-invitations-message">
                     <p>You have no pending invitations.</p>
@@ -672,9 +665,9 @@ export default function GroupsPage() {
                       isDiscoverTab={false}
                       onLeave={handleLeaveGroup}
                       onDelete={handleDeleteGroup}
-                    // onLeave={() => {
-                    //   leaveGroup(group.group_id);
-                    // }}
+                      // onLeave={() => {
+                      //   leaveGroup(group.group_id);
+                      // }}
                     />
                   ))
                 ) : (
@@ -1006,27 +999,35 @@ export default function GroupsPage() {
                     </div>
                   ) : (
                     <button
-                      className={` ${selectedGroup.role === "member" ||
+                      className={` ${
+                        selectedGroup.role === "member" ||
                         activeTab === "pending-groups"
-                        ? "leave-group-btn"
-                        : "admin-action-btn"
-                        }`}
+                          ? "leave-group-btn"
+                          : "admin-action-btn"
+                      }`}
                       onClick={() => {
                         console.log(selectedGroup);
-                        handleFollow(selectedGroup.admin_id, selectedGroup.group_id);
+                        handleFollow(
+                          selectedGroup.admin_id,
+                          selectedGroup.group_id
+                        );
 
-                        if (selectedGroup.role === "member" && activeTab === "my-groups") {
-                          setMyGroups(prev =>
-                            prev.filter(g => g.group_id !== selectedGroup.group_id)
+                        if (
+                          selectedGroup.role === "member" &&
+                          activeTab === "my-groups"
+                        ) {
+                          setMyGroups((prev) =>
+                            prev.filter(
+                              (g) => g.group_id !== selectedGroup.group_id
+                            )
                           );
 
-                          setSelectedGroup(prev => ({
+                          setSelectedGroup((prev) => ({
                             ...prev,
-                            role: "none"
+                            role: "none",
                           }));
 
                           handleTabChange("pending-groups");
-
                         } else if (activeTab === "discover") {
                           if (selectedGroup.privacy === "private") {
                             handleTabChange("pending-groups");
@@ -1034,17 +1035,15 @@ export default function GroupsPage() {
                             handleTabChange("my-groups");
                           }
 
-                          setSelectedGroup(prev => ({
+                          setSelectedGroup((prev) => ({
                             ...prev,
-                            role: "member"
+                            role: "member",
                           }));
-
                         } else if (activeTab === "pending-groups") {
                           handleTabChange("discover");
                           setSelectedGroup(selectedGroup);
                         }
                       }}
-
                     >
                       <svg
                         width="16"
@@ -1071,8 +1070,8 @@ export default function GroupsPage() {
                       {selectedGroup.role === "member"
                         ? "Leave Group"
                         : activeTab === "pending-groups"
-                          ? "Cancel"
-                          : "Join Group"}
+                        ? "Cancel"
+                        : "Join Group"}
                     </button>
                   )}
                 </div>
@@ -1088,8 +1087,9 @@ export default function GroupsPage() {
             )}
             <div className="group-detail-tabs">
               <button
-                className={`tab-button ${groupView === "posts" ? "active-tab" : ""
-                  }`}
+                className={`tab-button ${
+                  groupView === "posts" ? "active-tab" : ""
+                }`}
                 onClick={() => {
                   fetchGroupDetails("posts", selectedGroup.group_id);
                   setGroupView("posts");
@@ -1098,8 +1098,9 @@ export default function GroupsPage() {
                 Posts
               </button>
               <button
-                className={`tab-button ${groupView === "members" ? "active-tab" : ""
-                  }`}
+                className={`tab-button ${
+                  groupView === "members" ? "active-tab" : ""
+                }`}
                 onClick={() => {
                   fetchGroupDetails("members", selectedGroup.group_id);
                   setGroupView("members");
@@ -1108,8 +1109,9 @@ export default function GroupsPage() {
                 Members
               </button>
               <button
-                className={`tab-button ${groupView === "events" ? "active-tab" : ""
-                  }`}
+                className={`tab-button ${
+                  groupView === "events" ? "active-tab" : ""
+                }`}
                 onClick={() => {
                   fetchGroupDetails("events", selectedGroup.group_id);
                   setGroupView("events");
@@ -1132,7 +1134,7 @@ export default function GroupsPage() {
               {groupView === "posts" && (
                 <div className="group-posts-container">
                   {selectedGroup.role === "guest" &&
-                    selectedGroup.privacy === "private" ? (
+                  selectedGroup.privacy === "private" ? (
                     <div className="empty-state">
                       <img src="/icons/no-posts.svg" alt="" />
                       <p>You are not allowed to see Posts</p>
@@ -1187,7 +1189,7 @@ export default function GroupsPage() {
                     <h3>Members ({selectedGroup.members?.length || 0})</h3>
                   </div>
                   {selectedGroup.role === "guest" &&
-                    selectedGroup.privacy === "private" ? (
+                  selectedGroup.privacy === "private" ? (
                     <div className="empty-state">
                       <p className="empty-title">
                         You are not allowed to see Members
@@ -1202,10 +1204,7 @@ export default function GroupsPage() {
                       ) : (
                         <div className="members-grid">
                           {selectedGroup.members?.map((member) => (
-                            <MemberCard
-                              key={member.user_id}
-                              member={member}
-                            />
+                            <MemberCard key={member.user_id} member={member} />
                           ))}
                         </div>
                       )}
@@ -1217,7 +1216,7 @@ export default function GroupsPage() {
               {groupView === "events" && (
                 <div className="group-events-container">
                   {selectedGroup.role === "guest" &&
-                    selectedGroup.privacy === "private" ? (
+                  selectedGroup.privacy === "private" ? (
                     <div className="empty-state">
                       <p className="empty-title">
                         You are not allowed to see Events
@@ -1229,13 +1228,13 @@ export default function GroupsPage() {
                         <h3>Upcoming Events</h3>
                         {(selectedGroup.role === "admin" ||
                           selectedGroup.role === "member") && (
-                            <button
-                              className="create-event-btn"
-                              onClick={() => setShowEventForm(true)}
-                            >
-                              Create Event
-                            </button>
-                          )}
+                          <button
+                            className="create-event-btn"
+                            onClick={() => setShowEventForm(true)}
+                          >
+                            Create Event
+                          </button>
+                        )}
                       </div>
 
                       <div className="events-scroll-container">
@@ -1253,7 +1252,6 @@ export default function GroupsPage() {
                               <p>No events available.</p>
                             )}
                           </div>
-
                         )}
                       </div>
                     </>

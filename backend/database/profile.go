@@ -39,12 +39,9 @@ func GetProfileInfo(user_id int64, following []structs.User) (structs.User, erro
 	if err != nil {
 		return user, err
 	}
-	if following != nil {
-		following = append(following, user)
-		user.Stories, err = GetStories(following)
-		if err != nil {
-			return user, err
-		}
+	user.Stories, err = GetStories(user, following)
+	if err != nil {
+		return user, err
 	}
 	return user, err
 }

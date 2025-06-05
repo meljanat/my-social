@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, use } from "react";
 import "../styles/StoriesComponent.css";
+import { sendError } from "next/dist/server/api-utils";
 
 export default function StoriesComponent({ storiesUsers }) {
   const [storyUsers, setStoryUsers] = useState([]);
@@ -21,7 +22,7 @@ export default function StoriesComponent({ storiesUsers }) {
     setStoryUsers(storiesUsers);
   }, []);
 
-  async function storySeenn(userIndex) {
+  async function storySeenn(story_id) {
     try {
       const response = await fetch("http://localhost:8404/seen_story", {
         method: "POST",
@@ -29,42 +30,19 @@ export default function StoriesComponent({ storiesUsers }) {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(storyUsers[userIndex].user.user_id),
+        body: JSON.stringify(story_id),
       });
-      console.log(storyUsers[userIndex].user.user_id);
 
       if (!response.ok) {
         throw new Error("Failed to mark story as seen");
       }
 
       const data = await response.json();
-      console.log("Story marked as seen:", data);
     } catch (error) {
       console.error("Error marking story as seen:", error);
     }
   }
 
-  async function createNewStory() {
-    const formData = new FormData();
-    if (storyFormInput.storyImage) {
-      formData.append("storyImage", storyFormInput.storyImage);
-    }
-    try {
-      console.log("Form data:", formData);
-      const response = await fetch("http://localhost:8404/story", {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-      if (!response.ok) {
-        throw new Error("Failed to upload story");
-      }
-      const data = await response.json();
-      console.log("Story uploaded successfully:", data);
-    } catch (error) {
-      console.error("Error uploading story:", error);
-    }
-  }
   useEffect(() => {
     return () => {
       clearInterval(progressIntervalRef.current);
@@ -108,14 +86,15 @@ export default function StoriesComponent({ storiesUsers }) {
   }, [activeUserIndex, activeStoryIndex, isPaused]);
 
   const handleStoryClick = (userIndex) => {
-    console.log("User Index:", userIndex);
-    storySeenn(userIndex);
+    storySeenn(storyUsers[userIndex].stories[0].story_id);
     setActiveUserIndex(userIndex);
     setActiveStoryIndex(0);
     setProgress(0);
 
     const updatedUsers = [...storyUsers];
-    updatedUsers[userIndex].hasUnseenStory = false;
+    updatedUsers[userIndex].unseen_story = true;
+    console.log("dertvu", updatedUsers);
+
     setStoryUsers(updatedUsers);
   };
 
@@ -127,19 +106,18 @@ export default function StoriesComponent({ storiesUsers }) {
 
   const goToNextStory = () => {
     const user = storyUsers[activeUserIndex];
-
     if (activeStoryIndex < user.stories.length - 1) {
       setActiveStoryIndex(activeStoryIndex + 1);
     } else if (activeUserIndex < storyUsers.length - 1) {
       setActiveUserIndex(activeUserIndex + 1);
       setActiveStoryIndex(0);
-
       const updatedUsers = [...storyUsers];
-      updatedUsers[activeUserIndex + 1].hasUnseenStory = false;
+      updatedUsers[activeUserIndex + 1].unseen_story = false;
       setStoryUsers(updatedUsers);
     } else {
       closeStoryModal();
     }
+    storySeenn(user.stories[activeStoryIndex].story_id);
   };
 
   const goToPreviousStory = () => {
@@ -185,45 +163,70 @@ export default function StoriesComponent({ storiesUsers }) {
     });
   };
 
-  const handleShareStory = () => {
-    console.log("Sharing story...");
-    
+  const createNewStory = async () => {
     if (storyFormInput.storyImage) {
-      createNewStory();
-
-      const newStory = {
-        id: Date.now(),
-        image: storyFormInput.storyImage,
-        duration: 5000,
-      };
-
-      const currentUser = storyUsers.find(
-        (user) => user.username === "You"
-      ) || {
-        id: Date.now(),
-        username: "You",
-        avatar: storyFormInput.avatar,
-        hasUnseenStory: true,
-        stories: [],
-      };
-
-      const updatedCurrentUser = {
-        ...currentUser,
-        stories: [...currentUser.stories, newStory],
-        hasUnseenStory: true,
-      };
-
-      let updatedUsers;
-      if (storyUsers.find((user) => user.username === "You")) {
-        updatedUsers = storyUsers.map((user) =>
-          user.username === "You" ? updatedCurrentUser : user
-        );
-      } else {
-        updatedUsers = [updatedCurrentUser, ...storyUsers];
+      const formData = new FormData();
+      if (storyFormInput.storyImage) {
+        formData.append("storyImage", storyFormInput.storyImage);
       }
+      try {
+        const response = await fetch("http://localhost:8404/story", {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        });
+        if (!response.ok) {
+          throw new Error("Failed to upload story");
+        }
+        const data = await response.json();
 
-      setStoryUsers(updatedUsers);
-      closeAddStoryModal();
+        const newStory = {
+          id: data.stories.id,
+          image: data.stories.image,
+          duration: 5000,
+        };
+
+        const currentUser = storyUsers.find(
+          (user) => user.username === data.user.username
+        ) || {
+          user: {
+            id: data.stories.id,
+            username: data.user.username,
+            avatar: data.user.avatar,
+          },
+          unseen_story: data.stories.status,
+          stories: [],
+        };
+
+        console.log("currentUser", currentUser);
+
+        const updatedCurrentUser = {
+          ...currentUser,
+          stories: [...currentUser.stories, newStory],
+          unseen_story: false,
+        };
+
+        let updatedUsers;
+        if (
+          storyUsers.find((user) => {
+            return user.user.username === data.user.username;
+          })
+        ) {
+          updatedUsers = storyUsers.map((user) =>
+            user.user.username === data.user.username
+              ? updatedCurrentUser
+              : user
+          );
+        } else {
+          updatedUsers = [updatedCurrentUser, ...storyUsers];
+        }
+        console.log("updateUser", updatedUsers);
+
+        setStoryUsers(updatedUsers);
+        closeAddStoryModal();
+      } catch (error) {
+        console.error("Error uploading story:", error);
+      }
     }
   };
   return (
@@ -245,7 +248,7 @@ export default function StoriesComponent({ storiesUsers }) {
           <div key={index} className="story-item">
             <div
               className={`story-circle ${
-                user.hasUnseenStory ? "unseen-story" : "seen-story"
+                !user.unseen_story ? "unseen-story" : "seen-story"
               }`}
               onClick={() => {
                 console.log("Clicked on user:", index);
@@ -373,11 +376,13 @@ export default function StoriesComponent({ storiesUsers }) {
 
               <button
                 className="share-button"
-                onClick={handleShareStory}
+                onClick={createNewStory}
                 disabled={!storyFormInput?.storyImage}
                 style={{
                   opacity: storyFormInput?.storyImage ? 1 : 0.6,
-                  cursor: storyFormInput?.storyImage ? "pointer" : "not-allowed",
+                  cursor: storyFormInput?.storyImage
+                    ? "pointer"
+                    : "not-allowed",
                 }}
               >
                 Share Story

@@ -81,8 +81,9 @@ type Comment struct {
 }
 
 type Stories struct {
-	User    User    `json:"user" sqlite:"user"`
-	Stories []Story `json:"stories" sqlite:"stories"`
+	UnseenStory bool    `json:"unseen_story" sqlite:"unseen_story"`
+	User        User    `json:"user" sqlite:"user"`
+	Stories     []Story `json:"stories" sqlite:"stories"`
 }
 
 type Story struct {

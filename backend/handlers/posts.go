@@ -236,7 +236,7 @@ func CreatePostGroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	member, err := database.IsMemberGroup(group_id, user.ID)
+	member, err := database.IsMemberGroup(user.ID, group_id)
 	if err != nil {
 		fmt.Println("Failed to check if user is a member", err)
 		response := map[string]string{"error": "Failed to check if user is a member"}

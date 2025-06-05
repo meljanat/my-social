@@ -80,7 +80,9 @@ func CreateStoryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if database.StoryStatus(story_id, followers) != nil {
+	followers = append(followers, user.ID)
+
+	if err := database.StoryStatus(story_id, followers); err != nil {
 		fmt.Println("Failed to update story status", err)
 		response := map[string]string{"error": "Failed to update story status"}
 		w.WriteHeader(http.StatusInternalServerError)

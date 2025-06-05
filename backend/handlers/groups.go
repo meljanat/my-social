@@ -160,7 +160,7 @@ func AddMembers(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-
+	fmt.Println("group_id", group_id)
 	_, err = database.GetGroupById(group_id)
 	if err != nil {
 		fmt.Println("Failed to retrieve group", err)

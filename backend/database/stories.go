@@ -1,7 +1,7 @@
 package database
 
 import (
-	"fmt"
+	"database/sql"
 	"time"
 
 	structs "social-network/data"
@@ -19,26 +19,27 @@ func CreateStory(image string, user_id int64) (int64, error) {
 
 func StoryStatus(story_id int64, followers []int64) error {
 	for _, follower := range followers {
-		_, err := DB.Exec("INSERT INTO stories_status (story_id, user_id, read) VALUES (?, ?, ?)", story_id, follower, true)
+		_, err := DB.Exec("INSERT INTO stories_status (story_id, user_id, read) VALUES (?, ?, ?)", story_id, follower, false)
 		return err
 	}
 	return nil
 }
 
-func GetStories(following []structs.User) ([]structs.Stories, error) {
+func GetStories(user structs.User, following []structs.User) ([]structs.Stories, error) {
+	following = append(following, user)
 	var stories []structs.Stories
 	stories_ids := []int64{}
 	for _, usr := range following {
 		var user_stories structs.Stories
 		user_stories.User = usr
-		rows, err := DB.Query("SELECT s.id, s.image, ss.read, s.created_at FROM stories s LEFT JOIN stories_status ss ON s.id == ss.story_id WHERE s.user_id = ?", usr.ID)
+		rows, err := DB.Query("SELECT id, image, created_at FROM stories WHERE user_id = ?", usr.ID)
 		if err != nil {
 			return nil, err
 		}
 		defer rows.Close()
 		for rows.Next() {
 			var story structs.Story
-			if err := rows.Scan(&story.ID, &story.Image, &story.IsRead, &story.CreatedAt); err != nil {
+			if err := rows.Scan(&story.ID, &story.Image, &story.CreatedAt); err != nil {
 				return nil, err
 			}
 			if time.Since(story.CreatedAt) > 24*time.Hour {
@@ -48,6 +49,8 @@ func GetStories(following []structs.User) ([]structs.Stories, error) {
 			user_stories.Stories = append(user_stories.Stories, story)
 		}
 		if len(user_stories.Stories) > 0 {
+			GetStatusStory(&user_stories.Stories, user.ID)
+			user_stories.UnseenStory = user_stories.Stories[len(user_stories.Stories)-1].IsRead
 			stories = append(stories, user_stories)
 		}
 	}
@@ -59,13 +62,29 @@ func GetStories(following []structs.User) ([]structs.Stories, error) {
 	return stories, nil
 }
 
+func GetStatusStory(stories *[]structs.Story, user_id int64) error {
+	for i := 0; i < len(*stories); i++ {
+		err := DB.QueryRow("SELECT read FROM stories_status WHERE story_id = ? AND user_id = ?", (*stories)[i].ID, user_id).Scan(&(*stories)[i].IsRead)
+		if err == sql.ErrNoRows {
+			InsertStatusStory((*stories)[i].ID, user_id)
+		} else if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func InsertStatusStory(story_id int64, user_id int64) error {
+	_, err := DB.Exec("INSERT INTO stories_status (story_id, user_id, read) VALUES (?, ?, ?)", story_id, user_id, false)
+	return err
+}
+
 func SeenStory(id_story int64, id_user int64) error {
-	_, err := DB.Exec("UPDATE stories_status SET read = 1 WHERE story_id = ? AND user_id = ?", id_story, id_user)
+	_, err := DB.Exec("UPDATE stories_status SET read = ? WHERE story_id = ? AND user_id = ?", 1, id_story, id_user)
 	return err
 }
 
 func DeleteSt1ory(id_story int64) error {
 	_, err := DB.Exec("DELETE FROM stories WHERE id = ?", id_story)
-	fmt.Println("Deleting story with ID:", id_story, err)
 	return err
 }

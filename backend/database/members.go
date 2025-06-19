@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+
 	structs "social-network/data"
 )
 

@@ -10,6 +10,8 @@ export default function NotificationPage() {
   const [notifications, setNotifications] = useState([]);
   const [hasMoreNotifications, setHasMoreNotifications] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const container = useRef(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchNotifications();
@@ -44,7 +46,7 @@ export default function NotificationPage() {
   const markAllAsRead = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8404/notifications/mark_all_as_read",
+        "http://localhost:8404/notifications/mark_notifications_as_read",
         {
           method: "POST",
           credentials: "include",
@@ -80,7 +82,7 @@ export default function NotificationPage() {
   const markAsRead = async (notification) => {
     try {
       const response = await fetch(
-        `http://localhost:8404/notifications/mark_as_read?id=${notification.notification_id}`,
+        `http://localhost:8404/notifications/read_notification?id=${notification.notification_id}`,
         {
           method: "POST",
           credentials: "include",
@@ -141,9 +143,9 @@ export default function NotificationPage() {
 
         <div className="notification-list" ref={container}>
           {notifications.length
-            ? notifications.map((notification, index) => (
+            ? notifications.map((notification) => (
               <NotificationCard
-                key={index}
+                key={notification.notification_id}
                 notification={notification}
                 onClick={() => markAsRead(notification)}
               />

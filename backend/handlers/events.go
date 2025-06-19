@@ -74,7 +74,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if member, err := database.IsMemberGroup(event.GroupID, user.ID); err != nil || !member {
+	if member, err := database.IsMemberGroup(user.ID, event.GroupID); err != nil || !member {
 		fmt.Println("User is not a member of the group", err)
 		response := map[string]string{"error": "User is not a member of the group"}
 		w.WriteHeader(http.StatusUnauthorized)
@@ -227,6 +227,8 @@ func GetEventHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	event.ID = event_id
+	event.GroupID = group_id
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(event)
@@ -314,8 +316,6 @@ func JoinToEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("event", event)
-
 	_, err = database.GetGroupById(event.GroupID)
 	if err != nil {
 		fmt.Println("Error retrieving group:", err)
@@ -326,9 +326,9 @@ func JoinToEventHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	member, err := database.IsMemberGroup(user.ID, event.GroupID)
-	if err != nil || member {
-		fmt.Println("User is already a member of the group", err)
-		response := map[string]string{"error": "User is already a member of the group"}
+	if err != nil || !member {
+		fmt.Println("User is not a member of the group", err)
+		response := map[string]string{"error": "User is not a member of the group"}
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response)
 		return

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import LeftSidebar from "./components/LeftSideBar";
 import ProfileCard from "./components/ProfileCard";
 import TopGroups from "./components/TopGroups";
@@ -73,7 +73,7 @@ export default function Home() {
       const data = await response.json();
 
       if (!data.posts || !Array.isArray(data.posts)) {
-        console.error("Posts is not an array or missing", data.posts);
+        console.log("Posts is not an array or missing", data.posts);
         if (offset === 0) setPosts([]);
         setHasMorePosts(false);
         return [];

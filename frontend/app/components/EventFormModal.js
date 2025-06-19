@@ -48,7 +48,7 @@ export default function EventFormModal({
     formData.append("start_date", eventFormInput.start_date);
     formData.append("end_date", eventFormInput.end_date);
     formData.append("location", eventFormInput.location);
-    formData.append("group_id", eventFormInput.group_id);
+    formData.append("group_id", group.group_id);
 
     if (eventFormInput.eventImage) {
       formData.append("eventImage", eventFormInput.eventImage);
@@ -69,26 +69,26 @@ export default function EventFormModal({
 
       const responseData = await response.json();
       console.log(responseData);
-      
 
-        const newEvent = {
-          event_id: responseData.id || Date.now(),
-          name: eventFormInput.name,
-          description: eventFormInput.description,
-          start_date: eventFormInput.start_date,
-          end_date: eventFormInput.end_date,
-          location: eventFormInput.location,
-          creator: `${user.first_name} ${user.last_name}`,
-          creator_id: user.id,
-          created_at: "Just now",
-          image: eventFormInput.eventImage
-            ? URL.createObjectURL(eventFormInput.eventImage)
-            : null,
-        };
 
-        if (onEventCreated) {
-          onEventCreated(newEvent);
-        }
+      const newEvent = {
+        event_id: responseData.id || Date.now(),
+        name: eventFormInput.name,
+        description: eventFormInput.description,
+        start_date: eventFormInput.start_date,
+        end_date: eventFormInput.end_date,
+        location: eventFormInput.location,
+        creator: `${user.first_name} ${user.last_name}`,
+        creator_id: user.id,
+        created_at: "Just now",
+        image: eventFormInput.eventImage
+          ? URL.createObjectURL(eventFormInput.eventImage)
+          : null,
+      };
+
+      if (onEventCreated) {
+        onEventCreated(newEvent);
+      }
 
       onClose();
     } catch (error) {
@@ -141,7 +141,7 @@ export default function EventFormModal({
                 }}
               />
             </div>
-            {my_groups && (
+            {/* {my_groups && (
               <div className="form-group">
                 <label htmlFor="event-group">Select Group</label>
                 <select
@@ -163,7 +163,7 @@ export default function EventFormModal({
                   ))}
                 </select>
               </div>
-            )}{" "}
+            )}{" "} */}
             <div className="form-group">
               <label htmlFor="event-start-datetime">Start Date & Time</label>
               <input

@@ -1,20 +1,18 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "../components/NavBar";
-import EventCard from "../components/EventCard";
 import EventFormModal from "../components/EventFormModal";
 import "../styles/EventsPage.css";
 import useInfiniteScroll from "../components/useInfiniteScroll";
 
 export default function EventsPage() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState("my-events");
   const [showEventForm, setShowEventForm] = useState(false);
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMoreEvents, setHasMoreEvents] = useState(true);
+  const router = useRouter();
   let offset = 0;
 
   const fetchEvents = async (type) => {
@@ -48,8 +46,6 @@ export default function EventsPage() {
     fetchEvents("my-events");
   }, []);
 
-
-
   useInfiniteScroll({
     fetchMoreCallback: async () => {
       if (!selectedType || !hasMoreEvents) return;
@@ -75,67 +71,19 @@ export default function EventsPage() {
 
     if (tab === "my-events") {
       fetchEvents("my-events");
-      // setFilteredEvents(events.filter((event) => event.is_attending));
     } else if (tab === "discover") {
       fetchEvents("discover");
-
-      // setFilteredEvents(events.filter((event) => !event.is_attending));
     }
-    // else {
-    //   setFilteredEvents(events);
-    // }
   };
-
-  // const handleSearch = (e) => {
-  //   const query = e.target.value.toLowerCase();
-  //   setSearchQuery(query);
-
-  //   let filtered;
-  //   if (activeTab === "my-events") {
-  //     filtered = events.filter(
-  //       (event) =>
-  //         event.is_attending &&
-  //         (event.title.toLowerCase().includes(query) ||
-  //           event.location.toLowerCase().includes(query) ||
-  //           event.description.toLowerCase().includes(query))
-  //     );
-  //   } else if (activeTab === "discover") {
-  //     filtered = events.filter(
-  //       (event) =>
-  //         !event.is_attending &&
-  //         (event.title.toLowerCase().includes(query) ||
-  //           event.location.toLowerCase().includes(query) ||
-  //           event.description.toLowerCase().includes(query))
-  //     );
-  //   } else {
-  //     filtered = events.filter(
-  //       (event) =>
-  //         event.title.toLowerCase().includes(query) ||
-  //         event.location.toLowerCase().includes(query) ||
-  //         event.description.toLowerCase().includes(query)
-  //     );
-  //   }
-
-  //   setFilteredEvents(filtered);
-  // };
 
   const handleEventCreated = (newEvent) => {
     setEvents((prevEvents) => [newEvent, ...prevEvents]);
     setFilteredEvents((prevFiltered) => [newEvent, ...prevFiltered]);
   };
 
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading events...</p>
-      </div>
-    );
-  }
-
   const handleInterestedClick = async (eventId, groupId) => {
     console.log(groupId, eventId);
-    
+
     try {
       const response = await fetch("http://localhost:8404/join_to_event", {
         method: "POST",
@@ -161,8 +109,15 @@ export default function EventsPage() {
       console.error("Error joining/leaving event:", err.message);
     }
   };
-  console.log(events);
-  
+
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading events...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="events-page-container">
@@ -205,20 +160,6 @@ export default function EventsPage() {
             events.map((event) => (
               <div key={event.event_id} className="event-card-container">
                 <div className="event-card-wrapper">
-                  {/* <div className="event-date-badge">
-            <span className="event-month">
-              {new Date(event.start_date).toLocaleString("default", {
-                month: "short",
-              })}
-            </span>
-            <span className="event-day">
-              {new Date(event.start_date).getDate()}
-            </span>
-            <span className="event-year">
-              {new Date(event.start_date).getFullYear()}
-            </span>
-          </div> */}
-
                   <div className="event-card-content">
                     <h3 className="event-title">{event.title}</h3>
 
@@ -343,13 +284,11 @@ export default function EventsPage() {
                         >
                           {event.is_attending ? "Attending" : "Interested"}
                         </button>
-
-
                       )}
 
                       <button
                         className="event-details-btn"
-                        onClick={() => router.push(`/event/${event.event_id}`)}
+                        onClick={() => router.push(`/event?id=${event.group_id}&event=${event.event_id}`)}
                       >
                         View Details
                       </button>

@@ -228,7 +228,7 @@ export default function PostFormModal({
               >
                 {categories.length > 0 ? (
                   categories.map((category) => (
-                    <option key={category.name} value={category.id}>
+                    <option key={category.name} value={category.category_id}>
                       {category.name}
                     </option>
                   ))

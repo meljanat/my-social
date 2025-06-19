@@ -6,11 +6,12 @@ import (
 	"html"
 	"log"
 	"net/http"
-	structs "social-network/data"
-	"social-network/database"
 	"strconv"
 	"strings"
 	"time"
+
+	structs "social-network/data"
+	"social-network/database"
 )
 
 func CreateGrpoupHandler(w http.ResponseWriter, r *http.Request) {
@@ -323,7 +324,7 @@ func GroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	member, err := database.IsMemberGroup(group_id, user.ID)
+	member, err := database.IsMemberGroup(user.ID, group_id)
 	if err != nil {
 		fmt.Println("Failed to check if user is a member", err)
 		response := map[string]string{"error": "Failed to check if user is a member"}

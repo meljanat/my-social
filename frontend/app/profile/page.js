@@ -27,8 +27,7 @@ export default function ProfilePage() {
   const [error, setError] = useState(null);
   const [activeSubTab, setActiveSubTab] = useState("posts");
   const [savedGroupPosts, setSavedGroupPosts] = useState([]);
-  const [isLoadingSavedGroupPosts, setIsLoadingSavedGroupPosts] =
-    useState(false);
+  const [isLoadingSavedGroupPosts, setIsLoadingSavedGroupPosts] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -54,7 +53,7 @@ export default function ProfilePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: parseInt(user_id),
+          user_id: parseInt(user_id)
         }),
         credentials: "include",
       });
@@ -76,7 +75,7 @@ export default function ProfilePage() {
           return {
             ...prev,
             type: actionType,
-            total_followers: newFollowers,
+            total_followers: newFollowers
           };
         });
 
@@ -646,6 +645,7 @@ export default function ProfilePage() {
                     <PostsComponent
                       key={post.post_id}
                       post={post}
+                      setPosts={setUserPosts}
                     />
                   ))}
                 </div>
@@ -792,6 +792,7 @@ export default function ProfilePage() {
                         <PostsComponent
                           key={post.post_id}
                           post={post}
+                          setPosts={setSavedPosts}
                         />
                       ))}
                     </div>

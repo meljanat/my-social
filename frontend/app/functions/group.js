@@ -18,9 +18,13 @@ async function joinGroup(group_id) {
   }
 }
 
+async function leaveGroup(group_id) {
+  console.log("Leaving group with ID:", group_id);
+}
+
 async function InvitUsers(group_id) {
   console.log("group_id", group_id);
-  
+
   try {
     const response = await fetch(
       `http://localhost:8404/add_members?group_id=${group_id}`,
@@ -69,4 +73,4 @@ async function fetchGroupData(endpoint) {
     setIsLoading(false);
   }
 }
-export { joinGroup, InvitUsers, fetchGroupData };
+export { joinGroup, leaveGroup, InvitUsers, fetchGroupData };

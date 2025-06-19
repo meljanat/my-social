@@ -34,7 +34,7 @@ const NotificationsComponent = () => {
   const markAllAsRead = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8404/notifications/mark_all_as_read",
+        "http://localhost:8404/notifications/mark_notifications_as_read",
         {
           method: "POST",
           credentials: "include",
@@ -55,7 +55,7 @@ const NotificationsComponent = () => {
 
   const markAsRead = async (notification) => {
     try {
-      const response = await fetch(`http://localhost:8404/notifications/mark_as_read?id=${notification.notification_id}`, {
+      const response = await fetch(`http://localhost:8404/notifications/read_notification?id=${notification.notification_id}`, {
         method: "POST",
         credentials: "include",
       });

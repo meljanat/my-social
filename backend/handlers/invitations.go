@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+
 	structs "social-network/data"
 	"social-network/database"
-	"strconv"
 )
 
 func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
@@ -406,7 +407,7 @@ func AcceptInvitationHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		isMember, err := database.IsMemberGroup(group.ID, invitation.User)
+		isMember, err := database.IsMemberGroup(invitation.User, group.ID)
 		if err != nil {
 			fmt.Println("Failed to check if user is member of the group", err)
 			response := map[string]string{"error": "Failed to check if user is member of the group"}
@@ -550,7 +551,7 @@ func DeclineInvitationHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		isMember, err := database.IsMemberGroup(group.ID, invitation.User)
+		isMember, err := database.IsMemberGroup(invitation.User, group.ID)
 		if err != nil {
 			fmt.Println("Failed to check if user is member of the group", err)
 			response := map[string]string{"error": "Failed to check if user is member of the group"}
@@ -673,7 +674,7 @@ func AcceptOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isMember, err := database.IsMemberGroup(group.ID, user.ID)
+	isMember, err := database.IsMemberGroup(user.ID, group.ID)
 	if err != nil {
 		fmt.Println("Failed to check if user is member of the group", err)
 		response := map[string]string{"error": "Failed to check if user is member of the group"}
@@ -793,7 +794,7 @@ func DeclineOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isMember, err := database.IsMemberGroup(group.ID, user.ID)
+	isMember, err := database.IsMemberGroup(user.ID, group.ID)
 	if err != nil {
 		fmt.Println("Failed to check if user is member of the group", err)
 		response := map[string]string{"error": "Failed to check if user is member of the group"}

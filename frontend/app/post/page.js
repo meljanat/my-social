@@ -72,7 +72,7 @@ export default function PostPage() {
     };
 
     fetchPost(post_id);
-  }, []);
+  }, [post_id]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();

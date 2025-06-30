@@ -46,7 +46,7 @@ export default function NotificationPage() {
   const markAllAsRead = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8404/notifications/mark_notifications_as_read",
+        "http://localhost:8404/mark_notifications_as_read",
         {
           method: "POST",
           credentials: "include",
@@ -82,7 +82,7 @@ export default function NotificationPage() {
   const markAsRead = async (notification) => {
     try {
       const response = await fetch(
-        `http://localhost:8404/notifications/read_notification?id=${notification.notification_id}`,
+        `http://localhost:8404/read_notification?id=${notification.notification_id}`,
         {
           method: "POST",
           credentials: "include",
@@ -99,14 +99,20 @@ export default function NotificationPage() {
         )
       );
       if (notification.type_notification === "invitation") {
-        router.push("/profile?id=" + notification.user.user_id);
+        router.push("/profile?id=" + notification.user_id);
       } else if (
         notification.type_notification === "like" ||
         notification.type_notification === "comment"
       ) {
         router.push("/post?id=" + notification.post_id);
       } else if (notification.type_notification === "event") {
-        router.push("/groups");
+        router.push("/event?id=" + notification.event_id);
+      } else if (notification.type_notification === "group") {
+        router.push("/group?id=" + notification.group_id);
+      } else if (notification.type_notification === "join_request") {
+        router.push("/group?id=" + notification.group_id);
+      } else if (notification.type_notification === "save") {
+        router.push("/post?id=" + notification.post_id);
       }
     } catch (error) {
       console.error("Error marking notification as read:", error.message);

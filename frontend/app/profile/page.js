@@ -131,7 +131,7 @@ export default function ProfilePage() {
         const data = await response.json();
         console.log("saved posts data", data);
         setIsLoadingSavedPosts(false);
-        setSavedPostsis_follower(data || []);
+        setSavedPosts(data || []);
       } else {
         console.error("Failed to fetch saved posts");
       }

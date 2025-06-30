@@ -49,9 +49,33 @@ func GetNotifications(notified_id, offset int64) ([]structs.Notification, error)
 			return nil, err
 		}
 		notification.CreatedAt = TimeAgo(date)
+		notification.NotificationMessage = SetNotificationMessage(notification.TypeNotification)
 		notifications = append(notifications, notification)
 	}
 	return notifications, nil
+}
+
+func SetNotificationMessage(type_notification string) string {
+	switch type_notification {
+	case "like":
+		return "liked your post"
+	case "comment":
+		return "commented on your post"
+	case "save":
+		return "saved your post"
+	case "follow":
+		return "started following you"
+	case "follow_request":
+		return "sent you a follow request"
+	case "group":
+		return "invited you to join a group"
+	case "group_request":
+		return "requested to join your group"
+	case "event":
+		return "invited you to an event"
+	default:
+		return "sent you a notification"
+	}
 }
 
 func GetCountNotifications(user_id int64) (int64, error) {

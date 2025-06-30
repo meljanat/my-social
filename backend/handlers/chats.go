@@ -49,6 +49,11 @@ func GetConnectionsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(connections)
 }
 
+func GetUserHandler(w http.ResponseWriter, r *http.Request) {
+	// check if the user is followed by you or if not and his account is private
+	// to show if you can send him a message or not
+}
+
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		fmt.Println("Method not allowed", r.Method)

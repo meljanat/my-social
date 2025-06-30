@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import "../../styles/MessagesPage.css";
 import { addToListeners, removeFromListeners } from "../websocket/ws.js";
 import { websocket } from "../websocket/ws.js";
@@ -89,6 +89,7 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
   const [users, setUsers] = useState([]);
+  const [canSendMessage, setCanSendMessage] = useState(true);
   const [onlineUsers, setOnlineUsers] = useState(null);
   const [groups, setGroups] = useState([]);
   const [openEmojiSection, setOpenEmojiSection] = useState(false);
@@ -100,6 +101,54 @@ export default function MessagesPage() {
   const usersListRef = useRef(null);
   const sidebarRef = useRef(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const selectedUserId = searchParams.get("user");
+  const selectedGroupId = searchParams.get("group");
+  // const selectedTab = searchParams.get("tab");
+
+  useEffect(() => {
+    if (!selectedUserId && !selectedGroupId) return;
+    if (!users?.length && !groups?.length) return;
+
+    const user = selectedUserId ? users?.find(u => u.user_id == selectedUserId) : null;
+    const group = selectedGroupId ? groups?.find(g => g.group_id == selectedGroupId) : null;
+
+    if (user || group) {
+      setSelectedUser(user || group);
+      handleUserSelect(user || group);
+    } else {
+      getUserChat(selectedUserId, selectedGroupId).then((data) => {
+        if (data) {
+          setSelectedUser(data);
+          handleUserSelect(data);
+          setCanSendMessage(data.can_message);
+        } else {
+          setSelectedUser(null);
+        }
+      });
+    }
+  }, [selectedUserId, selectedGroupId, users, groups]);
+
+  useEffect(() => {
+    if (selectedGroupId) {
+      setActiveTab("groups");
+    } else {
+      setActiveTab("friends");
+    }
+  }, [selectedUserId, selectedGroupId]);
+
+  const getUserChat = async (user_id = 0, group_id = 0) => {
+    return await fetch(`http://localhost:8404/get_user?user_id=${user_id}&group_id=${group_id}`, {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((response) => response.json())
+      .catch((error) => {
+        console.error("Error fetching user chat:", error);
+        return null;
+      });
+  }
 
   const handleSeeProfile = () => {
     if (!selectedUser) return;
@@ -123,7 +172,6 @@ export default function MessagesPage() {
           }
         );
         const data = await response.json();
-        console.log(data);
 
         setUsers(data);
 
@@ -348,33 +396,36 @@ export default function MessagesPage() {
           >
             <ul className="users-list">
               {activeTab === "friends"
-                ? users
-                  ? users.map((user) => (
-                    <UserCard
-                      key={user.user_id}
-                      user={user}
-                      isActive={
-                        selectedUser && selectedUser.user_id === user.user_id
-                      }
-                      onClick={() => {
-                        handleUserSelect(user);
-                        user.total_messages = 0;
-                      }}
-                    />
-                  ))
-                  : ""
-                : groups
-                  ? groups.map((group) => (
-                    <UserCard
-                      key={group.group_id}
-                      user={group}
-                      isActive={
-                        selectedUser && selectedUser.id === group.group_id
-                      }
-                      onClick={() => handleUserSelect(group)}
-                    />
-                  ))
-                  : ""}
+                ? users?.length &&
+                users.map((user) => (
+                  <UserCard
+                    key={user.user_id}
+                    user={user}
+                    isActive={
+                      selectedUser && selectedUser.user_id === user.user_id
+                    }
+                    onClick={() => {
+                      // handleUserSelect(user);
+                      // user.total_messages = 0;
+                      router.push(`/messages?user=${user.user_id}`)
+                    }}
+                  />
+                ))
+                : groups?.length &&
+                groups.map((group) => (
+                  <UserCard
+                    key={group.group_id}
+                    user={group}
+                    isActive={
+                      selectedUser && selectedUser.id === group.group_id
+                    }
+                    onClick={() => {
+                      // handleUserSelect(group)
+                      router.push(`/messages?group=${group.group_id}`)
+                    }}
+                  />
+                ))
+              }
             </ul>
           </div>
         </div>
@@ -457,62 +508,68 @@ export default function MessagesPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <form className="message-input-form" onSubmit={handleSendMessage}>
-                <button type="button" className="attachment-button">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-                <div className="emoji-toggle">
-                  <button
-                    onClick={() => {
-                      toggleEmojiSection();
-                    }}
-                  >
-                    😄
+              {canSendMessage ? (
+                <form className="message-input-form" onSubmit={handleSendMessage}>
+                  <button type="button" className="attachment-button">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </button>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  className="message-input"
-                />
-                <button type="submit" className="send-button">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                </button>
-                {openEmojiSection && (
-                  <EmojiSection
-                    onEmojiSelect={(emoji) => {
-                      setNewMessage((prev) => prev + emoji);
-                    }}
+                  <div className="emoji-toggle">
+                    <button
+                      onClick={() => {
+                        toggleEmojiSection();
+                      }}
+                    >
+                      😄
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Type a message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    className="message-input"
                   />
-                )}
-              </form>
+                  <button type="submit" className="send-button">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </button>
+                  {openEmojiSection && (
+                    <EmojiSection
+                      onEmojiSelect={(emoji) => {
+                        setNewMessage((prev) => prev + emoji);
+                      }}
+                    />
+                  )}
+                </form>
+              ) : (
+                <div className="message-input-disabled">
+                  <p>You are not allowed to send messages in this chat.</p>
+                </div>
+              )}
             </>
           ) : (
             <div className="no-conversation-selected">

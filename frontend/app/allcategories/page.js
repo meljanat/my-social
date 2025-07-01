@@ -1,13 +1,19 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import PostComponent from "../components/PostComponent";
+import styles from "../styles/AllCategories.module.css";
 
 export default function AllCategories() {
   const [categories, setCategories] = useState([]);
   const [posts, setPosts] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
+  const [error, setError] = useState(null);
 
   async function fetchCategories() {
+    setIsLoadingCategories(true);
+    setError(null);
     try {
       const response = await fetch("http://localhost:8404/categories", {
         method: "GET",
@@ -22,90 +28,135 @@ export default function AllCategories() {
         setCategories(data);
 
         if (data.length > 0) {
-          const topCategory = data.reduce((max, cat) =>
-            (cat.count > max.count ? cat : max), data[0]);
+          const topCategory = data.reduce(
+            (max, cat) => (cat.count > max.count ? cat : max),
+            data[0]
+          );
           hundleClick(topCategory.category_id);
         }
       } else {
-        console.error("Failed to fetch categories");
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to fetch categories.");
       }
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      setError("Network error while fetching categories.");
+    } finally {
+      setIsLoadingCategories(false);
     }
   }
 
-
   async function hundleClick(id) {
     setActiveCategory(id);
+    setIsLoadingPosts(true);
+    setError(null);
     try {
-      const response = await fetch(`http://localhost:8404/posts_category?category_id=${id}&offset=0`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:8404/posts_category?category_id=${id}&offset=0`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
         setPosts(data);
       } else {
-        const error = await response.json();
-        console.error("Failed to fetch posts:", error.error);
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to fetch posts for this category.");
+        setPosts([]);
       }
     } catch (error) {
-      console.error("Error fetching posts:", error);
+      setError("Network error while fetching posts.");
+      setPosts([]);
+    } finally {
+      setIsLoadingPosts(false);
     }
   }
 
   useEffect(() => {
     fetchCategories();
   }, []);
-  
+
   let content;
-  if (posts !== null) {
-    if (posts.length !== 0 ) {
-      content = <PostComponent posts={posts} />;
-    } else {
-      content = <p>No posts to show</p>;
-    }
+  if (isLoadingPosts) {
+    content = (
+      <div className={styles.loadingMessage}>
+        <div className={styles.loadingSpinner}></div>
+        <p>Loading posts...</p>
+      </div>
+    );
+  } else if (error) {
+    content = (
+      <div className={styles.errorMessageContainer}>
+        <p>{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className={styles.retryButton}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  } else if (posts && posts.length > 0) {
+    content = <PostComponent posts={posts} />;
   } else {
-    content = <p>No posts to show</p>;
+    content = (
+      <div className={styles.noPostsMessage}>
+        <p>No posts to show for this category.</p>
+      </div>
+    );
   }
 
   return (
-    <div style={{ display: "flex", width: "100%" }}>
-      <div className="left-sidebar" style={{ marginTop: "7%", backgroundColor: "#f5f5f5", padding: "16px", maxHeight: "80vh", overflowY: "auto", borderRadius: "10px", width: "25%", marginLeft: "2%",position: "fixed" }}>
-        <h3 style={{ color: "#333", marginBottom: "16px" }}>All Categories</h3>
-        {categories.length === 0 ? (
-          <p>No categories found</p>
+    <div className={styles.categoriesPageContainer}>
+      <div className={styles.leftSidebar}>
+        <h3 className={styles.sidebarTitle}>All Categories</h3>
+        {isLoadingCategories ? (
+          <div className={styles.loadingMessage}>
+            <div className={styles.loadingSpinner}></div>
+            <p>Loading categories...</p>
+          </div>
+        ) : error ? (
+          <div className={styles.errorMessageContainer}>
+            <p>{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className={styles.retryButton}
+            >
+              Try Again
+            </button>
+          </div>
+        ) : categories.length === 0 ? (
+          <p className={styles.noCategoriesMessage}>No categories found</p>
         ) : (
-          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+          <ul className={styles.categoryList}>
             {categories.map((category) => (
               <li
                 key={category.category_id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "12px",
-                  padding: "12px 8px",
-                  borderRadius: "8px",
-                  backgroundColor: activeCategory === category.category_id ? "#e0e0e0" : "#fff",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-                  cursor: "pointer"
-                }}
+                className={`${styles.categoryItem} ${
+                  activeCategory === category.category_id
+                    ? styles.activeCategory
+                    : ""
+                }`}
                 onClick={() => hundleClick(category.category_id)}
               >
-                <div style={{ display: "flex", alignItems: "center" }}>
+                <div className={styles.categoryContent}>
                   <img
                     src={`/icons/${category.name}.png`}
                     alt={category.name}
-                    style={{ width: "40px", height: "40px", marginRight: "10px" }}
+                    className={styles.categoryIcon}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/inconnu/default-category.png";
+                    }}
                   />
-                  <span style={{ fontWeight: "500", color: "#333" }}>{category.name}</span>
+                  <span className={styles.categoryName}>{category.name}</span>
                 </div>
-                <span style={{ color: "#666", fontSize: "0.875rem", whiteSpace: "nowrap" }}>
+                <span className={styles.categoryCount}>
                   {category.count || 0} posts
                 </span>
               </li>
@@ -114,9 +165,7 @@ export default function AllCategories() {
         )}
       </div>
 
-      <div style={{ flex: 1, padding: "16px", marginTop: "7%", marginLeft: "30%", position: "relative" }}>
-        {content}
-      </div>
+      <div className={styles.mainContentArea}>{content}</div>
     </div>
   );
 }

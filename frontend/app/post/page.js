@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import "../styles/PostPage.css";
+import styles from "../styles/PostPage.module.css"; // Import the CSS Module
 
 export default function PostPage() {
   const searchParams = useSearchParams();
@@ -12,13 +12,14 @@ export default function PostPage() {
   const [newComment, setNewComment] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [groupImage, setGroupImage] = useState(null);
-  const [homeData, setHomeData] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [posts, setPosts] = useState([]);
-  const [postSaved, setPostSaved] = useState();
+  const [commentImageFile, setCommentImageFile] = useState(null); // Renamed from groupImage for clarity
+  // const [homeData, setHomeData] = useState(null); // Unused
+  // const [isLoggedIn, setIsLoggedIn] = useState(false); // Unused
+  // const [posts, setPosts] = useState([]); // Unused
+  // const [postSaved, setPostSaved] = useState(); // Unused
 
-  async function handleSave(post_id) {
+  async function handleSave(postIdToSave) {
+    // Renamed post_id to postIdToSave for clarity
     try {
       const response = await fetch(`http://localhost:8404/save`, {
         method: "POST",
@@ -26,12 +27,13 @@ export default function PostPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ post_id: post_id }),
+        body: JSON.stringify({ post_id: postIdToSave }),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        console.log(error);
+        const errorData = await response.json();
+        console.error("Failed to save post:", errorData);
+        setError(errorData.error || "Failed to save post.");
       } else {
         const updatedPost = await response.json();
         setPost({
@@ -41,15 +43,18 @@ export default function PostPage() {
         });
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error saving post:", error);
+      setError("Network error while saving post.");
     }
   }
+
   useEffect(() => {
-    const fetchPost = async (post_id) => {
+    const fetchPost = async (id) => {
       setIsLoading(true);
+      setError(null); // Clear previous errors
       try {
         const response = await fetch(
-          `http://localhost:8404/post?post_id=${post_id}&offset=0`,
+          `http://localhost:8404/post?post_id=${id}&offset=0`,
           {
             method: "GET",
             credentials: "include",
@@ -57,21 +62,27 @@ export default function PostPage() {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch post");
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to fetch post.");
         }
 
         const data = await response.json();
         setPost(data);
         setComments(data.comments || []);
       } catch (err) {
-        console.log("Error fetching post:", err);
-        setError("Failed to load post. Please try again later.");
+        console.error("Error fetching post:", err);
+        setError(err.message || "Failed to load post. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchPost(post_id);
+    if (post_id) {
+      fetchPost(post_id);
+    } else {
+      setIsLoading(false);
+      setError("No post ID provided.");
+    }
   }, [post_id]);
 
   const handleCommentSubmit = async (e) => {
@@ -80,10 +91,9 @@ export default function PostPage() {
 
     const formData = new FormData();
     formData.append("post_id", post_id);
-
     formData.append("content", newComment);
-    if (groupImage) {
-      formData.append("commentImage", groupImage);
+    if (commentImageFile) {
+      formData.append("commentImage", commentImageFile);
     }
     try {
       const response = await fetch("http://localhost:8404/comment", {
@@ -93,27 +103,29 @@ export default function PostPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add comment");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add comment.");
       }
 
       const data = await response.json();
 
       setComments([data, ...comments]);
 
-      setPost({
-        ...post,
-        total_comments: post.total_comments + 1,
-      });
+      setPost((prevPost) => ({
+        ...prevPost,
+        total_comments: prevPost.total_comments + 1,
+      }));
 
       setNewComment("");
-      setGroupImage(null);
+      setCommentImageFile(null);
     } catch (err) {
       console.error("Error adding comment:", err);
-      alert("Failed to add comment. Please try again.");
+      setError(err.message || "Failed to add comment. Please try again.");
     }
   };
 
-  const handleLike = async (post_id) => {
+  const handleLike = async (postIdToLike) => {
+    // Renamed post_id to postIdToLike
     try {
       const response = await fetch(`http://localhost:8404/like`, {
         method: "POST",
@@ -121,33 +133,32 @@ export default function PostPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ post_id: post_id }),
+        body: JSON.stringify({ post_id: postIdToLike }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to like post");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to like post.");
       }
 
-      if (response.ok) {
-        const updatedPost = await response.json();
-        setPost({
-          ...post,
-          total_likes: updatedPost.total_likes,
-          is_liked: updatedPost.is_liked,
-        });
-      }
+      const updatedPost = await response.json();
+      setPost({
+        ...post,
+        total_likes: updatedPost.total_likes,
+        is_liked: updatedPost.is_liked,
+      });
     } catch (err) {
       console.error("Error liking post:", err);
-      alert("Failed to like post. Please try again.");
+      setError(err.message || "Failed to like post. Please try again.");
     }
   };
 
   if (isLoading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner-wrapper">
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Loading Post...</p>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinnerWrapper}>
+          <div className={styles.loadingSpinner}></div>
+          <p className={styles.loadingText}>Loading Post...</p>
         </div>
       </div>
     );
@@ -155,14 +166,20 @@ export default function PostPage() {
 
   if (error) {
     return (
-      <div className="post-page-container">
-        <div className="post-page-content">
+      <div className={styles.postPageContainer}>
+        <div className={styles.postPageContent}>
           <img
-            src="/icons/no-post-state.svg"
+            src="/icons/no-post-state.svg" // Ensure this SVG exists
             alt="Error"
-            className="error-icon"
+            className={styles.errorIcon}
           />
-          <div className="error-message">{error}</div>
+          <div className={styles.errorMessage}>{error}</div>
+          <button
+            onClick={() => window.location.reload()}
+            className={styles.retryButton} // Reusing retry button style
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
@@ -170,10 +187,10 @@ export default function PostPage() {
 
   if (!post) {
     return (
-      <div className="post-page-container">
-        <div className="post-page-content">
-          <div className="error-message">Post not found</div>
-          {/* <button className="back-button" onClick={() => router.push("/")}>
+      <div className={styles.postPageContainer}>
+        <div className={styles.postPageContent}>
+          <div className={styles.errorMessage}>Post not found</div>
+          {/* <button className={styles.backButton} onClick={() => router.push("/")}>
             Back to Home
           </button> */}
         </div>
@@ -182,54 +199,91 @@ export default function PostPage() {
   }
 
   return (
-    <div className="post-page-container">
-      <div className="post-page-content">
-        <div className="post-page-card">
-          <div className="post-page-header">
-            <div className="post-author-info">
+    <div className={styles.postPageContainer}>
+      <div className={styles.postPageContent}>
+        <div className={styles.postPageCard}>
+          <div className={styles.postPageHeader}>
+            <div className={styles.postAuthorInfo}>
               <img
-                src={post.avatar}
-                alt={post.avatar}
-                className="author-avatar"
+                src={post.avatar || "/inconnu/avatar.png"} // Added fallback
+                alt={post.author}
+                className={styles.authorAvatar}
               />
-              <div className="author-details">
-                <a href={`/profile?id=${post.user_id}`} className="author-link">
-                  <h4 className="author-name">{post.author}</h4>
+              <div className={styles.authorDetails}>
+                <a
+                  href={`/profile?id=${post.user_id}`}
+                  className={styles.authorLink}
+                >
+                  <h4 className={styles.authorName}>{post.author}</h4>
                 </a>
-                <div className="timestamp">
-                  <img src="/icons/created_at.svg" alt="Created at" />
-                  <p className="created-at">{post.created_at}</p>
+                <div className={styles.timestamp}>
+                  {/* Assuming created_at.svg exists or use emoji/text */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={styles.timestampIcon}
+                  >
+                    <rect
+                      x="3"
+                      y="4"
+                      width="18"
+                      height="18"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  <p className={styles.createdAt}>{post.created_at}</p>
                 </div>
               </div>
             </div>
-            <div className="post-privacy">
+            <div className={styles.postPrivacy}>
               <img
-                src={`/icons/${post.privacy}.svg`}
+                src={`/icons/${post.privacy}.svg`} // Ensure these SVGs exist
                 width={"32px"}
                 height={"32px"}
-                className="privacy-icon"
+                className={styles.privacyIcon}
                 alt={post.privacy}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/icons/default-privacy.svg";
+                }} // Fallback
               />
             </div>
           </div>
 
-          <div className="post-page-body">
-            <h2 className="post-title">{post.title}</h2>
-            <p className="post-content">{post.content}</p>
+          <div className={styles.postPageBody}>
+            <h2 className={styles.postTitle}>{post.title}</h2>
+            <p className={styles.postContent}>{post.content}</p>
 
             {post.image && (
-              <div className="post-image-container">
-                <img src={post.image} alt="Post image" className="post-image" />
+              <div className={styles.postImageContainer}>
+                <img
+                  src={post.image}
+                  alt="Post image"
+                  className={styles.postImage}
+                />
               </div>
             )}
 
-            <div className="post-category">{post.category}</div>
+            <div className={styles.postCategory}>{post.category}</div>
           </div>
 
-          <div className="post-actions">
+          <div className={styles.postActions}>
             <div
-              className={`action-like ${post.is_liked ? "liked-post" : ""}`}
-              onClick={handleLike}
+              className={`${styles.actionLike} ${
+                post.is_liked ? styles.likedPost : ""
+              }`}
+              onClick={() => handleLike(post_id)} // Pass post_id to handleLike
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -239,23 +293,34 @@ export default function PostPage() {
                 viewBox="0 0 20 18"
               >
                 <path
-                  fill={post.is_liked ? "#2563EB" : "#B8C3E1"}
+                  fill={post.is_liked ? "#667eea" : "#B8C3E1"} // Changed fill color to match gradient
                   d="M14.44.1C12.63.1 11.01.98 10 2.33A5.55 5.55 0 0 0 5.56.1C2.49.1 0 2.6 0 5.69 0 6.88.19 7.98.52 9c1.58 5 6.45 7.99 8.86 8.81.34.12.9.12 1.24 0C13.03 16.99 17.9 14 19.48 9c.33-1.02.52-2.12.52-3.31C20 2.6 17.51.1 14.44.1"
                 ></path>
               </svg>
-              <p
-              // className={`${post.is_liked ? "liked-post" : ""}`}
-              >
-                {post.total_likes} Likes
-              </p>
+              <p>{post.total_likes} Likes</p>
             </div>
-            <div className="action-comment">
-              <img src="/icons/comment.svg" alt="Comment" />
+            <div className={styles.actionComment}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#B8C3E1"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={styles.commentIcon}
+              >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
               <p>{post.total_comments} Comments</p>
             </div>
             <div
-              className={`action-save ${post.saved ? "saved-post" : ""}`}
-              onClick={handleSave}
+              className={`${styles.actionSave} ${
+                post.saved ? styles.savedPost : ""
+              }`}
+              onClick={() => handleSave(post_id)} // Pass post_id to handleSave
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -266,24 +331,23 @@ export default function PostPage() {
               >
                 <path
                   d="M13.5 0H3.86C1.73 0 0 1.74 0 3.86v14.09c0 1.8 1.29 2.56 2.87 1.69l4.88-2.71c.52-.29 1.36-.29 1.87 0l4.88 2.71c1.58.88 2.87.12 2.87-1.69V3.86C17.36 1.74 15.63 0 13.5 0m-1.81 7.75c-.97.35-1.99.53-3.01.53s-2.04-.18-3.01-.53a.75.75 0 0 1-.45-.96c.15-.39.58-.59.97-.45 1.61.58 3.38.58 4.99 0a.75.75 0 1 1 .51 1.41"
-                  fill={post.saved ? "#2563EB" : "#B8C3E1"}
+                  fill={post.saved ? "#667eea" : "#B8C3E1"} // Changed fill color to match gradient
                 ></path>
               </svg>
-              {/* <img src="/icons/comment.svg" alt="Comment" /> */}
               <span>{post.total_saves} Saves</span>
             </div>
           </div>
-          <form className="comment-form" onSubmit={handleCommentSubmit}>
+          <form className={styles.commentForm} onSubmit={handleCommentSubmit}>
             <textarea
-              className="comment-input"
+              className={styles.commentInput}
               placeholder="Write a comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               rows={3}
             />
 
-            <div className="file-input-container">
-              <label className="file-input-label">
+            <div className={styles.fileInputContainer}>
+              <label className={styles.fileInputLabel}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="22"
@@ -292,11 +356,11 @@ export default function PostPage() {
                   viewBox="0 0 22 22"
                 >
                   <path
-                    fill="#3555F9"
+                    fill="#667eea" // Changed fill color
                     d="M1.67 18.7a.746.746 0 0 1-.41-1.37l4.93-3.31c1.08-.73 2.57-.64 3.55.19l.33.29c.5.43 1.35.43 1.84 0l4.16-3.57c1.06-.91 2.73-.91 3.8 0l1.63 1.4c.31.27.35.74.08 1.06-.27.31-.74.35-1.06.08l-1.63-1.4c-.5-.43-1.35-.43-1.85 0l-4.16 3.57c-1.06.91-2.73.91-3.8 0l-.33-.29c-.46-.39-1.22-.43-1.73-.08l-4.93 3.31c-.13.08-.28.12-.42.12M8 9.75C6.48 9.75 5.25 8.52 5.25 7S6.48 4.25 8 4.25 10.75 5.48 10.75 7 9.52 9.75 8 9.75m0-4a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5"
                   ></path>
                   <path
-                    fill="#3555F9"
+                    fill="#667eea" // Changed fill color
                     d="M14 21.75H8C2.57 21.75.25 19.43.25 14V8C.25 2.57 2.57.25 8 .25h6c5.43 0 7.75 2.32 7.75 7.75v6c0 5.43-2.32 7.75-7.75 7.75m-6-20C3.39 1.75 1.75 3.39 1.75 8v6c0 4.61 1.64 6.25 6.25 6.25h6c4.61 0 6.25-1.64 6.25-6.25V8c0-4.61-1.64-6.25-6.25-6.25z"
                   ></path>
                 </svg>
@@ -304,29 +368,29 @@ export default function PostPage() {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setGroupImage(e.target.files[0])}
-                  className="file-input"
+                  onChange={(e) => setCommentImageFile(e.target.files[0])}
+                  className={styles.hiddenFileInput} // Changed class name
                 />
               </label>
             </div>
 
-            {groupImage && (
-              <div className="image-preview">
+            {commentImageFile && (
+              <div className={styles.imagePreview}>
                 <img
-                  src={URL.createObjectURL(groupImage)}
+                  src={URL.createObjectURL(commentImageFile)}
                   alt="Preview"
-                  className="preview-image"
+                  className={styles.previewImage}
                 />
                 <span
-                  className="remove-image"
-                  onClick={() => setGroupImage(null)}
+                  className={styles.removeImage}
+                  onClick={() => setCommentImageFile(null)}
                 >
                   ×
                 </span>
               </div>
             )}
 
-            <button type="submit" className="comment-submit-btn">
+            <button type="submit" className={styles.commentSubmitBtn}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -342,50 +406,50 @@ export default function PostPage() {
               Comment
             </button>
           </form>
-          <div className="post-comments-section">
-            <h3 className="comments-title">Comments</h3>
+          <div className={styles.postCommentsSection}>
+            <h3 className={styles.commentsTitle}>Comments</h3>
 
-            <div className="comments-list">
+            <div className={styles.commentsList}>
               {comments.length > 0 ? (
                 comments.map((comment) => {
                   const key = `${comment.comment_id}`;
 
                   return (
-                    <div key={key} className="comment-item">
-                      <div className="comment-header">
+                    <div key={key} className={styles.commentItem}>
+                      <div className={styles.commentHeader}>
                         <img
-                          src={comment.avatar}
+                          src={comment.avatar || "/inconnu/avatar.png"} 
                           alt={comment.username}
-                          className="comment-avatar"
+                          className={styles.commentAvatar}
                         />
-                        <div className="comment-author-info">
-                          <h4 className="comment-author">{comment.username}</h4>
-                          <p className="comment-time">{comment.created_at}</p>
+                        <div className={styles.commentAuthorInfo}>
+                          <h4 className={styles.commentAuthor}>
+                            {comment.username}
+                          </h4>
+                          <p className={styles.commentTime}>
+                            {comment.created_at}
+                          </p>
                         </div>
                       </div>
-                      <p className="comment-content">{comment.content}</p>
+                      <p className={styles.commentContent}>{comment.content}</p>
                       {comment.image && (
                         <img
                           src={comment.image}
                           alt="Comment image"
-                          className="comment-image"
+                          className={styles.commentImage}
                         />
                       )}
                     </div>
                   );
                 })
               ) : (
-                <p className="no-comments">
+                <p className={styles.noComments}>
                   No comments yet. Be the first to comment!
                 </p>
               )}
             </div>
           </div>
         </div>
-
-        {/* <button className="back-button" onClick={() => router.push("/")}>
-          Back to Home
-        </button> */}
       </div>
     </div>
   );

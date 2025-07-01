@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import "../styles/PostComponent.css";
+import styles from "../styles/PostComponent.module.css";
 
 export default function PostComponent({ posts: initialPosts }) {
   const [posts, setPosts] = useState(initialPosts);
@@ -46,21 +46,19 @@ export default function PostComponent({ posts: initialPosts }) {
           prevPosts.map((post) =>
             post.post_id === postId
               ? {
-                ...post,
-                saved: updatedPost.saved,
-                total_saves: updatedPost.total_saves,
-              }
+                  ...post,
+                  saved: updatedPost.saved,
+                  total_saves: updatedPost.total_saves,
+                }
               : post
           )
         );
-        setSavedMessage(
-          {
-            postId: postId,
-            message: updatedPost.saved
-              ? "Post saved successfully!"
-              : "Post unsaved successfully!",
-          }
-        );
+        setSavedMessage({
+          postId: postId,
+          message: updatedPost.saved
+            ? "Post saved successfully!"
+            : "Post unsaved successfully!",
+        });
       }
     } catch (error) {
       console.log(error);
@@ -97,11 +95,11 @@ export default function PostComponent({ posts: initialPosts }) {
           prevPosts.map((post) =>
             post.post_id === postId
               ? {
-                ...post,
-                total_likes: updatedPost.total_likes,
-                is_liked: updatedPost.is_liked,
-                who_liked: updatedPost.who_liked || post.who_liked,
-              }
+                  ...post,
+                  total_likes: updatedPost.total_likes,
+                  is_liked: updatedPost.is_liked,
+                  who_liked: updatedPost.who_liked || post.who_liked,
+                }
               : post
           )
         );
@@ -120,51 +118,51 @@ export default function PostComponent({ posts: initialPosts }) {
   }
 
   return (
-    <div className="posts-container">
+    <div className={styles.postsContainer}>
       {posts?.map((post) => (
-        <div key={post.post_id} className="post-card">
-          <div className="header">
-            <div className="post-header">
+        <div key={post.post_id} className={styles.postCard}>
+          <div className={styles.header}>
+            <div className={styles.postHeader}>
               <img
                 src={post.avatar || "avatar.jpg"}
                 alt={post.author}
-                className="author-avatar"
+                className={styles.authorAvatar}
               />
-              <div className="author-info">
-                <h4 className="author-name">{post.author}</h4>
-                <div className="timestamp">
+              <div className={styles.authorInfo}>
+                <h4 className={styles.authorName}>{post.author}</h4>
+                <div className={styles.timestamp}>
                   <img src="./icons/created_at.svg" alt="Time" />
-                  <p className="created-at">{post.created_at}</p>
+                  <p className={styles.createdAt}>{post.created_at}</p>
                 </div>
               </div>
             </div>
-            <div className="post-privacy">
+            <div className={styles.postPrivacy}>
               <img
                 src={`./icons/${post.privacy}.svg`}
                 width="32"
                 height="32"
-                className="privacy-icon"
+                className={styles.privacyIcon}
                 alt={post.privacy}
               />
             </div>
           </div>
 
-          <div className="post-content">
-            <h3 className="post-title">{post.title}</h3>
-            <p className="post-text">{post.content}</p>
+          <div className={styles.postContent}>
+            <h3 className={styles.postTitle}>{post.title}</h3>
+            <p className={styles.postText}>{post.content}</p>
 
             {post.image && (
-              <div className="post-image-container">
+              <div className={styles.postImageContainer}>
                 <img
                   src={post.image}
                   alt="Post content"
-                  className="post-image"
+                  className={styles.postImage}
                 />
               </div>
             )}
 
             <div
-              className="post-category"
+              className={styles.postCategory}
               style={{
                 color: post.category_color,
                 backgroundColor: post.category_background,
@@ -174,15 +172,16 @@ export default function PostComponent({ posts: initialPosts }) {
             </div>
           </div>
 
-          <div className="post-actions">
-            <div className="like-action-container">
+          <div className={styles.postActions}>
+            <div className={styles.likeActionContainer}>
               <button
-                className={`action-button action-like ${post.is_liked ? "liked" : ""
-                  }`}
+                className={`${styles.actionButton} ${styles.actionLike} ${
+                  post.is_liked ? styles.liked : ""
+                }`}
                 onClick={() => handleLike(post.post_id)}
               >
                 <svg
-                  className="like-icon"
+                  className={styles.likeIcon}
                   width="20"
                   height="18"
                   viewBox="0 0 20 18"
@@ -191,7 +190,7 @@ export default function PostComponent({ posts: initialPosts }) {
                 >
                   <path
                     d="M14.44 0.0999756C12.63 0.0999756 11.01 0.979976 10 2.32998C8.99 0.979976 7.37 0.0999756 5.56 0.0999756C2.49 0.0999756 0 2.59998 0 5.68998C0 6.87998 0.19 7.97998 0.52 8.99998C2.1 14 6.97 16.99 9.38 17.81C9.72 17.93 10.28 17.93 10.62 17.81C13.03 16.99 17.9 14 19.48 8.99998C19.81 7.97998 20 6.87998 20 5.68998C20 2.59998 17.51 0.0999756 14.44 0.0999756Z"
-                    fill={post.is_liked ? "#2563EB" : "white"}
+                    fill={post.is_liked ? "#667eea" : "currentColor"}
                   />
                 </svg>
                 <span>{post.total_likes} Likes</span>
@@ -199,7 +198,7 @@ export default function PostComponent({ posts: initialPosts }) {
 
               {post.total_likes > 0 && (
                 <button
-                  className="view-likes-button"
+                  className={styles.viewLikesButton}
                   onClick={() => toggleLikesPopup(post.post_id)}
                 >
                   <svg
@@ -211,11 +210,11 @@ export default function PostComponent({ posts: initialPosts }) {
                   >
                     <path
                       d="M12 16.5C9.51 16.5 7.5 14.49 7.5 12C7.5 9.51 9.51 7.5 12 7.5C14.49 7.5 16.5 9.51 16.5 12C16.5 14.49 14.49 16.5 12 16.5ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z"
-                      fill="#555"
+                      fill="currentColor"
                     />
                     <path
                       d="M12 21C7.31 21 3.07 17.96 1.28 13.28C0.920005 12.46 0.920005 11.54 1.28 10.72C3.07 6.04 7.31 3 12 3C16.69 3 20.93 6.04 22.72 10.72C23.08 11.54 23.08 12.46 22.72 13.28C20.93 17.96 16.69 21 12 21ZM2.71 11.58C2.52 11.94 2.5 12.35 2.67 12.7C4.24 16.67 7.91 19.2 12 19.2C16.09 19.2 19.76 16.67 21.33 12.7C21.5 12.35 21.48 11.94 21.29 11.58C19.72 7.59 16.08 4.8 12 4.8C7.92 4.8 4.28 7.59 2.71 11.58Z"
-                      fill="#555"
+                      fill="currentColor"
                     />
                   </svg>
                 </button>
@@ -223,31 +222,28 @@ export default function PostComponent({ posts: initialPosts }) {
             </div>
 
             <button
-              className="action-button action-comment"
+              className={`${styles.actionButton} ${styles.actionComment}`}
               onClick={() => router.push(`/post?id=${post.post_id}`)}
             >
               <svg
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M13.19 6H6.79C6.53 6 6.28 6.01 6.04 6.04C3.35 6.27 2 7.86 2 10.79V14.79C2 18.79 3.6 19.58 6.79 19.58H7.19C7.41 19.58 7.7 19.73 7.83 19.9L9.03 21.5C9.56 22.21 10.42 22.21 10.95 21.5L12.15 19.9C12.3 19.7 12.54 19.58 12.79 19.58H13.19C16.12 19.58 17.71 18.24 17.94 15.54C17.97 15.3 17.98 15.05 17.98 14.79V10.79C17.98 7.6 16.38 6 13.19 6ZM6.5 14C5.94 14 5.5 13.55 5.5 13C5.5 12.45 5.95 12 6.5 12C7.05 12 7.5 12.45 7.5 13C7.5 13.55 7.05 14 6.5 14ZM9.99 14C9.43 14 8.99 13.55 8.99 13C8.99 12.45 9.44 12 9.99 12C10.54 12 10.99 12.45 10.99 13C10.99 13.55 10.55 14 9.99 14ZM13.49 14C12.93 14 12.49 13.55 12.49 13C12.49 12.45 12.94 12 13.49 12C14.04 12 14.49 12.45 14.49 13C14.49 13.55 14.04 14 13.49 14Z"
-                  fill="#fff"
-                />
-                <path
-                  d="M21.98 6.79V10.79C21.98 12.79 21.36 14.15 20.12 14.9C19.82 15.08 19.47 14.84 19.47 14.49L19.48 10.79C19.48 6.79 17.19 4.5 13.19 4.5L7.1 4.51C6.75 4.51 6.51 4.16 6.69 3.86C7.44 2.62 8.8 2 10.79 2H17.19C20.38 2 21.98 3.6 21.98 6.79Z"
-                  fill="#fff"
+                  d="M13.19 8H6.79C3.6 8 2 9.6 2 12.79V16.79C2 19.98 3.6 21.58 6.79 21.58H7.19C7.48 21.58 7.84 21.75 8.03 21.97L9.23 23.57C9.76 24.28 10.62 24.28 11.15 23.57L12.35 21.97C12.57 21.72 12.86 21.58 13.19 21.58C16.38 21.58 17.98 19.98 17.98 16.79V12.79C17.98 9.6 16.38 8 13.19 8ZM7 15C6.45 15 6 14.55 6 14C6 13.45 6.45 13 7 13C7.55 13 8 13.45 8 14C8 14.55 7.55 15 7 15ZM10 15C9.45 15 9 14.55 9 14C9 13.45 9.45 13 10 13C10.55 13 11 13.45 11 14C11 14.55 10.55 15 10 15ZM13 15C12.45 15 12 14.55 12 14C12 13.45 12.45 13 13 13C13.55 13 14 13.45 14 14C14 14.55 13.55 15 13 15Z"
+                  fill="currentColor"
                 />
               </svg>
               <span>{post.total_comments} Comments</span>
             </button>
 
             <button
-              className={`action-button action-save ${post.saved ? "saved" : ""
-                }`}
+              className={`${styles.actionButton} ${styles.actionSave} ${
+                post.saved ? styles.saved : ""
+              }`}
               onClick={() => handleSave(post.post_id)}
             >
               <svg
@@ -259,46 +255,42 @@ export default function PostComponent({ posts: initialPosts }) {
               >
                 <path
                   d="M13.5 0H3.86C1.73 0 0 1.74 0 3.86v14.09c0 1.8 1.29 2.56 2.87 1.69l4.88-2.71c.52-.29 1.36-.29 1.87 0l4.88 2.71c1.58.88 2.87.12 2.87-1.69V3.86C17.36 1.74 15.63 0 13.5 0m-1.81 7.75c-.97.35-1.99.53-3.01.53s-2.04-.18-3.01-.53a.75.75 0 0 1-.45-.96c.15-.39.58-.59.97-.45 1.61.58 3.38.58 4.99 0a.75.75 0 1 1 .51 1.41"
-                  fill={post.saved ? "#2563EB" : "white"}
-                ></path>
+                  fill={post.saved ? "#667eea" : "currentColor"}
+                />
               </svg>
               <span>{post.total_saves} Saves</span>
             </button>
           </div>
 
           {savedMessage?.postId === post.post_id && (
-            <div
-              className="saved-message"
-              style={{ color: "green", paddingLeft: "20px" }}
-            >
-              <p style={{ fontSize: "14px" }}>{savedMessage.message}</p>
+            <div className={styles.savedMessage}>
+              <p>{savedMessage.message}</p>
             </div>
           )}
 
-          <a href={`/post?id=${post.post_id}`} className="post-link">
-            <button className="see-post-button">
-              See post <span className="arrow">→</span>
+          <a href={`/post?id=${post.post_id}`} className={styles.postLink}>
+            <button className={styles.seePostButton}>
+              See post <span className={styles.arrow}>→</span>
             </button>
           </a>
         </div>
       ))}
 
-      {/* Modal popup for likes */}
       {activeLikesPopup !== null &&
         posts.find((p) => p.post_id === activeLikesPopup)?.who_liked && (
           <div
-            className="modal-overlay"
+            className={styles.modalOverlay}
             onClick={() => setActiveLikesPopup(null)}
           >
             <div
-              className="likes-modal"
+              className={styles.likesModal}
               ref={popupRef}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="likes-modal-header">
+              <div className={styles.likesModalHeader}>
                 <h4>People who liked this post</h4>
                 <button
-                  className="close-modal-button"
+                  className={styles.closeModalButton}
                   onClick={() => setActiveLikesPopup(null)}
                 >
                   <svg
@@ -310,14 +302,14 @@ export default function PostComponent({ posts: initialPosts }) {
                   >
                     <path
                       d="M18 6L6 18"
-                      stroke="#555"
+                      stroke="currentColor"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                     <path
                       d="M6 6L18 18"
-                      stroke="#555"
+                      stroke="currentColor"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -325,18 +317,18 @@ export default function PostComponent({ posts: initialPosts }) {
                   </svg>
                 </button>
               </div>
-              <div className="likes-modal-list">
+              <div className={styles.likesModalList}>
                 {posts
                   .find((p) => p.post_id === activeLikesPopup)
                   ?.who_liked.map((user, index) => (
-                    <div key={index} className="likes-modal-user-item">
+                    <div key={index} className={styles.likesModalUserItem}>
                       <img
                         src={user.avatar || "avatar.jpg"}
                         alt={user.username}
-                        className="likes-modal-user-avatar"
+                        className={styles.likesModalUserAvatar}
                       />
-                      <div className="likes-modal-user-info">
-                        <span className="likes-modal-username">
+                      <div className={styles.likesModalUserInfo}>
+                        <span className={styles.likesModalUsername}>
                           {user.username}
                         </span>
                       </div>

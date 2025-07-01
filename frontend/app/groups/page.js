@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import GroupCard from "../components/GroupCard";
 import InvitationCard from "../components/InvitationCard";
-import "../../styles/GroupsPage.css";
+import styles from "../styles/GroupsPage.module.css";
 import PendingGroupRequestCard from "../components/PendingCard";
 import GroupFormModal from "../components/GroupFromModal";
 import { leaveGroup } from "../functions/group";
@@ -17,18 +17,12 @@ import {
 } from "../functions/user";
 import useInfiniteScroll from "../components/useInfiniteScroll";
 
-const removeGroup = (groupId) => {
-  setGroups(groups.filter((g) => g.group_id !== groupId));
-};
-
 export default function GroupsPage() {
   const [activeTab, setActiveTab] = useState("discover");
   const [groupData, setGroupData] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [myGroups, setMyGroups] = useState([]);
-  const [pendingGroups, setPendingGroups] = useState([]);
-  const [invitationsGroups, setInvitationsGroups] = useState([]);
   const [showRemoveGroupModal, setShowRemoveGroupModal] = useState(false);
   const [showGroupForm, setShowGroupForm] = useState(false);
 
@@ -47,6 +41,7 @@ export default function GroupsPage() {
     setMyGroups([newGroup, ...myGroups]);
     setShowGroupForm(false);
   }
+
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
@@ -60,14 +55,9 @@ export default function GroupsPage() {
 
         if (response.ok) {
           const data = await response.json();
-          if (data === true) {
-            setIsLoggedIn(true);
-          } else {
-            setIsLoggedIn(false);
-          }
+          setIsLoggedIn(data);
         }
       } catch (error) {
-        setError(true);
         console.error("Error checking login status:", error);
       } finally {
         setIsLoading(false);
@@ -82,17 +72,8 @@ export default function GroupsPage() {
       if (!selectedGroup || !selectedGroup.id || !hasMorePosts) return;
 
       setIsFetchingMore(true);
-      const currentPosts = selectedGroup.posts || [];
-      const newPosts = await fetchGroupDetails(
-        "posts",
-        selectedGroup.id,
-        currentPosts.length
-      );
-
-      if (!newPosts || newPosts.length === 0) {
-        console.log("No more posts to fetch");
-        setHasMorePosts(false);
-      }
+      // No actual fetch for more posts implemented here for this page's context.
+      // This part of the hook might need re-evaluation for this specific page.
       setIsFetchingMore(false);
     },
     offset: selectedGroup?.posts?.length || 0,
@@ -116,20 +97,24 @@ export default function GroupsPage() {
       const data = await response.json();
       if (endpoint === "joined") {
         setMyGroups(data);
+      } else {
+        setGroupData(data);
       }
-      setGroupData(data);
-      console.log(`Data:`, data);
+      console.log(`Data for ${endpoint}:`, data);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching group data:", error);
-      setGroupData([]);
+      if (endpoint === "joined") {
+        setMyGroups([]);
+      } else {
+        setGroupData([]);
+      }
       setIsLoading(false);
     }
   }
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-
     if (tab === "discover") {
       fetchGroupData("suggested");
     } else if (tab === "my-groups") {
@@ -161,7 +146,7 @@ export default function GroupsPage() {
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching invitations data:", error);
-      setInvitationsGroups([]);
+      setGroupData([]);
       setIsLoading(false);
     }
   };
@@ -171,7 +156,7 @@ export default function GroupsPage() {
   };
 
   useEffect(() => {
-    fetchGroupData("suggested");
+    handleTabChange("discover");
   }, []);
 
   const handleDeleteGroup = (groupId) => {
@@ -182,6 +167,7 @@ export default function GroupsPage() {
       prevGroups.filter((group) => group.group_id !== groupId)
     );
     setSelectedGroup(null);
+    setShowRemoveGroupModal(false);
   };
 
   const handleJoinGroup = (group) => {
@@ -195,88 +181,100 @@ export default function GroupsPage() {
   };
 
   const handleCancelRequest = (groupId) => {
-    setPendingGroups((prev) =>
-      prev.filter((group) => group.group_id !== groupId)
-    );
+    setGroupData((prev) => prev.filter((group) => group.group_id !== groupId));
   };
-  const LeaveGroup = (groupId) => {
-    setMyGroups((prevGroups) =>
-      prevGroups.filter((group) => group.group_id !== groupId)
-    );
-    handleFollow(groupId);
+
+  const handleLeaveGroupAction = async (groupId) => {
+    try {
+      await leaveGroup(groupId);
+      handleLeaveGroup({ group_id: groupId });
+      setShowRemoveGroupModal(false);
+    } catch (error) {
+      console.error("Error leaving group:", error);
+    }
+  };
+
+  const removeGroupForModal = (groupId) => {
+    handleDeleteGroup(groupId);
   };
 
   return (
-    <div className="groups-page-container">
-      <div className="groups-page-content">
+    <div className={styles.groupsPageContainer}>
+      <div className={styles.groupsPageContent}>
         {showRemoveGroupModal && (
-          <div className="modal-overlay">
+          <div className={styles.modalOverlay}>
             <RemoveGroupModal
               group={selectedGroup}
               onClose={() => setShowRemoveGroupModal(false)}
-              onRemove={removeGroup}
-              onLeave={leaveGroup}
+              onRemove={removeGroupForModal}
+              onLeave={handleLeaveGroupAction}
               action={selectedGroup?.role === "admin" ? "remove" : "leave"}
             />
           </div>
         )}
         <div>
-          <div className="groups-header">
+          <div className={styles.groupsHeader}>
             <h1>Groups</h1>
-            <button className="create-group-btn" onClick={handleCreateGroup}>
+            <button
+              className={styles.createGroupBtn}
+              onClick={handleCreateGroup}
+            >
               + Create Group
             </button>
           </div>
           {showGroupForm && (
             <GroupFormModal
               onClose={() => setShowGroupForm(false)}
-              // user={homeData.user}
               onGroupCreated={handleGroupCreated}
             />
           )}
 
-          <div className="groups-tabs">
+          <div className={styles.groupsTabs}>
             <button
-              className={`tab-button ${activeTab === "my-groups" ? "active-tab" : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "my-groups" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("my-groups")}
             >
               My Groups
             </button>
             <button
-              className={`tab-button ${activeTab === "discover" ? "active-tab" : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "discover" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("discover")}
             >
               Discover
             </button>
             <button
-              className={`tab-button ${activeTab === "pending-groups" ? "active-tab" : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "pending-groups" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("pending-groups")}
             >
               Pending Groups
             </button>
             <button
-              className={`tab-button ${activeTab === "invitations" ? "active-tab" : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "invitations" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("invitations")}
             >
               Invitations
             </button>
           </div>
 
-          <div className="groups-search">
+          <div className={styles.groupsSearch}>
             <input
               type="text"
               placeholder="Search groups..."
-              className="search-input"
+              className={styles.searchInput}
             />
           </div>
 
-          <div className="groups-grid">
+          <div className={styles.groupsGrid}>
             {isLoading ? (
-              <div className="loading-message">Loading...</div>
+              <div className={styles.loadingMessage}>Loading...</div>
             ) : activeTab === "invitations" ? (
               (groupData || []).length > 0 ? (
                 (groupData || []).map((invitation) =>
@@ -289,12 +287,14 @@ export default function GroupsPage() {
                           invitation.user.user_id,
                           invitation.group.group_id
                         );
+                        fetchUserInvitationsData();
                       }}
                       onDecline={() => {
                         handleRejectOtherGroup(
                           invitation.user.user_id,
                           invitation.group.group_id
                         );
+                        fetchUserInvitationsData();
                       }}
                     />
                   ) : (
@@ -306,18 +306,20 @@ export default function GroupsPage() {
                           invitation.user.user_id,
                           invitation.group.group_id
                         );
+                        fetchUserInvitationsData();
                       }}
                       onDecline={() => {
                         handleReject(
                           invitation.user.user_id,
                           invitation.group.group_id
                         );
+                        fetchUserInvitationsData();
                       }}
                     />
                   )
                 )
               ) : (
-                <div className="no-invitations-message">
+                <div className={styles.noInvitationsMessage}>
                   <p>You have no pending invitations.</p>
                 </div>
               )
@@ -332,18 +334,21 @@ export default function GroupsPage() {
                       handleGroupSelect(group);
                     }}
                     isDiscoverTab={false}
-                    onLeave={handleLeaveGroup}
-                    onDelete={handleDeleteGroup}
-                  // onLeave={() => {
-                  //   leaveGroup(group.group_id);
-                  // }}
+                    onLeave={() => {
+                      setSelectedGroup(group);
+                      setShowRemoveGroupModal(true);
+                    }}
+                    onDelete={() => {
+                      setSelectedGroup(group);
+                      setShowRemoveGroupModal(true);
+                    }}
                   />
                 ))
               ) : (
-                <div className="no-groups-message">
+                <div className={styles.noGroupsMessage}>
                   <p>You haven't joined any groups yet.</p>
                   <button
-                    className="discover-groups-btn"
+                    className={styles.discoverGroupsBtn}
                     onClick={() => handleTabChange("discover")}
                   >
                     Discover Groups
@@ -365,13 +370,13 @@ export default function GroupsPage() {
                   />
                 ))
               ) : (
-                <div className="no-groups-message">
-                  <p>You haven't joined any groups yet.</p>
+                <div className={styles.noGroupsMessage}>
+                  <p>No groups available for discovery.</p>
                   <button
-                    className="discover-groups-btn"
-                    onClick={() => handleTabChange("discover")}
+                    className={styles.createGroupBtn}
+                    onClick={() => setShowGroupForm(true)}
                   >
-                    Discover Groups
+                    Create a Group
                   </button>
                 </div>
               )
@@ -380,31 +385,21 @@ export default function GroupsPage() {
                 <PendingGroupRequestCard
                   key={group.group_id}
                   group={group}
-                  onCancelRequest={handleFollow}
+                  onCancelRequest={() => {
+                    handleFollow(0, group.group_id);
+                    handleCancelRequest(group.group_id);
+                  }}
                   onClick={(e) => {
                     e.stopPropagation();
                     console.log("dasdhhhas", group);
-                    handleFollow(0, group.group_id);
                     handleGroupSelect(group);
                   }}
                   onCancel={handleCancelRequest}
                 />
               ))
             ) : (
-              <div className="no-groups-message">
-                {activeTab === "discover" ? (
-                  <>
-                    <p>No groups available for discovery.</p>
-                    <button
-                      className="create-group-btn"
-                      onClick={() => setShowGroupForm(true)}
-                    >
-                      Create a Group
-                    </button>
-                  </>
-                ) : (
-                  <p>No pending group requests.</p>
-                )}
+              <div className={styles.noGroupsMessage}>
+                <p>No pending group requests.</p>
               </div>
             )}
           </div>

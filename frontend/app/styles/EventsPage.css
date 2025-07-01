@@ -156,7 +156,7 @@
     font-size: 1.25rem;
     font-weight: 600;
     color: #1F2937;
-    padding-right: 70px; /* Make room for the date badge */
+    padding-right: 70px; 
   }
   
   .event-organizer, .event-location, .event-time {
@@ -173,9 +173,6 @@
     font-size: 0.875rem;
     color: #4B5563;
     line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
     overflow: hidden;
   }
   

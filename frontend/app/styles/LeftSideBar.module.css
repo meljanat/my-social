@@ -1,0 +1,178 @@
+.leftSidebar {
+  background-color: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+}
+
+.sidebarSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.sectionHeader h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.seeAllBtn {
+  background: none;
+  border: none;
+  color: #3555f9;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s ease;
+}
+
+.seeAllBtn:hover {
+  color: #2a44c7;
+}
+
+.arrow {
+  transition: transform 0.2s;
+}
+
+.seeAllBtn:hover .arrow {
+  transform: translateX(3px);
+}
+
+.userList,
+.categoryList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.categoryItem {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.categoryItem:hover {
+  background-color: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.categoryIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.categoryIcon img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.categoryName {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin-left: 12px;
+}
+
+.categoryCount {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.emptyState {
+  padding: 24px 20px;
+  text-align: center;
+  background-color: #f9fafb;
+  border-radius: 12px;
+  margin: 10px 0;
+  border: 1px dashed #d1d5db;
+}
+
+.emptyTitle {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin: 0 0 8px 0;
+  color: #374151;
+}
+
+.emptyDescription {
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.4;
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .leftSidebar {
+    padding: 1rem;
+    gap: 20px;
+  }
+  
+  .categoryIcon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .categoryIcon img {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .leftSidebar {
+    padding: 0.75rem;
+    gap: 16px;
+  }
+
+  .sectionHeader h3 {
+    font-size: 0.9rem;
+  }
+
+  .seeAllBtn {
+    font-size: 0.8rem;
+  }
+
+  .categoryItem {
+    padding: 10px;
+  }
+
+  .emptyState {
+    padding: 20px 16px;
+  }
+}

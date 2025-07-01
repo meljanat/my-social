@@ -1,4 +1,4 @@
-.modal-overlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,7 +12,7 @@
   backdrop-filter: blur(4px);
 }
 
-.edit-profile-modal {
+.editProfileModal {
   background-color: white;
   border-radius: 16px;
   width: 100%;
@@ -20,40 +20,28 @@
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  animation: modalFadeIn 0.3s ease;
 }
 
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.modal-header {
+.modalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.modal-header h2 {
+.modalHeader h2 {
   font-size: 20px;
   font-weight: 600;
-  color: #1F2937;
+  color: #1f2937;
   margin: 0;
 }
 
-.close-modal-btn {
+.closeModalBtn {
   background: none;
   border: none;
   font-size: 24px;
-  color: #6B7280;
+  color: #6b7280;
   cursor: pointer;
   width: 32px;
   height: 32px;
@@ -64,155 +52,14 @@
   transition: background-color 0.2s ease;
 }
 
-.close-modal-btn:hover {
-  background-color: #F3F4F6;
-  color: #1F2937;
+.closeModalBtn:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
 }
 
-.edit-profile-form {
-  padding: 24px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #4B5563;
-  margin-bottom: 8px;
-}
-
-.form-group input[type="text"],
-.form-group textarea {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  font-size: 15px;
-  color: #1F2937;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-group input[type="text"]:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #3555F9;
-  box-shadow: 0 0 0 3px rgba(53, 85, 249, 0.1);
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.privacy-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.privacy-option {
-  display: flex;
-  align-items: flex-start;
-  padding: 12px;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.privacy-option:hover {
-  background-color: #F9FAFB;
-}
-
-.privacy-option input[type="radio"] {
-  margin-top: 8px;
-  margin-right: 12px;
-  accent-color: #3555F9;
-}
-
-.option-content {
-  display: flex;
-  align-items: center;
-  flex: 1;
-}
-
-.option-icon {
-  font-size: 20px;
-  margin-right: 12px;
-}
-
-.option-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.option-title {
-  font-weight: 500;
-  color: #1F2937;
-  margin-bottom: 4px;
-}
-
-.option-description {
-  font-size: 13px;
-  color: #6B7280;
-}
-
-.privacy-option input[type="radio"]:checked + .option-content {
-  font-weight: 500;
-}
-
-.privacy-option input[type="radio"]:checked + .option-content .option-title {
-  color: #3555F9;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.cancel-btn, .save-btn {
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cancel-btn {
-  background-color: white;
-  color: #4B5563;
-  border: 1px solid #E5E7EB;
-}
-
-.cancel-btn:hover {
-  background-color: #F9FAFB;
-}
-
-.save-btn {
-  background-color: #3555F9;
-  color: white;
-  border: none;
-}
-
-.save-btn:hover {
-  background-color: #2A44C7;
-}
-
-.save-btn:disabled, .cancel-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.error-message {
-  background-color: #FEF2F2;
-  color: #DC2626;
+.errorMessage {
+  background-color: #fef2f2;
+  color: #dc2626;
   padding: 12px 16px;
   border-radius: 8px;
   margin: 0 24px;
@@ -222,30 +69,172 @@
   gap: 8px;
 }
 
-.error-message::before {
+.errorMessage::before {
   content: "!";
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 20px;
   height: 20px;
-  background-color: #DC2626;
+  background-color: #dc2626;
   color: white;
   border-radius: 50%;
   font-weight: bold;
 }
 
+.editProfileForm {
+  padding: 24px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 8px;
+}
+
+.formGroup input[type="text"],
+.formGroup textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #1f2937;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.formGroup input[type="text"]:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #3555f9;
+  box-shadow: 0 0 0 3px rgba(53, 85, 249, 0.1);
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.privacyOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.privacyOption {
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.privacyOption:hover {
+  background-color: #f9fafb;
+}
+
+.privacyOption input[type="radio"] {
+  margin-top: 8px;
+  margin-right: 12px;
+  accent-color: #3555f9;
+}
+
+.optionContent {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.optionInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.optionTitle {
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.optionDescription {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.privacyOption input[type="radio"]:checked + .optionContent {
+  font-weight: 500;
+}
+
+.privacyOption input[type="radio"]:checked + .optionContent .optionTitle {
+  color: #3555f9;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cancelBtn,
+.saveBtn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn {
+  background-color: white;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+}
+
+.cancelBtn:hover {
+  background-color: #f9fafb;
+}
+
+.saveBtn {
+  background-color: #3555f9;
+  color: white;
+  border: none;
+}
+
+.saveBtn:hover {
+  background-color: #2a44c7;
+}
+
+.saveBtn:disabled,
+.cancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 640px) {
-  .edit-profile-modal {
+  .editProfileModal {
     max-width: 90%;
     max-height: 80vh;
   }
-  
-  .form-actions {
+
+  .formActions {
     flex-direction: column;
   }
-  
-  .cancel-btn, .save-btn {
+
+  .cancelBtn,
+  .saveBtn {
     width: 100%;
   }
 }

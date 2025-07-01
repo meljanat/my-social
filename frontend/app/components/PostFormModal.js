@@ -1,47 +1,59 @@
 "use client";
 import { useState, useEffect } from "react";
-import "../styles/ProfileCard.css";
-export default function PostFormModal({
-  onClose,
-  // user,
-  onPostCreated,
-  group_id,
-}) {
+import styles from "../styles/PostFormModal.module.css"; 
+
+export default function PostFormModal({ onClose, user, onPostCreated }) {
   const [postFormInput, setPostFormInput] = useState({
     title: "",
     content: "",
+    privacy: "",
     categoryId: 0,
     postImage: null,
   });
-  //   console.log("groupid: ", group_id);
-
   const [imageInputKey, setImageInputKey] = useState(Date.now());
+  const [followers, setFollowers] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [selectedFollowers, setSelectedFollowers] = useState([]);
+  const [selectedFollowerNames, setSelectedFollowerNames] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAudienceSelector, setShowAudienceSelector] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchCategories = async () => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (postFormInput.privacy === "almost_private") {
+      setShowAudienceSelector(true);
+    } else {
+      setShowAudienceSelector(false);
+    }
+  }, [postFormInput.privacy]);
+
+  const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `http://localhost:8404/new_post_group?group_id=${group_id}`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
+      const response = await fetch("http://localhost:8404/new_post", {
+        method: "GET",
+        credentials: "include",
+      });
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
+        console.log("Data from creating post",data);
+        
+        if (data.Users && Array.isArray(data.Users)) {
+          setFollowers(data.Users);
+        }
 
-        if (data && Array.isArray(data)) {
-          setCategories(data);
+        if (data.Categories && Array.isArray(data.Categories)) {
+          setCategories(data.Categories);
 
-          if (data.length > 0) {
+          if (data.Categories.length > 0) {
             setPostFormInput((prev) => ({
               ...prev,
-              categoryId: data[0].category_id,
+              categoryId: data.Categories[0].category_id,
             }));
           }
         }
@@ -63,22 +75,40 @@ export default function PostFormModal({
     });
   };
 
+  const toggleFollowerSelection = (follower) => {
+    const isSelected = selectedFollowers.includes(follower.user_id);
+
+    if (isSelected) {
+      setSelectedFollowers((prev) =>
+        prev.filter((id) => id !== follower.user_id)
+      );
+      setSelectedFollowerNames((prev) =>
+        prev.filter((name) => name !== follower.username)
+      );
+    } else {
+      setSelectedFollowers((prev) => [...prev, follower.user_id]);
+      setSelectedFollowerNames((prev) => [...prev, follower.username]);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const formData = new FormData();
-    formData.append("group_id", group_id);
+
     formData.append("title", postFormInput.title);
     formData.append("content", postFormInput.content);
     formData.append("privacy", postFormInput.privacy);
     formData.append("category", postFormInput.categoryId.toString());
+
+    formData.append("users", selectedFollowers.join(","));
     if (postFormInput.postImage) {
       formData.append("postImage", postFormInput.postImage);
     }
 
     try {
-      const response = await fetch("http://localhost:8404/new_post_group", {
+      const response = await fetch("http://localhost:8404/new_post", {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -89,26 +119,34 @@ export default function PostFormModal({
         console.error(data);
         throw new Error(data.error || "Failed to create the post");
       }
-
-      const responseData = await response.json();
+      const data = await response.json();
+      for (let pair of formData.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
+      }
 
       const newPost = {
-        id: responseData.id || Date.now(),
-        title: postFormInput.title,
-        content: postFormInput.content,
-        // author: `${user.first_name} ${user.last_name}`,
-        // author_id: user.id,
+        id: data.id || Date.now(),
+        title: data.title || postFormInput.title,
+        content: data.content || postFormInput.content,
+        privacy: data.privacy || postFormInput.privacy || "public",
+        author: `${user.first_name} ${user.last_name}`,
+        author_id: user.user_id,
         created_at: "Just now",
         category:
-          categories.find((c) => c.category_id === postFormInput.categoryId)
-            ?.name || "",
+          categories.find(
+            (c) => c.category_id === parseInt(postFormInput.categoryId)
+          )?.name || "",
+        category_color: "#000000",
+        category_background: "#f0f0f0",
         total_likes: 0,
         total_comments: 0,
-        image: postFormInput.postImage
-          ? URL.createObjectURL(postFormInput.postImage)
-          : null,
-        // avatar: user.avatar || "avatar.jpg",
+        is_liked: false,
+        saved: false,
+        image: data.image || null,
+        avatar: user.avatar || "/avatars/default.jpg",
       };
+
+      console.log("New post object:", newPost);
 
       if (onPostCreated) {
         onPostCreated(newPost);
@@ -116,29 +154,29 @@ export default function PostFormModal({
 
       onClose();
     } catch (error) {
-      console.error(error);
+      console.log(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <div className="modal-header">
+    <div className={styles.modalOverlay}>
+      <div className={styles.modal}>
+        <div className={styles.modalHeader}>
           <h3>Create a new post</h3>
-          <button className="close-button" onClick={onClose}>
+          <button className={styles.closeButton} onClick={onClose}>
             &times;
           </button>
         </div>
 
-        <form className="post-form" onSubmit={handleSubmit}>
-          <div className="form-fields">
-            <div className="form-group">
+        <form className={styles.postForm} onSubmit={handleSubmit}>
+          <div className={styles.formFields}>
+            <div className={styles.formGroup}>
               <label htmlFor="post-title">Title</label>
               <input
                 id="post-title"
-                className="form-control"
+                className={styles.formControl}
                 placeholder="Enter post title"
                 required
                 value={postFormInput.title}
@@ -148,11 +186,11 @@ export default function PostFormModal({
               />
             </div>
 
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="post-content">Content</label>
               <textarea
                 id="post-content"
-                className="form-control"
+                className={styles.formControl}
                 placeholder="Post Content..."
                 required
                 value={postFormInput.content}
@@ -165,16 +203,16 @@ export default function PostFormModal({
               />
             </div>
 
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label>Upload Image</label>
               {postFormInput.postImage ? (
-                <div className="image-preview">
+                <div className={styles.imagePreview}>
                   <img
                     src={URL.createObjectURL(postFormInput.postImage)}
                     alt="Selected"
                   />
                   <button
-                    className="remove-image-button"
+                    className={styles.removeImageButton}
                     onClick={(e) => {
                       e.preventDefault();
                       setPostFormInput({
@@ -188,21 +226,21 @@ export default function PostFormModal({
                   </button>
                 </div>
               ) : (
-                <div className="file-upload">
+                <div className={styles.fileUpload}>
                   <input
                     key={imageInputKey}
                     type="file"
                     id="file-input"
-                    className="file-input"
+                    className={styles.fileInput}
                     name="postImage"
                     onChange={handleImageChange}
                     accept="image/*"
                   />
-                  <label htmlFor="file-input" className="file-label">
+                  <label htmlFor="file-input" className={styles.fileLabel}>
                     <img src="/icons/upload.svg" alt="" />
                     Choose File
                   </label>
-                  <span className="file-name">
+                  <span className={styles.fileName}>
                     {postFormInput.postImage
                       ? postFormInput.postImage.name
                       : "No file chosen"}
@@ -211,15 +249,13 @@ export default function PostFormModal({
               )}
             </div>
 
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="post-category">Category</label>
               <select
                 id="post-category"
-                className="form-control"
+                className={styles.formControl}
                 value={postFormInput.categoryId}
-                onClick={fetchCategories}
                 onChange={(e) => {
-                  //   fetchCategories();
                   setPostFormInput({
                     ...postFormInput,
                     categoryId: parseInt(e.target.value, 10),
@@ -237,11 +273,98 @@ export default function PostFormModal({
                 )}
               </select>
             </div>
+
+            <div className={styles.formGroup}>
+              <label>Privacy</label>
+              <div className={styles.privacyOptions}>
+                <label className={styles.privacyOption}>
+                  <input
+                    type="radio"
+                    value="private"
+                    name="privacy"
+                    checked={postFormInput.privacy === "private"}
+                    onChange={(e) => {
+                      setPostFormInput({
+                        ...postFormInput,
+                        privacy: e.target.value,
+                      });
+                    }}
+                  />
+                  <span>Private</span>
+                </label>
+
+                <label className={styles.privacyOption}>
+                  <input
+                    type="radio"
+                    value="public"
+                    name="privacy"
+                    checked={postFormInput.privacy === "public"}
+                    onChange={(e) => {
+                      setPostFormInput({
+                        ...postFormInput,
+                        privacy: e.target.value,
+                      });
+                    }}
+                  />
+                  <span>Public</span>
+                </label>
+
+                <label className={styles.privacyOption}>
+                  <input
+                    type="radio"
+                    value="almost_private"
+                    name="privacy"
+                    checked={postFormInput.privacy === "almost_private"}
+                    onChange={(e) => {
+                      setPostFormInput({
+                        ...postFormInput,
+                        privacy: e.target.value,
+                      });
+                    }}
+                  />
+                  <span>Almost Private</span>
+                </label>
+              </div>
+            </div>
+
+            {showAudienceSelector && (
+              <div className={`${styles.formGroup} ${styles.audienceSelector}`}>
+                <label>Select Audience</label>
+
+                {selectedFollowerNames.length > 0 && (
+                  <div className={styles.selectedFollowers}>
+                    <p>Selected: {selectedFollowerNames.join(", ")}</p>
+                  </div>
+                )}
+
+                <div className={styles.followersList}>
+                  {isLoading ? (
+                    <p className={styles.loadingText}>Loading followers...</p>
+                  ) : followers.length > 0 ? (
+                    followers.map((follower) => (
+                      <label key={follower.id} className={styles.followerItem}>
+                        <input
+                          type="checkbox"
+                          className={styles.followerCheckbox}
+                          checked={selectedFollowers.includes(follower.id)}
+                          onChange={() => toggleFollowerSelection(follower)}
+                        />
+                        <span className={styles.followerName}>
+                          {follower.username}
+                        </span>
+                      </label>
+                    ))
+                  ) : (
+                    <p className={styles.noFollowersText}>No followers found</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <button
             type="submit"
-            className="submit-button"
+            className={styles.submitButton}
             disabled={isSubmitting}
           >
             {isSubmitting ? "Publishing..." : "Publish Post"}

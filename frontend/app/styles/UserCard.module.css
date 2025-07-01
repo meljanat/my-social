@@ -1,0 +1,141 @@
+.userItem {
+  display: flex;
+  align-items: center;
+  background-color: #fdfefe;
+  border: 1px solid #eef2f9;
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.userItem:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.userAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 1rem;
+  border: 3px solid #e0e5f0;
+  flex-shrink: 0; 
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.userDetails {
+  flex-grow: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer; 
+}
+
+.userName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userUsername {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 0.2rem;
+}
+
+.followBtn {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  flex-shrink: 0; 
+}
+
+.followBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.followBtn.Following {
+  background: linear-gradient(135deg, #eef2f9 0%, #e0e5f0 100%);
+  color: #475569;
+  border: 1px solid #dbe2ef;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.followBtn.Following:hover {
+  background: linear-gradient(135deg, #e0e5f0 0%, #d3d9e8 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.followBtn.Requested {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); /* Orange for pending */
+  color: white;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.followBtn.Requested:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
+}
+
+@media (max-width: 768px) {
+  .userItem {
+    padding: 0.8rem 1rem;
+  }
+  .userAvatar {
+    width: 50px;
+    height: 50px;
+    margin-right: 0.8rem;
+  }
+  .userName {
+    font-size: 1rem;
+  }
+  .userUsername {
+    font-size: 0.8rem;
+  }
+  .followBtn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .userItem {
+    padding: 0.6rem 0.8rem;
+  }
+  .userAvatar {
+    width: 45px;
+    height: 45px;
+    margin-right: 0.6rem;
+  }
+  .userName {
+    font-size: 0.95rem;
+  }
+  .userUsername {
+    font-size: 0.75rem;
+  }
+  .followBtn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}

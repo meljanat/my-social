@@ -174,7 +174,9 @@ body {
   overflow-y: auto;
   padding: 1rem;
   box-sizing: border-box;
-  background-color: #fff;
+    scrollbar-width: thin;
+  scrollbar-color: #679fe2 #dee9f5;
+  /* background-color: #fff; */
 }
 
 @media (max-width: 976px) {

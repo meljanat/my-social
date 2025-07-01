@@ -1,0 +1,248 @@
+.postCardModern {
+    background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+  
+  /* .postCardModern:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  } */
+  
+  .postCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e8ecf7;
+  }
+  
+  .postAuthorInfo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .postAuthorAvatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e8ecf7;
+    flex-shrink: 0;
+  }
+  
+  .postAuthorName {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  .postAuthorName:hover {
+    color: #667eea;
+  }
+  
+  .postMeta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 0.2rem;
+  }
+  
+  .postVisibilityIcon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
+  }
+  
+  .postCategoryBadge {
+    background: linear-gradient(135deg, #eff2f9 0%, #e0e5f0 100%);
+    color: #475569;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid #dbe2ef;
+  }
+  
+  .postCardContent {
+    padding: 1.5rem 2rem;
+  }
+  
+  .postTitleModern {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  
+  .postTextModern {
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+  
+  .postImageContainer {
+    width: 100%;
+    max-height: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 1.5rem;
+    background-color: #f0f0f0;
+    border: 1px solid #e8ecf7;
+  }
+  
+  .postImageModern {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block; /* Remove extra space below image */
+  }
+  
+  .postCardFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e8ecf7;
+  }
+  
+  .postEngagement {
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  .postStat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .postStat:hover {
+    color: #667eea;
+    transform: translateY(-1px);
+  }
+  
+  .postStat img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+  
+  .postStat:hover img {
+    opacity: 1;
+  }
+  
+  .postViewButton {
+    background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+  
+  .postViewButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  }
+  
+  @media (max-width: 768px) {
+    .postCardHeader,
+    .postCardContent,
+    .postCardFooter {
+      padding: 1rem 1.5rem;
+    }
+  
+    .postAuthorAvatar {
+      width: 45px;
+      height: 45px;
+    }
+  
+    .postAuthorName {
+      font-size: 0.95rem;
+    }
+  
+    .postMeta {
+      font-size: 0.75rem;
+    }
+  
+    .postCategoryBadge {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.75rem;
+    }
+  
+    .postTitleModern {
+      font-size: 1.3rem;
+    }
+  
+    .postTextModern {
+      font-size: 0.9rem;
+    }
+  
+    .postStat {
+      font-size: 0.85rem;
+    }
+  
+    .postStat img {
+      width: 18px;
+      height: 18px;
+    }
+  
+    .postViewButton {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.85rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .postCardHeader,
+    .postCardContent,
+    .postCardFooter {
+      padding: 0.75rem 1rem;
+    }
+  
+    .postAuthorAvatar {
+      width: 40px;
+      height: 40px;
+    }
+  
+    .postAuthorInfo {
+      gap: 0.75rem;
+    }
+  
+    .postTitleModern {
+      font-size: 1.15rem;
+    }
+  
+    .postTextModern {
+      font-size: 0.85rem;
+    }
+  
+    .postEngagement {
+      gap: 1rem;
+    }
+  }

@@ -1,4 +1,6 @@
-import "../styles/ChatContact.css";
+// import "../styles/ChatContact.css";
+import styles from "../styles/ChatContact.module.css";
+
 const ChatContact = ({ user, onClick, isOnline = false }) => {
   const getInitials = (name) => {
     return name
@@ -9,35 +11,35 @@ const ChatContact = ({ user, onClick, isOnline = false }) => {
   };
 
   return (
-    <div className="chat-contact" onClick={onClick}>
-      <div className="chat-contact-avatar-container">
+    <div className={styles.chatContact} onClick={onClick}>
+      <div className={styles.chatContactAvatarContainer}>
         {user.avatar ? (
           <img
             src={user.avatar}
             alt={user.username}
-            className="chat-contact-avatar"
+            className={styles.chatContactAvatar}
           />
         ) : (
-          <div className="chat-contact-avatar-fallback">
+          <div className={styles.chatContactAvatarFallback}>
             {`${user.first_name} ${user.last_name}`}
           </div>
         )}
         <div
-          className={`status-indicator ${isOnline ? "online" : "offline"}`}
+          className={`${styles.statusIndicator} ${isOnline ? "online" : "offline"}`}
         />
       </div>
 
-      <div className="chat-contact-info">
-        <div className="chat-contact-primary">
-          <h4 className="chat-contact-name">
+      <div className={styles.chatContactInfo}>
+        <div className={styles.chatContactPrimary}>
+          <h4 className={styles.chatContactName}>
             {user.first_name} {user.last_name}
           </h4>
           {user.unread_count > 0 && (
-            <span className="unread-badge">{user.unread_count}</span>
+            <span className={styles.unreadBadge}>{user.unread_count}</span>
           )}
         </div>
-        <div className="chat-contact-secondary">
-          <p className="chat-contact-username">@{user.username}</p>
+        <div className={styles.chatContactSecondary}>
+          <p className={styles.chatContactUsername}>@{user.username}</p>
         </div>
       </div>
     </div>

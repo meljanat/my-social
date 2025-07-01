@@ -1,10 +1,12 @@
 "use client";
 import { useState } from "react";
-import "../styles/EditProfileModal.css";
+import styles from "../styles/EditProfileModal.module.css";
 
 export default function EditProfileModal({ user, onClose, onSave }) {
+  console.log("EditProfileModal props:", user, onClose, onSave);
+
   const [formData, setFormData] = useState({
-    id: user.user_id || 0,
+    // id: user.user_id || 0,
     username: user.username || "",
     privacy: user.privacy || "public",
     bio: user.bio || "",
@@ -70,19 +72,22 @@ export default function EditProfileModal({ user, onClose, onSave }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="edit-profile-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div
+        className={styles.editProfileModal}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={styles.modalHeader}>
           <h2>Edit Profile</h2>
-          <button className="close-modal-btn" onClick={onClose}>
+          <button className={styles.closeModalBtn} onClick={onClose}>
             &times;
           </button>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && <div className={styles.errorMessage}>{error}</div>}
 
-        <form onSubmit={handleSubmit} className="edit-profile-form">
-          <div className="form-group">
+        <form onSubmit={handleSubmit} className={styles.editProfileForm}>
+          <div className={styles.formGroup}>
             <label htmlFor="first_name">First Name</label>
             <input
               type="text"
@@ -94,7 +99,7 @@ export default function EditProfileModal({ user, onClose, onSave }) {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label htmlFor="last_name">Last Name</label>
             <input
               type="text"
@@ -106,7 +111,7 @@ export default function EditProfileModal({ user, onClose, onSave }) {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label htmlFor="username">Username</label>
             <input
               type="text"
@@ -119,7 +124,7 @@ export default function EditProfileModal({ user, onClose, onSave }) {
             />
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label htmlFor="bio">Bio</label>
             <textarea
               id="bio"
@@ -131,10 +136,10 @@ export default function EditProfileModal({ user, onClose, onSave }) {
             ></textarea>
           </div>
 
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label>Privacy</label>
-            <div className="privacy-options">
-              <label className="privacy-option">
+            <div className={styles.privacyOptions}>
+              <label className={styles.privacyOption}>
                 <input
                   type="radio"
                   name="privacy"
@@ -142,18 +147,18 @@ export default function EditProfileModal({ user, onClose, onSave }) {
                   checked={formData.privacy === "public"}
                   onChange={handleChange}
                 />
-                <div className="option-content">
+                <div className={styles.optionContent}>
                   {/* <div className="option-icon"></div> */}
-                  <div className="option-info">
-                    <span className="option-title">Public</span>
-                    <span className="option-description">
+                  <div className={styles.optionInfo}>
+                    <span className={styles.optionTitle}>Public</span>
+                    <span className={styles.optionDescription}>
                       Anyone can see your profile and posts
                     </span>
                   </div>
                 </div>
               </label>
 
-              <label className="privacy-option">
+              <label className={styles.privacyOption}>
                 <input
                   type="radio"
                   name="privacy"
@@ -161,11 +166,11 @@ export default function EditProfileModal({ user, onClose, onSave }) {
                   checked={formData.privacy === "private"}
                   onChange={handleChange}
                 />
-                <div className="option-content">
+                <div className={styles.optionContent}>
                   {/* <div className="option-icon"></div> */}
-                  <div className="option-info">
-                    <span className="option-title">Private</span>
-                    <span className="option-description">
+                  <div className={styles.optionInfo}>
+                    <span className={styles.optionTitle}>Private</span>
+                    <span className={styles.optionDescription}>
                       Only followers can see your posts
                     </span>
                   </div>
@@ -174,16 +179,20 @@ export default function EditProfileModal({ user, onClose, onSave }) {
             </div>
           </div>
 
-          <div className="form-actions">
+          <div className={styles.formActions}>
             <button
               type="button"
-              className="cancel-btn"
+              className={styles.cancelBtn}
               onClick={onClose}
               disabled={isLoading}
             >
               Cancel
             </button>
-            <button type="submit" className="save-btn" disabled={isLoading}>
+            <button
+              type="submit"
+              className={styles.saveBtn}
+              disabled={isLoading}
+            >
               {isLoading ? "Saving..." : "Save Changes"}
             </button>
           </div>

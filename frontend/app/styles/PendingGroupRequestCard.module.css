@@ -1,0 +1,261 @@
+/* PendingGroupRequestCard.module.css */
+
+.pendingGroupCard {
+  background-color: #fdfefe;
+  border: 1px solid #eef2f9;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.pendingGroupCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.pendingGroupContent {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.pendingGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pendingGroupInfo {
+  display: flex; /* Added to align avatar and name/status */
+  align-items: center;
+  gap: 1rem;
+  flex-grow: 1;
+}
+
+.pendingGroupAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 3px solid #e0e5f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pendingGroupName {
+  flex-grow: 1;
+}
+
+.pendingGroupName h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pendingGroupStatus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 0.2rem;
+}
+
+.pendingGroupStatus span {
+  font-weight: 500;
+  color: #f97316; /* Orange for pending status */
+}
+
+.pendingGroupCancelBtn {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+  flex-shrink: 0; /* Prevent button from shrinking */
+}
+
+.pendingGroupCancelBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.pendingGroupCancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #cbd5e1;
+  box-shadow: none;
+}
+
+.pendingGroupDescription {
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  flex-grow: 1; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pendingGroupStats {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+  margin-top: auto; 
+  padding-top: 1.5rem;
+  border-top: 1px solid #eef2f9;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.statIcon svg {
+  width: 16px;
+  height: 16px;
+  color: #667eea; /* Primary blue for icons */
+  flex-shrink: 0;
+}
+
+.statLabel {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.statText {
+  color: #64748b;
+}
+
+.pendingGroupRequestDate {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  text-align: right;
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed #f0f2f5;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .pendingGroupContent {
+    padding: 1.2rem;
+  }
+  .pendingGroupHeader {
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+  .pendingGroupInfo {
+    gap: 0.8rem;
+  }
+  .pendingGroupAvatar {
+    width: 50px;
+    height: 50px;
+  }
+  .pendingGroupName h3 {
+    font-size: 1.1rem;
+  }
+  .pendingGroupStatus {
+    font-size: 0.8rem;
+  }
+  .pendingGroupCancelBtn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  .pendingGroupDescription {
+    font-size: 0.85rem;
+    margin-bottom: 1.2rem;
+  }
+  .pendingGroupStats {
+    padding-top: 1.2rem;
+    gap: 0.8rem;
+  }
+  .statItem {
+    font-size: 0.8rem;
+  }
+  .statIcon svg {
+    width: 14px;
+    height: 14px;
+  }
+  .pendingGroupRequestDate {
+    font-size: 0.75rem;
+    margin-top: 0.8rem;
+    padding-top: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pendingGroupContent {
+    padding: 1rem;
+  }
+  .pendingGroupHeader {
+    flex-direction: column; /* Stack avatar and info on very small screens */
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+  }
+  .pendingGroupInfo {
+    width: 100%;
+    justify-content: space-between; /* Keep status next to name */
+    gap: 0.6rem;
+  }
+  .pendingGroupAvatar {
+    width: 45px;
+    height: 45px;
+  }
+  .pendingGroupName h3 {
+    font-size: 1rem;
+  }
+  .pendingGroupStatus {
+    flex-direction: row; /* Keep status and button inline if space allows */
+    gap: 0.4rem;
+    font-size: 0.75rem;
+  }
+  .pendingGroupCancelBtn {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+  }
+  .pendingGroupDescription {
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  .pendingGroupStats {
+    flex-direction: column; 
+    padding-top: 1rem;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+  .statItem {
+    font-size: 0.75rem;
+  }
+  .statIcon svg {
+    width: 12px;
+    height: 12px;
+  }
+  .pendingGroupRequestDate {
+    font-size: 0.7rem;
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+  }
+}

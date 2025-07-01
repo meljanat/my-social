@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useRef, use } from "react";
-import "../styles/StoriesComponent.css";
-import { sendError } from "next/dist/server/api-utils";
+import React, { useState, useEffect, useRef } from "react";
+import styles from "../styles/StoriesComponent.module.css"; 
+// import { sendError } from "next/dist/server/api-utils"; 
 
 export default function StoriesComponent({ storiesUsers }) {
   const [storyUsers, setStoryUsers] = useState([]);
@@ -20,7 +20,7 @@ export default function StoriesComponent({ storiesUsers }) {
 
   useEffect(() => {
     setStoryUsers(storiesUsers);
-  }, []);
+  }, [storiesUsers]);
 
   async function storySeenn(story_id) {
     try {
@@ -53,7 +53,12 @@ export default function StoriesComponent({ storiesUsers }) {
   useEffect(() => {
     if (activeUserIndex !== null && !isPaused) {
       const user = storyUsers[activeUserIndex];
-      const story = user.stories[activeStoryIndex];
+      // Check if user or stories exist before accessing
+      if (!user || !user.stories || user.stories.length === 0) {
+        closeStoryModal();
+        return;
+      }
+      // const story = user.stories[activeStoryIndex]; // 'story' variable not directly used in this effect's logic
 
       clearInterval(progressIntervalRef.current);
       clearTimeout(storyTimeoutRef.current);
@@ -83,18 +88,26 @@ export default function StoriesComponent({ storiesUsers }) {
       clearInterval(progressIntervalRef.current);
       clearTimeout(storyTimeoutRef.current);
     };
-  }, [activeUserIndex, activeStoryIndex, isPaused]);
+  }, [activeUserIndex, activeStoryIndex, isPaused, storyUsers]); // Added storyUsers to dependencies
 
   const handleStoryClick = (userIndex) => {
-    storySeenn(storyUsers[userIndex].stories[0].story_id);
+    // Ensure user and stories exist before attempting to access story_id
+    if (
+      storyUsers[userIndex] &&
+      storyUsers[userIndex].stories &&
+      storyUsers[userIndex].stories.length > 0
+    ) {
+      storySeenn(storyUsers[userIndex].stories[0].story_id);
+    }
     setActiveUserIndex(userIndex);
     setActiveStoryIndex(0);
     setProgress(0);
 
     const updatedUsers = [...storyUsers];
-    updatedUsers[userIndex].unseen_story = true;
-    console.log("dertvu", updatedUsers);
-
+    if (updatedUsers[userIndex]) {
+      // Ensure user exists before updating
+      updatedUsers[userIndex].unseen_story = true; // This might need to be false if it means "seen"
+    }
     setStoryUsers(updatedUsers);
   };
 
@@ -106,18 +119,39 @@ export default function StoriesComponent({ storiesUsers }) {
 
   const goToNextStory = () => {
     const user = storyUsers[activeUserIndex];
+    if (!user || !user.stories) {
+      // Safety check
+      closeStoryModal();
+      return;
+    }
+
     if (activeStoryIndex < user.stories.length - 1) {
       setActiveStoryIndex(activeStoryIndex + 1);
+      storySeenn(user.stories[activeStoryIndex + 1].story_id); // Mark next story as seen
     } else if (activeUserIndex < storyUsers.length - 1) {
-      setActiveUserIndex(activeUserIndex + 1);
+      const nextUserIndex = activeUserIndex + 1;
+      setActiveUserIndex(nextUserIndex);
       setActiveStoryIndex(0);
       const updatedUsers = [...storyUsers];
-      updatedUsers[activeUserIndex + 1].unseen_story = false;
+      if (updatedUsers[nextUserIndex]) {
+        // Ensure user exists
+        updatedUsers[nextUserIndex].unseen_story = false; // Mark next user's stories as unseen if they have any
+      }
       setStoryUsers(updatedUsers);
+      // Mark the first story of the next user as seen
+      if (
+        updatedUsers[nextUserIndex] &&
+        updatedUsers[nextUserIndex].stories &&
+        updatedUsers[nextUserIndex].stories.length > 0
+      ) {
+        storySeenn(updatedUsers[nextUserIndex].stories[0].story_id);
+      }
     } else {
       closeStoryModal();
     }
-    storySeenn(user.stories[activeStoryIndex].story_id);
+    // Original logic marked the *current* story as seen *after* advancing,
+    // which might be a bug if it's supposed to mark the *next* one.
+    // The previous `storySeenn` call was moved to the correct branches.
   };
 
   const goToPreviousStory = () => {
@@ -126,19 +160,25 @@ export default function StoriesComponent({ storiesUsers }) {
     } else if (activeUserIndex > 0) {
       const prevUserIndex = activeUserIndex - 1;
       const prevUser = storyUsers[prevUserIndex];
-      setActiveUserIndex(prevUserIndex);
-      setActiveStoryIndex(prevUser.stories.length - 1);
+      if (prevUser && prevUser.stories) {
+        // Safety check
+        setActiveUserIndex(prevUserIndex);
+        setActiveStoryIndex(prevUser.stories.length - 1);
+      } else {
+        // If previous user or their stories are invalid, close or handle
+        closeStoryModal(); // Or go to the next available user/story
+      }
     }
   };
 
   const handleAddStory = () => {
     setAddingStory(true);
-    setStoryFormInput(null);
+    setStoryFormInput({ storyImage: null }); // Reset form input
   };
 
   const closeAddStoryModal = () => {
     setAddingStory(false);
-    setStoryFormInput(null);
+    setStoryFormInput({ storyImage: null });
   };
 
   const handleMouseDown = () => {
@@ -157,18 +197,19 @@ export default function StoriesComponent({ storiesUsers }) {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setStoryFormInput({
-      ...storyFormInput,
-      storyImage: file,
-    });
+    if (file) {
+      setStoryFormInput({
+        ...storyFormInput,
+        storyImage: file,
+      });
+    }
   };
 
   const createNewStory = async () => {
     if (storyFormInput.storyImage) {
       const formData = new FormData();
-      if (storyFormInput.storyImage) {
-        formData.append("storyImage", storyFormInput.storyImage);
-      }
+      formData.append("storyImage", storyFormInput.storyImage);
+
       try {
         const response = await fetch("http://localhost:8404/story", {
           method: "POST",
@@ -181,99 +222,101 @@ export default function StoriesComponent({ storiesUsers }) {
         const data = await response.json();
 
         const newStory = {
-          id: data.stories.id,
+          story_id: data.stories.id, // Assuming 'id' from backend maps to 'story_id'
           image: data.stories.image,
           duration: 5000,
         };
 
-        const currentUser = storyUsers.find(
-          (user) => user.username === data.user.username
-        ) || {
-          user: {
-            id: data.stories.id,
-            username: data.user.username,
-            avatar: data.user.avatar,
-          },
-          unseen_story: data.stories.status,
-          stories: [],
-        };
+        const currentUserIndex = storyUsers.findIndex(
+          (user) => user.user.username === data.user.username
+        );
 
-        console.log("currentUser", currentUser);
+        let updatedUsers = [...storyUsers];
 
-        const updatedCurrentUser = {
-          ...currentUser,
-          stories: [...currentUser.stories, newStory],
-          unseen_story: false,
-        };
-
-        let updatedUsers;
-        if (
-          storyUsers.find((user) => {
-            return user.user.username === data.user.username;
-          })
-        ) {
-          updatedUsers = storyUsers.map((user) =>
-            user.user.username === data.user.username
-              ? updatedCurrentUser
-              : user
-          );
+        if (currentUserIndex !== -1) {
+          // User exists, update their stories
+          updatedUsers[currentUserIndex] = {
+            ...updatedUsers[currentUserIndex],
+            stories: [...updatedUsers[currentUserIndex].stories, newStory],
+            unseen_story: false, // New story is added, so it's "unseen" for others
+          };
         } else {
-          updatedUsers = [updatedCurrentUser, ...storyUsers];
+          // New user or first story for this user
+          const newUserEntry = {
+            user: {
+              user_id: data.user.id, // Assuming user ID from backend
+              username: data.user.username,
+              avatar: data.user.avatar,
+            },
+            unseen_story: false, // New story is added
+            stories: [newStory],
+          };
+          updatedUsers = [newUserEntry, ...updatedUsers]; // Add new user to the beginning
         }
-        console.log("updateUser", updatedUsers);
 
         setStoryUsers(updatedUsers);
         closeAddStoryModal();
       } catch (error) {
         console.error("Error uploading story:", error);
+        // Optionally, show an error message to the user
       }
     }
   };
+
+  const getStoryImageSrc = (story) => {
+    if (storyFormInput.storyImage instanceof File) {
+      return URL.createObjectURL(storyFormInput.storyImage);
+    }
+    return story.image || "/inconnu/placeholder-story.png"; // Fallback for story image
+  };
+
   return (
-    <div className="stories-wrapper">
-      <div className="stories-header">
+    <div className={styles.storiesWrapper}>
+      <div className={styles.storiesHeader}>
         <h2>Stories</h2>
-        <button className="stories-view-all-btn">View All</button>
+        <button className={styles.storiesViewAllBtn}>View All</button>
       </div>
 
-      <div className="stories-container">
-        <div className="story-item">
-          <div className="add-story-button" onClick={handleAddStory}>
-            <div className="plus-icon">+</div>
+      <div className={styles.storiesContainer}>
+        <div className={styles.storyItem}>
+          <div className={styles.addStoryButton} onClick={handleAddStory}>
+            <div className={styles.plusIcon}>+</div>
           </div>
-          <p className="username">Add Story</p>
+          <p className={styles.username}>Add Story</p>
         </div>
 
         {storyUsers?.map((user, index) => (
-          <div key={index} className="story-item">
+          <div key={user.user.user_id || index} className={styles.storyItem}>
             <div
-              className={`story-circle ${
-                !user.unseen_story ? "unseen-story" : "seen-story"
+              className={`${styles.storyCircle} ${
+                user.unseen_story ? styles.unseenStory : styles.seenStory
               }`}
               onClick={() => {
-                console.log("Clicked on user:", index);
                 handleStoryClick(index);
               }}
             >
               <img
-                src={user.user.avatar || "/api/placeholder/72/72"}
+                src={user.user.avatar || "/inconnu/avatar.png"} 
                 alt={user.user.username}
-                className="avatar"
+                className={styles.avatar}
               />
             </div>
-            <p className="username">{user.username}</p>
+            <p className={styles.username}>{user.user.username}</p>{" "}
           </div>
         ))}
       </div>
 
-      {activeUserIndex !== null && (
-        <div className="story-modal">
-          <div className="modal-content story-viewer">
-            <div className="story-progress-container">
+      {activeUserIndex !== null && storyUsers[activeUserIndex] && (
+        <div className={styles.storyModal}>
+          <div className={`${styles.modalContent} ${styles.storyViewer}`}>
+            <div className={styles.storyProgressContainer}>
               {storyUsers[activeUserIndex]?.stories?.map((story, idx) => (
-                <div key={story.id} className="story-progress-bar">
+                <div
+                  key={story.story_id || idx}
+                  className={styles.storyProgressBar}
+                >
                   <div
-                    className="story-progress"
+                    className={styles.storyProgress}
                     style={{
                       width:
                         idx < activeStoryIndex
@@ -287,24 +330,27 @@ export default function StoriesComponent({ storiesUsers }) {
               ))}
             </div>
 
-            <div className="story-header">
-              <div className="story-user-info">
+            <div className={styles.storyHeader}>
+              <div className={styles.storyUserInfo}>
                 <img
-                  src={storyUsers[activeUserIndex].user.avatar}
+                  src={
+                    storyUsers[activeUserIndex].user.avatar ||
+                    "/inconnu/avatar.png"
+                  } 
                   alt={storyUsers[activeUserIndex].user.username}
-                  className="story-avatar"
+                  className={styles.storyAvatar}
                 />
-                <span className="story-username">
+                <span className={styles.storyUsername}>
                   {storyUsers[activeUserIndex].user.username}
                 </span>
               </div>
-              <button className="close-button" onClick={closeStoryModal}>
+              <button className={styles.closeButton} onClick={closeStoryModal}>
                 ×
               </button>
             </div>
 
             <div
-              className="story-content"
+              className={styles.storyContent}
               onMouseDown={handleMouseDown}
               onMouseUp={handleMouseUp}
               onTouchStart={handleMouseDown}
@@ -312,18 +358,22 @@ export default function StoriesComponent({ storiesUsers }) {
             >
               <img
                 src={
-                  storyUsers[activeUserIndex].stories[activeStoryIndex].image
-                }
+                  storyUsers[activeUserIndex].stories[activeStoryIndex]
+                    ?.image || "/inconnu/placeholder-story.png"
+                } 
                 alt="Story"
-                className="story-image"
+                className={styles.storyImage}
               />
 
-              <div className="story-navigation">
+              <div className={styles.storyNavigation}>
                 <div
-                  className="story-nav prev"
+                  className={`${styles.storyNav} ${styles.prev}`}
                   onClick={goToPreviousStory}
                 ></div>
-                <div className="story-nav next" onClick={goToNextStory}></div>
+                <div
+                  className={`${styles.storyNav} ${styles.next}`}
+                  onClick={goToNextStory}
+                ></div>
               </div>
             </div>
           </div>
@@ -331,51 +381,41 @@ export default function StoriesComponent({ storiesUsers }) {
       )}
 
       {addingStory && (
-        <div className="story-modal">
-          <div className="modal-content">
-            <button className="close-button" onClick={closeAddStoryModal}>
+        <div className={styles.storyModal}>
+          <div className={styles.modalContent}>
+            <button className={styles.closeButton} onClick={closeAddStoryModal}>
               ×
             </button>
-            <div
-              className="story-content"
-              style={{ backgroundColor: "#fff", padding: "24px" }}
-            >
-              <h3 className="story-header" style={{ color: "#262626" }}>
-                Create New Story
-              </h3>
+            <div className={styles.addStoryContent}>
+              <h3 className={styles.addStoryTitle}>Create New Story</h3>
 
               {!storyFormInput?.storyImage ? (
-                <div className="upload-area">
-                  <div className="upload-box" onClick={handleFileSelect}>
-                    <div className="upload-icon">+</div>
-                    <p className="upload-text">Upload Photo</p>
+                <div className={styles.uploadArea}>
+                  <div className={styles.uploadBox} onClick={handleFileSelect}>
+                    <div className={styles.uploadIcon}>+</div>
+                    <p className={styles.uploadText}>Upload Photo</p>
                     <input
                       type="file"
                       ref={fileInputRef}
                       accept="image/*"
                       name="storyImage"
                       onChange={handleFileChange}
-                      style={{ display: "none" }}
+                      className={styles.hiddenFileInput}
                     />
                   </div>
                 </div>
               ) : (
-                <div className="upload-area" style={{ padding: "0" }}>
+                <div className={styles.uploadedImageArea}>
                   <img
-                    src={storyFormInput?.storyImage}
+                    src={getStoryImageSrc(storyFormInput)}
                     alt="Selected"
-                    style={{
-                      width: "100%",
-                      height: "300px",
-                      objectFit: "contain",
-                      borderRadius: "8px",
-                    }}
+                    className={styles.uploadedImage}
                   />
                 </div>
               )}
 
               <button
-                className="share-button"
+                className={styles.shareButton}
                 onClick={createNewStory}
                 disabled={!storyFormInput?.storyImage}
                 style={{

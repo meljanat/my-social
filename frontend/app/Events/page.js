@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import EventFormModal from "../components/EventFormModal";
-import "../styles/EventsPage.css";
+import styles from "../styles/EventsPage.module.css";
 import useInfiniteScroll from "../components/useInfiniteScroll";
 
 export default function EventsPage() {
@@ -12,78 +12,86 @@ export default function EventsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMoreEvents, setHasMoreEvents] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
-  let offset = 0;
 
-  const fetchEvents = async (type) => {
+  const eventsGridRef = useRef(null);
+
+  const fetchEvents = async (type, currentOffset = 0) => {
+    setError(null);
     try {
       const response = await fetch(
-        `http://localhost:8404/events?type=${type}&offset=${offset}`,
+        `http://localhost:8404/events?type=${type}&offset=${currentOffset}`,
         {
           method: "GET",
           credentials: "include",
         }
       );
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
-
-        if (offset === 0) {
-          setEvents(data);
-        } else {
-          setEvents((prev) => [...prev, ...data]);
-        }
-        setIsLoading(false);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch events.");
       }
+
+      const data = await response.json();
+
+      if (currentOffset === 0) {
+        setEvents(data);
+      } else {
+        setEvents((prev) => [...prev, ...data]);
+      }
+
+      if (data?.length === 0 || data?.length < 10) {
+        setHasMoreEvents(false);
+      } else {
+        setHasMoreEvents(true);
+      }
+      return data;
     } catch (error) {
-      console.error("Error fetching events:", error);
+      setError(error.message || "An unexpected error occurred.");
+      setHasMoreEvents(false);
+      return [];
+    } finally {
       setIsLoading(false);
+      setIsFetchingMore(false);
     }
   };
 
   useEffect(() => {
-    fetchEvents("my-events");
+    setIsLoading(true);
+    fetchEvents("my-events", 0);
   }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setIsLoading(true);
+      setEvents([]);
+      setHasMoreEvents(true);
+      fetchEvents(activeTab, 0);
+    }
+  }, [activeTab]);
 
   useInfiniteScroll({
     fetchMoreCallback: async () => {
-      if (!selectedType || !hasMoreEvents) return;
-
-      setIsFetchingMore(true);
-      const currentEvents = events || [];
-      const newEvents = await fetchEvents(selectedType, currentEvents.length);
-
-      if (!newEvents || newEvents.length === 0) {
-        console.log("No more events to fetch");
-        setHasMoreEvents(false);
+      if (!isFetchingMore && hasMoreEvents) {
+        setIsFetchingMore(true);
+        await fetchEvents(activeTab, events?.length);
       }
-
-      setIsFetchingMore(false);
     },
-    offset: events?.length || 0,
+    containerRef: eventsGridRef,
     isFetching: isFetchingMore,
     hasMore: hasMoreEvents,
   });
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-
-    if (tab === "my-events") {
-      fetchEvents("my-events");
-    } else if (tab === "discover") {
-      fetchEvents("discover");
-    }
   };
 
   const handleEventCreated = (newEvent) => {
     setEvents((prevEvents) => [newEvent, ...prevEvents]);
-    setFilteredEvents((prevFiltered) => [newEvent, ...prevFiltered]);
   };
 
   const handleInterestedClick = async (eventId, groupId) => {
-    console.log(groupId, eventId);
-
     try {
       const response = await fetch("http://localhost:8404/join_to_event", {
         method: "POST",
@@ -98,7 +106,8 @@ export default function EventsPage() {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed");
+      if (!response.ok)
+        throw new Error(data.error || "Failed to join/leave event.");
 
       setEvents((prev) =>
         prev.map((e) =>
@@ -106,64 +115,78 @@ export default function EventsPage() {
         )
       );
     } catch (err) {
-      console.error("Error joining/leaving event:", err.message);
+      setError(err.message);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Loading events...</p>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <p className={styles.loadingText}>Loading events...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.log("Error fetching events:", error);
+    
+    return (
+      <div className={styles.errorContainer}>
+        <div className={styles.errorIcon}>!</div>
+        <h2 className={styles.errorTitle}>Error loading events</h2>
+        <p className={styles.errorMessage}>{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className={styles.retryButton}
+        >
+          Try Again
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="events-page-container">
-      <div className="events-page-content">
-        <div className="events-header">
+    <div className={styles.eventsPageContainer}>
+      <div className={styles.eventsPageContent}>
+        <div className={styles.eventsHeader}>
           <h1>Events</h1>
           <button
-            className="create-event-btn"
+            className={styles.createEventBtn}
             onClick={() => setShowEventForm(true)}
           >
             + Create Event
           </button>
         </div>
 
-        <div className="events-tabs">
+        <div className={styles.eventsTabs}>
           <button
-            className={`tab-button ${activeTab === "my-events" ? "active-tab" : ""
-              }`}
+            className={`${styles.tabButton} ${
+              activeTab === "my-events" ? styles.activeTab : ""
+            }`}
             onClick={() => handleTabChange("my-events")}
           >
             My Events
           </button>
           <button
-            className={`tab-button ${activeTab === "discover" ? "active-tab" : ""
-              }`}
+            className={`${styles.tabButton} ${
+              activeTab === "discover" ? styles.activeTab : ""
+            }`}
             onClick={() => handleTabChange("discover")}
           >
             Discover
           </button>
-          {/* <button
-            className={`tab-button ${activeTab === "all" ? "active-tab" : ""}`}
-            onClick={() => handleTabChange("all")}
-          >
-            All Events
-          </button> */}
         </div>
 
-        <div className="events-grid">
+        <div className={styles.eventsGrid} ref={eventsGridRef}>
           {events?.length > 0 ? (
             events.map((event) => (
-              <div key={event.event_id} className="event-card-container">
-                <div className="event-card-wrapper">
-                  <div className="event-card-content">
-                    <h3 className="event-title">{event.title}</h3>
+              <div key={event.event_id} className={styles.eventCardContainer}>
+                <div className={styles.eventCardWrapper}>
+                  <div className={styles.eventCardContent}>
+                    <h3 className={styles.eventTitle}>{event.title}</h3>
 
-                    <p className="event-organizer">
+                    <p className={styles.eventInfo}>
                       <svg
                         width="16"
                         height="16"
@@ -188,10 +211,12 @@ export default function EventsPage() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                      {event.organizer}
+                      <span className={styles.eventInfoText}>
+                        {event.organizer}
+                      </span>
                     </p>
 
-                    <p className="event-location">
+                    <p className={styles.eventInfo}>
                       <svg
                         width="16"
                         height="16"
@@ -216,10 +241,12 @@ export default function EventsPage() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                      {event.location}
+                      <span className={styles.eventInfoText}>
+                        {event.location}
+                      </span>
                     </p>
 
-                    <p className="event-time">
+                    <p className={styles.eventInfo}>
                       <svg
                         width="16"
                         height="16"
@@ -244,22 +271,28 @@ export default function EventsPage() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                      {new Date(event.start_date).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}{" "}
-                      -
-                      {new Date(event.end_date).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      <span className={styles.eventInfoText}>
+                        {new Date(event.start_date).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}{" "}
+                        -
+                        {new Date(event.end_date).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
                     </p>
 
-                    <p className="event-description">{event.description}</p>
+                    <p className={styles.eventDescription}>
+                      {event.description}
+                    </p>
 
-                    <div className="event-actions">
+                    <div className={styles.eventActions}>
                       {event.is_attending ? (
-                        <button className="event-action-btn attending">
+                        <button
+                          className={`${styles.eventActionButton} ${styles.attending}`}
+                        >
                           <svg
                             width="16"
                             height="16"
@@ -279,16 +312,25 @@ export default function EventsPage() {
                         </button>
                       ) : (
                         <button
-                          className={`event-action-btn ${event.is_attending ? "attending" : ""}`}
-                          onClick={() => handleInterestedClick(event.event_id, event.group.group_id)}
+                          className={styles.eventActionButton}
+                          onClick={() =>
+                            handleInterestedClick(
+                              event.event_id,
+                              event.group.group_id
+                            )
+                          }
                         >
-                          {event.is_attending ? "Attending" : "Interested"}
+                          Interested
                         </button>
                       )}
 
                       <button
-                        className="event-details-btn"
-                        onClick={() => router.push(`/event?id=${event.group_id}&event=${event.event_id}`)}
+                        className={styles.eventDetailsBtn}
+                        onClick={() =>
+                          router.push(
+                            `/event?id=${event.group_id}&event=${event.event_id}`
+                          )
+                        }
                       >
                         View Details
                       </button>
@@ -298,14 +340,14 @@ export default function EventsPage() {
               </div>
             ))
           ) : (
-            <div className="no-events-message">
+            <div className={styles.noEventsMessage}>
               {activeTab === "my-events" ? (
                 <>
-                  <div className="empty-state-icon">📅</div>
+                  <div className={styles.emptyStateIcon}>📅</div>
                   <h3>You're not attending any events yet</h3>
                   <p>Discover upcoming events or create your own!</p>
                   <button
-                    className="discover-events-btn"
+                    className={styles.discoverEventsBtn}
                     onClick={() => handleTabChange("discover")}
                   >
                     Discover Events
@@ -313,17 +355,28 @@ export default function EventsPage() {
                 </>
               ) : activeTab === "discover" ? (
                 <>
-                  <div className="empty-state-icon">🔍</div>
+                  <div className={styles.emptyStateIcon}>🔍</div>
                   <h3>No events to discover right now</h3>
                   <p>Check back later or create your own event!</p>
                 </>
               ) : (
                 <>
-                  <div className="empty-state-icon">📅</div>
+                  <div className={styles.emptyStateIcon}>📅</div>
                   <h3>No events found</h3>
                   <p>Try adjusting your search or create a new event</p>
                 </>
               )}
+            </div>
+          )}
+          {isFetchingMore && hasMoreEvents && (
+            <div className={styles.loadingMoreMessage}>
+              <div className={styles.loadingSpinner}></div>
+              <p>Loading more events...</p>
+            </div>
+          )}
+          {!hasMoreEvents && events.length > 0 && (
+            <div className={styles.endOfEventsMessage}>
+              <p>You've reached the end of the events list.</p>
             </div>
           )}
         </div>

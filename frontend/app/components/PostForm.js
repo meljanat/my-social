@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../styles/PostFormStyle.css";
+import styles from "../styles/PostFormStyle.module.css";
 
 export default function PostForm() {
   const [showModal, setShowModal] = useState(false);
@@ -106,40 +106,30 @@ export default function PostForm() {
   };
 
   return (
-    <div className="post-form-container">
+    <div className={styles.postFormContainer}>
       <button
-        className="create-post-btn"
+        className={styles.createPostBtn}
         onClick={() => setShowModal(true)}
-        style={{
-          backgroundColor: "rgb(174, 0, 255)",
-          width: "150px",
-          height: "32px",
-          border: "none",
-          color: "white",
-          borderRadius: "8px",
-          fontSize: "14px",
-          fontWeight: "500",
-        }}
       >
         Create Post
       </button>
 
       {showModal && (
-        <div className="post-modal-overlay">
-          <div className="post-modal">
-            <div className="post-modal-header">
-              <h3 style={{ color: "#18151b" }}>Create a new Post</h3>
+        <div className={styles.postModalOverlay}>
+          <div className={styles.postModal}>
+            <div className={styles.postModalHeader}>
+              <h3>Create a new Post</h3>
               <button
-                className="close-modal-btn"
+                className={styles.closeModalBtn}
                 onClick={() => setShowModal(false)}
               >
                 &times;
               </button>
             </div>
 
-            <form className="create-post-form" onSubmit={handleSubmit}>
-              <div className="form-div">
-                <div className="title-input">
+            <form className={styles.createPostForm} onSubmit={handleSubmit}>
+              <div className={styles.formDiv}>
+                <div className={styles.titleInput}>
                   <label>Title</label>
                   <input
                     placeholder="Enter post title"
@@ -154,7 +144,7 @@ export default function PostForm() {
                   />
                 </div>
 
-                <div className="content-input">
+                <div className={styles.contentInput}>
                   <label>Content</label>
                   <textarea
                     placeholder="What's on your mind?"
@@ -169,21 +159,16 @@ export default function PostForm() {
                   />
                 </div>
 
-                <div className="image-input">
+                <div className={styles.imageInput}>
                   <label>Upload Image</label>
                   {postFormInput.postImage && (
-                    <div className="image-preview">
+                    <div className={styles.imagePreview}>
                       <img
-                        style={{
-                          width: "150px",
-                          borderRadius: "8px",
-                          marginBottom: "10px",
-                        }}
                         src={URL.createObjectURL(postFormInput.postImage)}
                         alt="Selected"
                       />
                       <button
-                        className="remove-image-btn"
+                        className={styles.removeImageBtn}
                         onClick={(e) => {
                           e.preventDefault();
                           setPostFormInput({
@@ -202,10 +187,11 @@ export default function PostForm() {
                     type="file"
                     name="postImage"
                     onChange={handleImageChange}
+                    accept="image/*"
                   />
                 </div>
 
-                <div className="category-input">
+                <div className={styles.categoryInput}>
                   <label>Category</label>
                   <select
                     value={postFormInput.category}
@@ -223,10 +209,10 @@ export default function PostForm() {
                   </select>
                 </div>
 
-                <div className="privacy-input">
+                <div className={styles.privacyInput}>
                   <label>Privacy</label>
-                  <div className="privacy-options">
-                    <label className="privacy-option">
+                  <div className={styles.privacyOptions}>
+                    <label className={styles.privacyOption}>
                       <input
                         type="radio"
                         value="private"
@@ -242,7 +228,7 @@ export default function PostForm() {
                       <span>Private</span>
                     </label>
 
-                    <label className="privacy-option">
+                    <label className={styles.privacyOption}>
                       <input
                         type="radio"
                         value="public"
@@ -258,7 +244,7 @@ export default function PostForm() {
                       <span>Public</span>
                     </label>
 
-                    <label className="privacy-option">
+                    <label className={styles.privacyOption}>
                       <input
                         type="radio"
                         value="almost-private"
@@ -277,12 +263,15 @@ export default function PostForm() {
                 </div>
 
                 {postFormInput.privacy === "almost-private" && (
-                  <div className="audience-selector">
+                  <div className={styles.audienceSelector}>
                     <label>Select Audience</label>
-                    <div className="followers-list">
+                    <div className={styles.followersList}>
                       {followers.length > 0 ? (
                         followers.map((follower) => (
-                          <label key={follower.id} className="follower-item">
+                          <label
+                            key={follower.id}
+                            className={styles.followerItem}
+                          >
                             <input
                               type="checkbox"
                               checked={selectedFollowers.includes(follower.id)}
@@ -301,21 +290,7 @@ export default function PostForm() {
                 )}
               </div>
 
-              <button
-                type="submit"
-                className="publish-btn"
-                style={{
-                  backgroundColor: "rgb(174, 0, 255)",
-                  width: "150px",
-                  height: "32px",
-                  border: "none",
-                  color: "white",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontWeight: "500",
-                  marginTop: "20px",
-                }}
-              >
+              <button type="submit" className={styles.publishBtn}>
                 Publish
               </button>
             </form>

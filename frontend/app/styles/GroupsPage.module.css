@@ -1,0 +1,255 @@
+
+.groupsPageContainer {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  /* .groupsPageContent {
+  } */
+  
+  .modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+  }
+  
+  .groupsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e8ecf7;
+  }
+  
+  .groupsHeader h1 {
+    font-size: 2.25rem;
+    color: #1e293b;
+    margin: 0;
+    font-weight: 800;
+  }
+  
+  .createGroupBtn {
+    background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+  
+  .createGroupBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  }
+  
+  .groupsTabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+    border-radius: 16px;
+    padding: 0.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(10px);
+    border: 1px solid #e8ecf7;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .tabButton {
+    background-color: transparent;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .tabButton:hover {
+    background-color: #eef2f9;
+    color: #475569;
+  }
+  
+  .tabButton.activeTab {
+    background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+  
+  .groupsSearch {
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  
+  .searchInput {
+    width: 100%;
+    background-color: #f8faff;
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    border: 1px solid #e8ecf7;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    font-weight: 400;
+    color: #334155;
+  }
+  
+  .searchInput:focus {
+    outline: none;
+    border-color: #667eea;
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
+  }
+  
+  .searchInput::placeholder {
+    color: #94a3b8;
+  }
+  
+  .groupsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .loadingMessage,
+  .noGroupsMessage,
+  .noInvitationsMessage {
+    grid-column: 1 / -1; /* Span across all columns */
+    text-align: center;
+    padding: 3rem 0;
+    color: #64748b;
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .discoverGroupsBtn {
+    background: linear-gradient(135deg, #eff2f9 0%, #e0e5f0 100%);
+    color: #475569;
+    border: 1px solid #dbe2ef;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .discoverGroupsBtn:hover {
+    background: linear-gradient(135deg, #e0e5f0 0%, #d3d9e8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 1024px) {
+    .groupsPageContainer {
+      padding: 1.5rem;
+    }
+    .groupsHeader h1 {
+      font-size: 2rem;
+    }
+    .createGroupBtn {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+    }
+    .groupsTabs {
+      width: 100%;
+      padding: 0.4rem;
+    }
+    .tabButton {
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+    }
+    .groupsSearch {
+      margin-bottom: 1.5rem;
+    }
+    .searchInput {
+      padding: 0.9rem 1rem;
+    }
+    .groupsGrid {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .groupsPageContainer {
+      padding: 1rem;
+    }
+    .groupsHeader {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .groupsHeader h1 {
+      font-size: 1.75rem;
+    }
+    .createGroupBtn {
+      width: 100%;
+      justify-content: center;
+    }
+    .groupsTabs {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .tabButton {
+      flex: 1 1 auto;
+      text-align: center;
+      min-width: unset;
+    }
+    .searchInput {
+      padding: 0.8rem 1rem;
+    }
+    .groupsGrid {
+      grid-template-columns: 1fr;
+    }
+    .loadingMessage,
+    .noGroupsMessage,
+    .noInvitationsMessage {
+      font-size: 1rem;
+      padding: 2rem 0;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .groupsPageContainer {
+      padding: 0.5rem;
+    }
+    .groupsHeader h1 {
+      font-size: 1.5rem;
+    }
+    .createGroupBtn {
+      font-size: 0.85rem;
+    }
+    .tabButton {
+      font-size: 0.75rem;
+      padding: 0.4rem 0.6rem;
+    }
+    .searchInput {
+      font-size: 0.85rem;
+    }
+  }

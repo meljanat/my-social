@@ -1,0 +1,151 @@
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modalContent {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  width: 90%;
+  max-width: 450px;
+  text-align: center;
+  position: relative;
+  border: 1px solid #eef2f9;
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+  line-height: 1;
+  padding: 0.2rem;
+}
+
+.closeButton:hover {
+  color: #64748b;
+  transform: rotate(90deg);
+}
+
+.modalContent h2 {
+  font-size: 1.8rem;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.modalContent p {
+  font-size: 1rem;
+  color: #475569;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.actionButton {
+  flex: 1;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.removeButton {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  color: white;
+}
+
+.removeButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.cancelButton {
+  background: linear-gradient(135deg, #eef2f9 0%, #e0e5f0 100%);
+  color: #475569;
+  border: 1px solid #dbe2ef;
+}
+
+.cancelButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.actionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #cbd5e1;
+  box-shadow: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .modalContent {
+    padding: 1.5rem;
+    max-width: 90%;
+    border-radius: 12px;
+  }
+  .modalContent h2 {
+    font-size: 1.5rem;
+  }
+  .modalContent p {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+  .modalActions {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  .actionButton {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+  .modalContent h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
+  }
+  .modalContent p {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .modalActions {
+    gap: 0.6rem;
+  }
+  .actionButton {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+}

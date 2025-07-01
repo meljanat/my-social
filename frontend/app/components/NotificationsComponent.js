@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../styles/Notifications.css";
 import NotificationCard from "../components/NotificationCard";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 const NotificationsComponent = () => {
   const [notifications, setNotifications] = useState([]);
@@ -14,10 +14,13 @@ const NotificationsComponent = () => {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8404/notifications?offset=0`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:8404/notifications?offset=0`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to fetch notifications");
 
@@ -46,7 +49,6 @@ const NotificationsComponent = () => {
 
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       console.log(notifications);
-
     } catch (error) {
       console.error("Error marking notifications as read:", error.message);
     }
@@ -70,21 +72,20 @@ const NotificationsComponent = () => {
       );
       if (notification.type_notification === "invitation") {
         router.push('/profile?id=' + notification.user_id);
-      } else if (notification.type_notification === "like" || notification.type_notification === "comment") {
+      } else if (notification.type_notification === "like" ||
+        notification.type_notification === "comment" ||
+        notification.type_notification === "save") {
         router.push('/post?id=' + notification.post_id);
       } else if (notification.type_notification === "event") {
         router.push('/event?id=' + notification.event_id);
-      } else if (notification.type_notification === "group") {
+      } else if (notification.type_notification === "group" ||
+        notification.type_notification === "join_request") {
         router.push('/group?id=' + notification.group_id);
-      } else if (notification.type_notification === "join_request") {
-        router.push("/group?id=" + notification.group_id);
-      } else if (notification.type_notification === "save") {
-        router.push("/post?id=" + notification.post_id);
       }
     } catch (error) {
       console.error("Error marking notification as read:", error.message);
     }
-  }
+  };
 
   useEffect(() => {
     fetchNotifications();
@@ -131,11 +132,15 @@ const NotificationsComponent = () => {
             <p>Loading notifications...</p>
           </div>
         ) : filteredNotifications.length > 0 ? (
-          filteredNotifications
-            .slice(0, 5)
-            .map((notification) => (
-              <NotificationCard key={notification.notification_id} notification={notification} onClick={() => { markAsRead(notification) }} />
-            ))
+          filteredNotifications.slice(0, 5).map((notification) => (
+            <NotificationCard
+              key={notification.notification_id}
+              notification={notification}
+              onClick={() => {
+                markAsRead(notification);
+              }}
+            />
+          ))
         ) : (
           <div className="empty-notifications">
             <p>No notifications yet</p>

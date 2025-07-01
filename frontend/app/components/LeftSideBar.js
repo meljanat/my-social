@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import "../styles/LeftSideBar.css";
+import styles from "../styles/LeftSideBar.module.css";
 import UserCard from "./UserCard";
 
 export default function LeftSidebar({ users, bestcategories }) {
@@ -8,28 +8,25 @@ export default function LeftSidebar({ users, bestcategories }) {
   const safeCategories = bestcategories || [];
 
   return (
-    <div className="left-sidebar">
-      <div className="sidebar-section">
-        <div className="section-header">
+    <div className={styles.leftSidebar}>
+      <div className={styles.sidebarSection}>
+        <div className={styles.sectionHeader}>
           <h3>Suggested Users</h3>
           <button
-            className="see-all-btn"
+            className={styles.seeAllBtn}
             onClick={() => {
               window.location.href = "/allusers";
             }}
           >
-            See all <span className="arrow">→</span>
+            See all <span className={styles.arrow}>→</span>
           </button>
         </div>
         {safeUsers.length === 0 ? (
-          <div className="empty-state">
-            <p className="empty-title">No suggested users yet</p>
-            {/* <p className="empty-description">
-              Connect with others to see suggestions based on your network
-            </p> */}
+          <div className={styles.emptyState}>
+            <p className={styles.emptyTitle}>No suggested users yet</p>
           </div>
         ) : (
-          <ul className="user-list">
+          <ul className={styles.userList}>
             {safeUsers.map((user) => (
               <UserCard key={user.user_id} user={user} action={"follow"} />
             ))}
@@ -37,38 +34,38 @@ export default function LeftSidebar({ users, bestcategories }) {
         )}
       </div>
 
-      <div className="sidebar-section">
-        <div className="section-header">
+      <div className={styles.sidebarSection}>
+        <div className={styles.sectionHeader}>
           <h3>Popular Categories</h3>
           <button
-            className="see-all-btn"
+            className={styles.seeAllBtn}
             onClick={() => {
               window.location.href = "/allcategories";
             }}
           >
-            See all <span className="arrow">→</span>
+            See all <span className={styles.arrow}>→</span>
           </button>
         </div>
 
         {safeCategories.length === 0 ? (
-          <div className="empty-state">
-            <p className="empty-title">No categories yet</p>
-            <p className="empty-description">
+          <div className={styles.emptyState}>
+            <p className={styles.emptyTitle}>No categories yet</p>
+            <p className={styles.emptyDescription}>
               Categories will appear as content is created
             </p>
           </div>
         ) : (
-          <ul className="category-list">
+          <ul className={styles.categoryList}>
             {safeCategories.map((category) => (
-              <li key={category.category_id} className="category-item">
-                <div className="category-icon">
+              <li key={category.category_id} className={styles.categoryItem}>
+                <div className={styles.categoryIcon}>
                   <img
                     src={`/icons/${category.name}.png`}
                     alt={category.name}
                   />
                 </div>
-                <span className="category-name">{category.name}</span>
-                <span className="category-count">
+                <span className={styles.categoryName}>{category.name}</span>
+                <span className={styles.categoryCount}>
                   {category.count || 0} posts
                 </span>
               </li>

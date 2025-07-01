@@ -1,26 +1,28 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import "../../styles/MessagesPage.css";
+import styles from "../styles/MessagesPage.module.css";
 import { addToListeners, removeFromListeners } from "../websocket/ws.js";
 import { websocket } from "../websocket/ws.js";
 import EmojiSection from "../components/EmojiSection";
 
 const Message = ({ message, isSent }) => {
   return (
-    <div className={`message ${isSent ? "sent" : "received"}`}>
+    <div
+      className={`${styles.message} ${isSent ? styles.sent : styles.received}`}
+    >
       {!isSent && (
-        <div className="message-user-header">
+        <div className={styles.messageUserHeader}>
           <img
-            className="message-user-avatar"
-            src={message.avatar}
+            className={styles.messageUserAvatar}
+            src={message.avatar || "/inconnu/avatar.png"}
             alt={message.username}
           />
           <p>{message.username}</p>
         </div>
       )}
-      <p className="message-content">{message.content}</p>
-      <span className="message-time">{message.created_at}</span>
+      <p className={styles.messageContent}>{message.content}</p>
+      <span className={styles.messageTime}>{message.created_at}</span>
     </div>
   );
 };
@@ -46,23 +48,23 @@ const UserCard = ({ user, isActive, onClick }) => {
 
   return (
     <li
-      className={`user-item ${isActive ? "active-user" : ""}`}
+      className={`${styles.userItem} ${isActive ? styles.activeUser : ""}`}
       onClick={onClick}
       data-id={user.user_id || user.group_id}
     >
       <img
-        src={user.avatar || user.image}
-        className="user-avatar"
+        src={user.avatar || user.image || "/inconnu/avatar.png"}
+        className={styles.userAvatar}
         alt={user.username || user.name}
       />
-      <div className="user-details">
-        <div className="user-info">
-          <h4 className="user-name">
+      <div className={styles.userDetails}>
+        <div className={styles.userInfo}>
+          <h4 className={styles.userName}>
             {user.first_name
               ? `${user.first_name} ${user.last_name}`
               : user.name}
           </h4>
-          <p className="user-username">
+          <p className={styles.userUsername}>
             {user.username
               ? `@${user.username}`
               : user.total_members
@@ -71,9 +73,11 @@ const UserCard = ({ user, isActive, onClick }) => {
           </p>
         </div>
         {user.message && user.message.total_messages > 0 ? (
-          <div className="unread-badge">{user.message.total_messages}</div>
+          <div className={styles.unreadBadge}>
+            {user.message.total_messages}
+          </div>
         ) : user.total_messages > 0 ? (
-          <div className="unread-badge">{user.total_messages}</div>
+          <div className={styles.unreadBadge}>{user.total_messages}</div>
         ) : (
           ""
         )}
@@ -105,14 +109,17 @@ export default function MessagesPage() {
 
   const selectedUserId = searchParams.get("user");
   const selectedGroupId = searchParams.get("group");
-  // const selectedTab = searchParams.get("tab");
 
   useEffect(() => {
     if (!selectedUserId && !selectedGroupId) return;
     if (!users?.length && !groups?.length) return;
 
-    const user = selectedUserId ? users?.find(u => u.user_id == selectedUserId) : null;
-    const group = selectedGroupId ? groups?.find(g => g.group_id == selectedGroupId) : null;
+    const user = selectedUserId
+      ? users?.find((u) => u.user_id == selectedUserId)
+      : null;
+    const group = selectedGroupId
+      ? groups?.find((g) => g.group_id == selectedGroupId)
+      : null;
 
     if (user || group) {
       setSelectedUser(user || group);
@@ -128,6 +135,14 @@ export default function MessagesPage() {
         }
       });
     }
+    if (selectedUser) {
+      setSelectedUser((prev) => {
+        return {
+          ...prev,
+          total_messages: 0,
+        };
+      });
+    }
   }, [selectedUserId, selectedGroupId, users, groups]);
 
   useEffect(() => {
@@ -139,24 +154,26 @@ export default function MessagesPage() {
   }, [selectedUserId, selectedGroupId]);
 
   const getUserChat = async (user_id = 0, group_id = 0) => {
-    return await fetch(`http://localhost:8404/get_user?user_id=${user_id}&group_id=${group_id}`, {
-      method: "GET",
-      credentials: "include",
-    })
+    return await fetch(
+      `http://localhost:8404/get_user?user_id=${user_id}&group_id=${group_id}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    )
       .then((response) => response.json())
       .catch((error) => {
         console.error("Error fetching user chat:", error);
         return null;
       });
-  }
+  };
 
   const handleSeeProfile = () => {
     if (!selectedUser) return;
 
     if (selectedUser.user_id) {
       router.push(`/profile?id=${selectedUser.user_id}`);
-    }
-    else if (selectedUser.group_id) {
+    } else if (selectedUser.group_id) {
       router.push(`/group?id=${selectedUser.group_id}`);
     }
   };
@@ -230,14 +247,14 @@ export default function MessagesPage() {
     const { scrollTop, scrollHeight, clientHeight } = sidebarRef.current;
 
     if (scrollHeight - (scrollTop + clientHeight) < 50 && !isLoading) {
-      loadMoreUsersOrGroups();
     }
   };
 
   useEffect(() => {
     if (selectedUser && usersListRef.current) {
       const selectedElement = usersListRef.current.querySelector(
-        `.user-item[data-id="${selectedUser.user_id || selectedUser.group_id}"]`
+        `.${styles.userItem}[data-id="${selectedUser.user_id || selectedUser.group_id
+        }"]`
       );
       if (selectedElement) {
         selectedElement.scrollIntoView({
@@ -249,7 +266,6 @@ export default function MessagesPage() {
   }, [selectedUser]);
 
   const handleUserSelect = (user, offset = 0) => {
-    setSelectedUser(user);
     let fetchMessages = user.group_id
       ? `chats_group?group_id=${user.group_id}&offset=${offset}`
       : `chats?id=${user.user_id}&offset=${offset}`;
@@ -327,12 +343,6 @@ export default function MessagesPage() {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedUser) return;
-    // const message = {
-    //   id: Date.now(),
-    //   content: newMessage,
-    //   username: "me",
-    //   created_at: 'Just now',
-    // };
 
     const mssg = selectedUser.group_id
       ? {
@@ -346,8 +356,9 @@ export default function MessagesPage() {
         content: newMessage,
       };
 
-    // setMessages(messages ? [...messages, message] : [message]);
     websocket.send(JSON.stringify(mssg));
+    console.log(mssg);
+
     setNewMessage("");
   };
 
@@ -356,23 +367,23 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="messages-page-container">
-      <div className="messages-page-content">
-        <div className="messages-sidebar">
-          <div className="messages-header">
+    <div className={styles.messagesPageContainer}>
+      <div className={styles.messagesPageContent}>
+        <div className={styles.messagesSidebar}>
+          <div className={styles.messagesHeader}>
             <h2>Messages</h2>
           </div>
 
-          <div className="messages-tabs">
+          <div className={styles.messagesTabs}>
             <button
-              className={`tab-button ${activeTab === "friends" ? "active-tab" : ""
+              className={`${styles.tabButton} ${activeTab === "friends" ? styles.activeTab : ""
                 }`}
               onClick={() => setActiveTab("friends")}
             >
               Friends
             </button>
             <button
-              className={`tab-button ${activeTab === "groups" ? "active-tab" : ""
+              className={`${styles.tabButton} ${activeTab === "groups" ? styles.activeTab : ""
                 }`}
               onClick={() => setActiveTab("groups")}
             >
@@ -380,23 +391,22 @@ export default function MessagesPage() {
             </button>
           </div>
 
-          <div className="search-messages">
+          {/* <div className={styles.searchMessages}>
             <input
               type="text"
               placeholder="Search messages..."
-              className="search-input"
+              className={styles.searchInput}
             />
-          </div>
+          </div> */}
 
           <div
-            className="users-list-container"
+            className={styles.usersListContainer}
             ref={sidebarRef}
             onScroll={handleSidebarScroll}
-            style={{ overflowY: "auto", maxHeight: "calc(100vh - 180px)" }}
           >
-            <ul className="users-list">
+            <ul className={styles.usersList} ref={usersListRef}>
               {activeTab === "friends"
-                ? users?.length &&
+                ? users?.length > 0 &&
                 users.map((user) => (
                   <UserCard
                     key={user.user_id}
@@ -405,59 +415,65 @@ export default function MessagesPage() {
                       selectedUser && selectedUser.user_id === user.user_id
                     }
                     onClick={() => {
-                      // handleUserSelect(user);
-                      // user.total_messages = 0;
-                      router.push(`/messages?user=${user.user_id}`)
+                      router.push(`/messages?user=${user.user_id}`);
                     }}
                   />
                 ))
-                : groups?.length &&
+                : groups?.length > 0 &&
                 groups.map((group) => (
                   <UserCard
                     key={group.group_id}
                     user={group}
                     isActive={
-                      selectedUser && selectedUser.id === group.group_id
+                      selectedUser && selectedUser.group_id === group.group_id
                     }
                     onClick={() => {
-                      // handleUserSelect(group)
-                      router.push(`/messages?group=${group.group_id}`)
+                      router.push(`/messages?group=${group.group_id}`);
                     }}
                   />
-                ))
-              }
+                ))}
+              {!users?.length && activeTab === "friends" && (
+                <div className={styles.noUsersMessage}>No friends found.</div>
+              )}
+              {!groups?.length && activeTab === "groups" && (
+                <div className={styles.noUsersMessage}>No groups found.</div>
+              )}
             </ul>
           </div>
         </div>
 
-        <div className="messages-main">
+        <div className={styles.messagesMain}>
           {selectedUser ? (
             <>
-              <div className="conversation-header">
-                <div className="conversation-user-info">
+              <div className={styles.conversationHeader}>
+                <div className={styles.conversationUserInfo}>
                   <img
-                    src={selectedUser.avatar || selectedUser.image}
+                    src={
+                      selectedUser.avatar ||
+                      selectedUser.image ||
+                      "/inconnu/avatar.png"
+                    }
                     alt={selectedUser.username || selectedUser.name}
-                    className="conversation-avatar"
+                    className={styles.conversationAvatar}
                   />
-                  <div className="conversation-user-details">
-                    <h3 className="conversation-user-name">
+                  <div className={styles.conversationUserDetails}>
+                    <h3 className={styles.conversationUserName}>
                       {selectedUser.first_name
                         ? `${selectedUser.first_name} ${selectedUser.last_name}`
                         : selectedUser.name}
                     </h3>
                     {selectedUser.username && (
-                      <p className="conversation-user-status">
+                      <p className={styles.conversationUserStatus}>
                         <span
-                          className={`status-dot ${selectedUser.user_id
-                            ? onlineUsers[selectedUser.user_id]
-                              ? "online"
-                              : "offline"
-                            : "offline"
+                          className={`${styles.statusDot} ${selectedUser.user_id
+                            ? onlineUsers && onlineUsers[selectedUser.user_id]
+                              ? styles.online
+                              : styles.offline
+                            : styles.offline
                             }`}
                         ></span>
                         {selectedUser.user_id
-                          ? onlineUsers[selectedUser.user_id]
+                          ? onlineUsers && onlineUsers[selectedUser.user_id]
                             ? "Online"
                             : "Offline"
                           : "Offline"}
@@ -465,9 +481,9 @@ export default function MessagesPage() {
                     )}
                   </div>
                 </div>
-                <div className="conversation-actions">
+                <div className={styles.conversationActions}>
                   <button
-                    className="action-button"
+                    className={styles.actionButton}
                     onClick={handleSeeProfile}
                   >
                     <svg
@@ -491,26 +507,32 @@ export default function MessagesPage() {
               </div>
 
               <div
-                className="conversation-messages"
+                className={styles.conversationMessages}
                 ref={conversationRef}
                 onScroll={handleScroll}
-                style={{ overflowY: "auto", maxHeight: "calc(100vh - 200px)" }}
               >
-                {messages && messages.length > 0
-                  ? messages.map((message, index) => (
+                {messages && messages.length > 0 ? (
+                  messages.map((message, index) => (
                     <Message
                       key={index}
                       message={message}
                       isSent={message.username !== selectedUser.username}
                     />
                   ))
-                  : ""}
+                ) : (
+                  <div className={styles.noMessagesYet}>
+                    No messages in this conversation.
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
               </div>
 
               {canSendMessage ? (
-                <form className="message-input-form" onSubmit={handleSendMessage}>
-                  <button type="button" className="attachment-button">
+                <form
+                  className={styles.messageInputForm}
+                  onSubmit={handleSendMessage}
+                >
+                  <button type="button" className={styles.attachmentButton}>
                     <svg
                       width="20"
                       height="20"
@@ -527,11 +549,10 @@ export default function MessagesPage() {
                       />
                     </svg>
                   </button>
-                  <div className="emoji-toggle">
+                  <div className={styles.emojiToggle}>
                     <button
-                      onClick={() => {
-                        toggleEmojiSection();
-                      }}
+                      type="button"
+                      onClick={toggleEmojiSection}
                     >
                       😄
                     </button>
@@ -540,10 +561,14 @@ export default function MessagesPage() {
                     type="text"
                     placeholder="Type a message..."
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    className="message-input"
+                    onChange={(e) => {
+                      // console.log(newMessage);
+
+                      setNewMessage(e.target.value)
+                    }}
+                    className={styles.messageInput}
                   />
-                  <button type="submit" className="send-button">
+                  <button type="submit" className={styles.sendButton}>
                     <svg
                       width="20"
                       height="20"
@@ -566,14 +591,14 @@ export default function MessagesPage() {
                   )}
                 </form>
               ) : (
-                <div className="message-input-disabled">
+                <div className={styles.messageInputDisabled}>
                   <p>You are not allowed to send messages in this chat.</p>
                 </div>
               )}
             </>
           ) : (
-            <div className="no-conversation-selected">
-              <div className="no-conversation-content">
+            <div className={styles.noConversationSelected}>
+              <div className={styles.noConversationContent}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="687"

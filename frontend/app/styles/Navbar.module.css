@@ -1,0 +1,436 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+  padding: 1rem 2rem;
+  border-radius: 0 0 20px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.navbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 12px;
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.logo img {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #f8faff;
+  padding: 0.5rem;
+  border-radius: 16px;
+  border: 1px solid #e8ecf7;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.navLink:hover::before {
+  left: 100%;
+}
+
+.navLink:hover {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.navLink.active {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.navLink img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.navLink:hover img,
+.navLink.active img {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+}
+
+.searchBar {
+  flex: 1;
+  max-width: 500px;
+  margin: 0 2rem;
+}
+
+.searchInputContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInputContainer input {
+  width: 100%;
+  background-color: #f8faff;
+  border-radius: 16px;
+  padding: 1rem 1.25rem 1rem 3rem;
+  border: 1px solid #e8ecf7;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  font-weight: 400;
+}
+
+.searchInputContainer input:focus {
+  outline: none;
+  border-color: #667eea;
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+.searchInputContainer input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  width: 18px;
+  height: 18px;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.searchSuggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 10;
+  border: 1px solid #e8ecf7;
+  backdrop-filter: blur(10px);
+}
+
+.noSuggestions {
+  padding: 1.5rem;
+  color: #64748b;
+  font-size: 0.875rem;
+  text-align: center;
+  font-weight: 400;
+}
+
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.actionIcon,
+.notificationButton {
+  position: relative;
+  background: none;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #f8faff;
+  border: 1px solid #e8ecf7;
+}
+
+.actionIcon:hover,
+.notificationButton:hover {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.actionIcon img,
+.notificationButton img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.actionIcon:hover img,
+.notificationButton:hover img {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+}
+
+.badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.notificationCount {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #e2e8f0;
+  color: #64748b;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.profileDropdown {
+  position: relative;
+}
+
+.profileButton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #f8faff;
+  border: 1px solid #e8ecf7;
+}
+
+.profileButton:hover {
+  background: linear-gradient(135deg, #f8faff 0%, #e8ecf7 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e8ecf7;
+  transition: all 0.3s ease;
+}
+
+.profileButton:hover .userAvatar {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.userUsername {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.dropdownIcon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.dropdownIcon.rotate {
+  transform: rotate(180deg);
+}
+
+.profileMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  width: 220px;
+  overflow: hidden;
+  z-index: 10;
+  border: 1px solid #e8ecf7;
+  backdrop-filter: blur(10px);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  color: #475569;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.menuItem:hover {
+  background: linear-gradient(135deg, #f8faff 0%, #e8ecf7 100%);
+  color: #1e293b;
+}
+
+.menuItem img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.menuItem:hover img {
+  opacity: 1;
+}
+
+.logoutItem {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: white;
+  border-top: 1px solid #e8ecf7;
+}
+
+.logoutItem:hover {
+  background: linear-gradient(135deg, #ee5a52 0%, #dc4c4c 100%);
+  color: white;
+}
+
+.logoutItem img {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+}
+
+@media (max-width: 1024px) {
+  .navbar {
+    padding: 1rem;
+  }
+
+  .searchBar {
+    max-width: 300px;
+    margin: 0 1rem;
+  }
+
+  .userInfo {
+    display: none;
+  }
+
+  .navbarLeft {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navLink span {
+    display: none;
+  }
+
+  .navLink {
+    padding: 0.75rem;
+  }
+
+  .searchBar {
+    max-width: 200px;
+  }
+
+  .navLinks {
+    gap: 0.25rem;
+    padding: 0.25rem;
+  }
+
+  .profileMenu {
+    width: 180px;
+  }
+
+  .userActions {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0.75rem;
+  }
+
+  .searchInputContainer input {
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+  }
+
+  .actionIcon,
+  .notificationButton {
+    width: 40px;
+    height: 40px;
+  }
+}

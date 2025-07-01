@@ -1,0 +1,133 @@
+.invitationCard {
+    padding: 20px;
+    background-color: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(53, 85, 249, 0.08);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e5e9fd;
+    position: relative;
+  }
+  
+  .invitationCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px rgba(53, 85, 249, 0.12);
+  }
+  
+  .invitationCardContent {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .invitationHeader {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .invitationAvatar {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 0.75rem;
+    background-color: #f1f4fd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3555f9;
+    font-weight: 600;
+    border: 2px solid #e5e9fd;
+  }
+  
+  .invitationAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+    .invitationRequester {
+    flex: 1;
+  }
+  
+  .invitationSender {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.2;
+  }
+  
+  .invitationLabel {
+    display: block;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+  }
+  
+  .invitationGroupInfo {
+    margin-bottom: 1rem;
+  }
+  
+  .invitationTitle {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.2;
+  }
+  
+  .invitationActions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: auto;
+  }
+  
+  .invitationAcceptBtn,
+  .invitationDeclineBtn {
+    flex: 1;
+    padding: 0.625rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+  }
+  
+  .invitationAcceptBtn {
+    background-color: #3555f9;
+    color: white;
+    box-shadow: 0 2px 4px rgba(53, 85, 249, 0.2);
+  }
+  
+  .invitationAcceptBtn:hover:not(:disabled) {
+    background-color: #2a44c7;
+    box-shadow: 0 4px 6px rgba(53, 85, 249, 0.3);
+  }
+  
+  .invitationDeclineBtn {
+    background-color: #f1f4fd;
+    color: #6b7280;
+    border: 1px solid #e5e9fd;
+  }
+  
+  .invitationDeclineBtn:hover:not(:disabled) {
+    background-color: #ef4444;
+    color: white;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+  }
+  
+  @media screen and (max-width: 640px) {
+    .invitationActions {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }

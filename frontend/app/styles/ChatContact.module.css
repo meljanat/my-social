@@ -1,5 +1,4 @@
-/* ChatContact.css */
-.chat-contact {
+.chatContact {
     display: flex;
     align-items: center;
     padding: 12px 16px;
@@ -10,16 +9,16 @@
     margin: 4px 8px;
   }
   
-  .chat-contact:hover {
+  .chatContact:hover {
     background-color: #F8FAFF;
   }
   
-  .chat-contact-avatar-container {
+  .chatContactAvatarContainer {
     position: relative;
     flex-shrink: 0;
   }
   
-  .chat-contact-avatar {
+  .chatContactAvatar {
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -29,7 +28,7 @@
     transition: transform 0.2s ease;
   }
   
-  .chat-contact-avatar-fallback {
+  .chatContactAvatarFallback {
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -44,7 +43,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
   
-  .status-indicator {
+  .statusIndicator {
     position: absolute;
     bottom: 2px;
     right: 2px;
@@ -54,27 +53,27 @@
     border: 2px solid #ffffff;
   }
   
-  .status-indicator.online {
+  .statusIndicator.online {
     background-color: #10B981;
   }
   
-  .status-indicator.offline {
+  .statusIndicator.offline {
     background-color: #94A3B8;
   }
   
-  .chat-contact-info {
+  .chatContactInfo {
     flex: 1;
-    min-width: 0; /* Enables text truncation */
+    min-width: 0; 
   }
   
-  .chat-contact-primary {
+  .chatContactPrimary {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2px;
   }
   
-  .chat-contact-name {
+  .chatContactName {
     margin: 0;
     font-size: 15px;
     font-weight: 600;
@@ -84,7 +83,7 @@
     text-overflow: ellipsis;
   }
   
-  .unread-badge {
+  .unreadBadge {
     background: linear-gradient(135deg, #3555F9 0%, #4466FF 100%);
     color: white;
     font-size: 12px;
@@ -95,13 +94,13 @@
     text-align: center;
   }
   
-  .chat-contact-secondary {
+  .chatContactSecondary {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   
-  .chat-contact-username {
+  .chatContactUsername {
     margin: 0;
     font-size: 13px;
     color: #64748B;
@@ -110,33 +109,30 @@
     text-overflow: ellipsis;
   }
   
-  .chat-contact-time {
+  .chatContactTime {
     font-size: 12px;
     color: #94A3B8;
     white-space: nowrap;
   }
   
-  /* Active/Selected state */
-  .chat-contact.active {
+  .chatContact.active {
     background-color: #EEF2FF;
   }
   
-  .chat-contact.active .chat-contact-name {
+  .chatContact.active .chatContactName {
     color: #3555F9;
   }
   
-  /* Hover effects */
   .chat-contact:hover .chat-contact-avatar {
     transform: scale(1.05);
   }
   
-  /* Animation for new messages */
   @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
   }
   
-  .chat-contact.has-new-message {
+  .chatContact.hasNewMessage {
     animation: pulse 1s ease-in-out;
   }

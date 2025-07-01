@@ -99,16 +99,16 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	count, err := database.GetCountUserGroups(user.ID)
-	if err != nil {
-		fmt.Println("Failed to count groups", err)
-		response := map[string]string{"error": "Failed to count groups"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
+	// count, err := database.GetCountUserGroups(user.ID)
+	// if err != nil {
+	// 	fmt.Println("Failed to count groups", err)
+	// 	response := map[string]string{"error": "Failed to count groups"}
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	json.NewEncoder(w).Encode(response)
+	// 	return
+	// }
 
-	my_groups, err := database.GetGroups(*user, count)
+	my_groups, err := database.GetGroups(*user, -1)
 	if err != nil {
 		fmt.Println("Failed to retrieve my groups", err)
 		response := map[string]string{"error": "Failed to retrieve my groups"}
@@ -134,6 +134,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+
 
 	var home = struct {
 		User           structs.User       `json:"user"`

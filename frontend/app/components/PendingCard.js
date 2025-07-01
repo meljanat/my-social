@@ -1,11 +1,15 @@
+import React, { useState } from "react";
+import styles from "../styles/PendingGroupRequestCard.module.css";
 import { handleFollow } from "../functions/user";
-import "../styles/PendingGroupRequestCard.css";
-import { useState } from "react";
+
 export default function PendingGroupRequestCard({ group, onClick, onCancel }) {
   const [isRemoved, setIsRemoved] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleCancel = async (e) => {
     e.stopPropagation();
+    setIsProcessing(true);
+
     try {
       await handleFollow(group.admin_id, group.group_id);
       setIsRemoved(true);
@@ -14,6 +18,8 @@ export default function PendingGroupRequestCard({ group, onClick, onCancel }) {
       }
     } catch (error) {
       console.error("Error canceling group request:", error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -22,26 +28,27 @@ export default function PendingGroupRequestCard({ group, onClick, onCancel }) {
   }
 
   return (
-    <div className="pending-group-card" onClick={onClick}>
-      <div className="pending-group-content">
-        <div className="pending-group-header">
-          <div className="pending-group-info">
+    <div className={styles.pendingGroupCard} onClick={onClick}>
+      <div className={styles.pendingGroupContent}>
+        <div className={styles.pendingGroupHeader}>
+          <div className={styles.pendingGroupInfo}>
             <img
-              src={group.image}
+              src={group.image || "/inconnu/group-placeholder.png"}
               alt={group.name}
-              className="pending-group-avatar"
+              className={styles.pendingGroupAvatar}
             />
 
-            <div className="pending-group-name">
+            <div className={styles.pendingGroupName}>
               <h3>{group.name}</h3>
-              <div className="pending-group-status">
+              <div className={styles.pendingGroupStatus}>
                 <span>Request Pending</span>
                 <div>
                   <button
                     onClick={handleCancel}
-                    className="pending-group-cancel-btn"
+                    className={styles.pendingGroupCancelBtn}
+                    disabled={isProcessing}
                   >
-                    Cancel
+                    {isProcessing ? "Canceling..." : "Cancel"}
                   </button>
                 </div>
               </div>
@@ -50,31 +57,31 @@ export default function PendingGroupRequestCard({ group, onClick, onCancel }) {
         </div>
 
         {group.description && (
-          <p className="pending-group-description">{group.description}</p>
+          <p className={styles.pendingGroupDescription}>{group.description}</p>
         )}
 
-        <div className="pending-group-stats">
-          <div className="stat-item">
-            <div className="stat-icon">
+        <div className={styles.pendingGroupStats}>
+          <div className={styles.statItem}>
+            <div className={styles.statIcon}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
-                fill="#3555F9"
+                fill="currentColor"
                 width="14"
                 height="14"
               >
                 <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
               </svg>
             </div>
-            <span className="stat-label">{group.total_members || 1}</span>
-            <span className="stat-text">members</span>
+            <span className={styles.statLabel}>{group.total_members || 1}</span>
+            <span className={styles.statText}>members</span>
           </div>
-          <div className="stat-item">
-            <div className="stat-icon">
+          <div className={styles.statItem}>
+            <div className={styles.statIcon}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
-                fill="#3555F9"
+                fill="currentColor"
                 width="14"
                 height="14"
               >
@@ -86,12 +93,12 @@ export default function PendingGroupRequestCard({ group, onClick, onCancel }) {
                 <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z" />
               </svg>
             </div>
-            <span className="stat-label">{group.total_posts || 0}</span>
-            <span className="stat-text">posts</span>
+            <span className={styles.statLabel}>{group.total_posts || 0}</span>
+            <span className={styles.statText}>posts</span>
           </div>
         </div>
 
-        <div className="pending-group-request-date">
+        <div className={styles.pendingGroupRequestDate}>
           Requested on {group.created_at || "2 hours ago"}
         </div>
       </div>

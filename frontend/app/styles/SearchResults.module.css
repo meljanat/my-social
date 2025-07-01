@@ -1,0 +1,313 @@
+.searchPageContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f0f2f5;
+    min-height: 100vh;
+    padding: 2rem 1rem; 
+  }
+  
+  .searchResultsTitle {
+    font-size: 2.25rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    font-weight: 800;
+    text-align: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e8ecf7;
+    width: 100%; 
+    /* max-width: 1200px;  */
+  }
+  
+  .sections {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e8ecf7;
+    width: 100%; 
+    /* max-width: 1200px;  */
+  }
+  
+  .sectionTitle {
+    font-size: 1.8rem;
+    color: #1e293b;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    border-bottom: 1px solid #eef2f9;
+    padding-bottom: 0.8rem;
+  }
+  
+  .resultCardsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .showMoreButton {
+    grid-column: 1 / -1; 
+    background: linear-gradient(135deg, #eef2f9 0%, #e0e5f0 100%);
+    color: #475569;
+    border: 1px solid #dbe2ef;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    width: fit-content;
+    margin: 0 auto;
+    display: block; 
+  }
+  
+  .showMoreButton:hover {
+    background: linear-gradient(135deg, #e0e5f0 0%, #d3d9e8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
+  
+  .noResultsMessage {
+    text-align: center;
+    padding: 1.5rem 0;
+    color: #64748b;
+    font-size: 1rem;
+    font-weight: 500;
+    background-color: #f8faff;
+    border-radius: 12px;
+    border: 1px dashed #e0e5f0;
+  }
+  
+  .loadingContainer,
+  .errorContainer,
+  .noQueryMessage,
+  .noResultsFound {
+    text-align: center;
+    padding: 3rem 0;
+    color: #64748b;
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    border: 1px dashed #e0e5f0;
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 600px; 
+  }
+  
+  .loadingSpinner {
+    border: 6px solid #e0e5f0;
+    border-top: 6px solid #667eea;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .loadingText {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+  
+  .errorIcon {
+    font-size: 3rem;
+    color: #ef4444;
+    font-weight: bold;
+  }
+  
+  .errorTitle {
+    font-size: 1.8rem;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+  }
+  
+  .errorMessage {
+    font-size: 1rem;
+    color: #64748b;
+    margin-bottom: 1.5rem;
+  }
+  
+  .retryButton {
+    background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.8rem 1.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+  
+  .retryButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45);
+  }
+  
+  .emptyStateIcon {
+    font-size: 3rem;
+    line-height: 1;
+  }
+  
+  .noResultsFound h3,
+  .noQueryMessage h3 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 0.5rem 0 0;
+  }
+  
+  .noResultsFound p,
+  .noQueryMessage p {
+    font-size: 0.95rem;
+    max-width: 400px;
+  }
+  
+  @media (max-width: 1024px) {
+    .searchPageContainer {
+      padding: 1.5rem;
+    }
+    .searchResultsTitle {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .sections {
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .sectionTitle {
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.6rem;
+    }
+    .resultCardsGrid {
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    .showMoreButton {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+    }
+    .noResultsMessage {
+      padding: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .loadingContainer,
+    .errorContainer,
+    .noQueryMessage,
+    .noResultsFound {
+      padding: 2rem 0;
+      font-size: 1rem;
+    }
+    .noResultsFound h3,
+    .noQueryMessage h3 {
+      font-size: 1.3rem;
+    }
+    .noResultsFound p,
+    .noQueryMessage p {
+      font-size: 0.85rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .searchPageContainer {
+      padding: 1rem;
+    }
+    .searchResultsTitle {
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+    }
+    .sections {
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .sectionTitle {
+      font-size: 1.4rem;
+      margin-bottom: 0.8rem;
+      padding-bottom: 0.5rem;
+    }
+    .resultCardsGrid {
+      grid-template-columns: 1fr; 
+      gap: 0.8rem;
+    }
+    .showMoreButton {
+      width: 100%;
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+    }
+    .noResultsMessage {
+      padding: 0.8rem 0;
+      font-size: 0.85rem;
+    }
+    .loadingContainer,
+    .errorContainer,
+    .noQueryMessage,
+    .noResultsFound {
+      padding: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    .noResultsFound h3,
+    .noQueryMessage h3 {
+      font-size: 1.2rem;
+    }
+    .noResultsFound p,
+    .noQueryMessage p {
+      font-size: 0.8rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .searchPageContainer {
+      padding: 0.5rem;
+    }
+    .searchResultsTitle {
+      font-size: 1.5rem;
+    }
+    .sections {
+      padding: 0.8rem;
+    }
+    .sectionTitle {
+      font-size: 1.2rem;
+    }
+    .showMoreButton {
+      font-size: 0.8rem;
+      padding: 0.4rem 0.8rem;
+    }
+    .noResultsMessage {
+      font-size: 0.8rem;
+    }
+    .loadingContainer,
+    .errorContainer,
+    .noQueryMessage,
+    .noResultsFound {
+      padding: 1rem 0;
+      font-size: 0.85rem;
+    }
+    .noResultsFound h3,
+    .noQueryMessage h3 {
+      font-size: 1.1rem;
+    }
+    .noQueryMessage p {
+      font-size: 0.75rem;
+    }
+  }
+  

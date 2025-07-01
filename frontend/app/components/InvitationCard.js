@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../styles/GroupsPage.css";
+import styles from "../styles/InvitationCard.module.css";
 
 export default function InvitationCard({ invitation, onAccept, onDecline }) {
   const [status, setStatus] = useState("pending");
@@ -19,36 +19,35 @@ export default function InvitationCard({ invitation, onAccept, onDecline }) {
   }
 
   return (
-    <div className={`invitation-card`}>
-      <div className="invitation-card-content">
-        <div className="invitation-header">
-          <div className="invitation-avatar">
+    <div className={styles.invitationCard}>
+      <div className={styles.invitationCardContent}>
+        <div className={styles.invitationHeader}>
+          <div className={styles.invitationAvatar}>
             <img src={invitation.user.avatar} alt={invitation.user.username} />
           </div>
-          <div className="invitation-requester">
-            <h4 className="invitation-sender">@{invitation.user.username}</h4>
-            <span className="invitation-label">
+          <div className={styles.invitationRequester}>
+            <h4 className={styles.invitationSender}>
+              @{invitation.user.username}
+            </h4>
+            <span className={styles.invitationLabel}>
               {invitation.created_at || "2 hours ago"}
             </span>
           </div>
         </div>
 
-        <div className="invitation-group-info">
-          <h3 className="invitation-title">
+        <div className={styles.invitationGroupInfo}>
+          <h3 className={styles.invitationTitle}>
             {invitation.group.name} ({invitation.group.total_members || 0}{" "}
             members)
           </h3>
         </div>
 
-        <div className="invitation-actions">
-          <button
-            className={`invitation-accept-btn`}
-            onClick={handleAccept}
-          >
+        <div className={styles.invitationActions}>
+          <button className={styles.invitationAcceptBtn} onClick={handleAccept}>
             Accept
           </button>
           <button
-            className={`invitation-decline-btn`}
+            className={styles.invitationDeclineBtn}
             onClick={handleDecline}
           >
             Decline

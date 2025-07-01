@@ -1,0 +1,140 @@
+.postCard {
+    background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(232, 236, 247, 0.5);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+  }
+  
+  .postCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border-color: rgba(102, 126, 234, 0.2);
+  }
+  
+  .postHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .userAvatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e8ecf7;
+    transition: all 0.3s ease;
+  }
+  
+  .userInfo {
+    flex: 1;
+  }
+  
+  .userName {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.2;
+  }
+  
+  .postTime {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 400;
+  }
+  
+  .postTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.75rem 0;
+    line-height: 1.4;
+  }
+  
+  .postContent {
+    font-size: 0.875rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0 0 1rem 0;
+  }
+  
+  .postImage {
+    margin: 1rem 0;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e8ecf7;
+  }
+  
+  .postImage img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: all 0.3s ease;
+  }
+  
+  .postImage:hover img {
+    transform: scale(1.02);
+  }
+  
+  .postActions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e8ecf7;
+  }
+  
+  .actionBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+  
+  .actionBtn:hover {
+    background-color: #f8faff;
+    color: #667eea;
+    transform: translateY(-1px);
+  }
+  
+  .actionIcon {
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+  }
+  
+  .actionBtn:hover .actionIcon {
+    opacity: 1;
+    color: #667eea;
+  }
+  
+  @media (max-width: 768px) {
+    .postCard {
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .postActions {
+      gap: 0.5rem;
+    }
+    
+    .actionBtn {
+      font-size: 0.8rem;
+      padding: 0.5rem;
+    }
+  }

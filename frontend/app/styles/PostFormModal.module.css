@@ -1,0 +1,339 @@
+
+.modalOverlay {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    backdrop-filter: blur(5px);
+  }
+  
+  .modal {
+    /* position: absolute; */
+    background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 600px;
+    animation: fadeIn 0.3s ease-out;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e8ecf7;
+  }
+  
+  .modalHeader h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1e293b;
+    font-weight: 700;
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    line-height: 1;
+  }
+  
+  .closeButton:hover {
+    color: #64748b;
+  }
+  
+  .postForm {
+    padding: 2rem;
+    overflow-y: auto;
+    max-height: 70vh; 
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .formFields {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  
+  .formGroup label {
+    font-size: 0.95rem;
+    color: #475569;
+    font-weight: 600;
+  }
+  
+  .formControl {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1px solid #e8ecf7;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    color: #334155;
+    background-color: #f8faff;
+    transition: all 0.3s ease;
+  }
+  
+  .formControl:focus {
+    outline: none;
+    border-color: #667eea;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+  
+  .formControl::placeholder {
+    color: #94a3b8;
+  }
+  
+  textarea.formControl {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+  
+  .imagePreview {
+    position: relative;
+    width: 100%;
+    max-height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+    border: 1px solid #e8ecf7;
+  }
+  
+  .imagePreview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .removeImageButton {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: rgba(255, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .removeImageButton:hover {
+    background-color: rgba(255, 0, 0, 0.9);
+  }
+  
+  .fileUpload {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  
+  .fileInput {
+    display: none;
+  }
+  
+  .fileLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #eff2f9;
+    border: 1px solid #dbe2ef;
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #475569;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .fileLabel:hover {
+    background-color: #e0e5f0;
+    border-color: #cbd5e1;
+  }
+  
+  .fileLabel img {
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+  }
+  
+  .fileName {
+    font-size: 0.85rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+  }
+  
+  .privacyOptions {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .privacyOption {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #334155;
+    cursor: pointer;
+  }
+  
+  .privacyOption input[type="radio"] {
+    accent-color: #667eea;
+    width: 18px;
+    height: 18px;
+  }
+  
+  .audienceSelector {
+    border: 1px solid #e8ecf7;
+    border-radius: 12px;
+    padding: 1rem;
+    background-color: #f8faff;
+  }
+  
+  .selectedFollowers {
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: #e8ecf7;
+    border-radius: 8px;
+  }
+  
+  .selectedFollowers p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: 500;
+  }
+  
+  .followersList {
+    max-height: 150px;
+    overflow-y: auto;
+    padding-right: 0.5rem; 
+  }
+  
+  .followerItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #334155;
+  }
+  
+  .followerItem:hover {
+    background-color: #eef2f9;
+  }
+  
+  .followerCheckbox {
+    accent-color: #667eea;
+    width: 16px;
+    height: 16px;
+  }
+  
+  .followerName {
+    font-weight: 500;
+  }
+  
+  .loadingText,
+  .noFollowersText {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    padding: 1rem 0;
+  }
+  
+  .submitButton {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+  
+  .submitButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  }
+  
+  .submitButton:disabled {
+    background: linear-gradient(135deg, #a7b9f8 0%, #6f6cdb 100%);
+    cursor: not-allowed;
+    opacity: 0.8;
+    box-shadow: none;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .modal {
+      width: 95%;
+      margin: 1rem;
+    }
+    .modalHeader {
+      padding: 1rem 1.5rem;
+    }
+    .modalHeader h3 {
+      font-size: 1.1rem;
+    }
+    .postForm {
+      padding: 1.5rem;
+    }
+    .actionBtn {
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+    }
+    .fileLabel {
+      padding: 0.6rem 1rem;
+    }
+  }

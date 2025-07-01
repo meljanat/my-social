@@ -1,0 +1,963 @@
+
+.appContainer {
+  display: flex;
+  justify-content: center;
+  background-color: #f0f2f5; 
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.profileContainer {
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  /* max-width: 900px; */
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin: 1rem;
+}
+
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* min-height: 400px; */  
+  height: 100vh;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  margin: 2rem auto;
+  /* max-width: 500px; */
+}
+
+.loadingSpinner {
+  border: 6px solid #e0e5f0;
+  border-top: 6px solid #667eea;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: 1.1rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.errorIcon {
+  font-size: 3rem;
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.errorTitle {
+  font-size: 1.8rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.errorMessage {
+  font-size: 1rem;
+  color: #64748b;
+  margin-bottom: 1.5rem;
+}
+
+.retryButton {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 1.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.retryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45);
+}
+
+.profileHeader {
+  position: relative;
+  background-color: #f8faff;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.picturePreview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+}
+
+.picturePreview img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.coverPreview {
+  object-fit: contain; 
+}
+
+.closePreview {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.closePreview:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.profileCover {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profileCover:hover {
+  transform: scale(1.01);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.profileAvatarContainer {
+  position: absolute;
+  bottom: -60px; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  padding: 5px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profileAvatarContainer:hover {
+  transform: translateX(-50%) translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.profileAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.profileInfo {
+  padding: 80px 2rem 2rem; 
+  text-align: center;
+}
+
+.profileDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.profileStatusBadge {
+  margin-bottom: 0.5rem;
+}
+
+.statusOnline,
+.statusOffline {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.statusOnline {
+  background-color: #d4edda;
+  color: #28a745;
+}
+
+.statusOffline {
+  background-color: #f8d7da;
+  color: #dc3545;
+}
+
+.profileName {
+  font-size: 2.2rem;
+  color: #1e293b;
+  margin: 0;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.profileUsername {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.privacyBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #e0e5f0;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 3px;
+}
+
+.privacyBadge svg {
+  color: #64748b;
+}
+
+.profileBio {
+  font-size: 1rem;
+  color: #475569;
+  margin-top: 1rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.profileJoined {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.joinedIcon {
+  font-size: 1.1rem;
+}
+
+.profileActions {
+  margin-top: 1.5rem;
+}
+
+.editProfileBtn,
+.followBtn,
+.unfollowBtn,
+.requestCancelBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.editProfileBtn {
+  background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf7 100%);
+  color: #475569;
+  border: 1px solid #dbe2ef;
+}
+
+.editProfileBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #e8ecf7 0%, #dbe2ef 100%);
+}
+
+.followBtn {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.followBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.unfollowBtn,
+.requestCancelBtn {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.unfollowBtn:hover,
+.requestCancelBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
+}
+
+.profileStats {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1.5rem;
+  padding: 1.5rem 2rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid #eef2f9;
+  background-color: #fcfdfe;
+}
+
+.stat {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.2rem;
+}
+
+.statLabel {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.statDivider {
+  width: 1px;
+  background-color: #e8ecf7;
+  height: 40px;
+  align-self: center;
+}
+
+.profileContent {
+  padding: 2rem;
+}
+
+.profileTabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+  border-radius: 16px;
+  padding: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(10px);
+  border: 1px solid #e8ecf7;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.tabButton {
+  background-color: transparent;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tabButton:hover {
+  background-color: #eef2f9;
+  color: #475569;
+}
+
+.tabButton.active {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.tabContent {
+  padding-top: 1rem;
+}
+
+.postsModernLayout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.loadingTab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  color: #64748b;
+  font-size: 1.1rem;
+  font-weight: 500;
+  gap: 1rem;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 1rem;
+  background-color: #f8faff;
+  border-radius: 15px;
+  border: 1px dashed #e0e5f0;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.emptyStateIcon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.emptyStateIcon.bookmark {
+  color: #667eea; 
+}
+
+.emptyStateTitle {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin-top: 0.5rem;
+}
+
+.emptyStateText {
+  font-size: 0.95rem;
+  color: #64748b;
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+}
+
+.createPostButton {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.createPostButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.aboutSection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.aboutItem {
+  background-color: #fcfdfe;
+  border: 1px solid #eef2f9;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.aboutItemTitle {
+  font-size: 1.3rem;
+  color: #1e293b;
+  margin-bottom: 1.2rem;
+  font-weight: 700;
+  border-bottom: 1px solid #eef2f9;
+  padding-bottom: 0.8rem;
+}
+
+.aboutItemContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed #f0f2f5;
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.infoLabel {
+  font-weight: 500;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.infoValue {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.savedContentContainer {
+  margin-top: 1rem;
+}
+
+.savedTabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+  border-radius: 16px;
+  padding: 0.4rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e8ecf7;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.savedTabButton {
+  background-color: transparent;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.savedTabButton:hover {
+  background-color: #eef2f9;
+  color: #475569;
+}
+
+.savedTabButton.active {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+  color: white;
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.25);
+}
+
+.postsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.usersSection {
+  background-color: #fcfdfe;
+  border: 1px solid #eef2f9;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+.usersHeader {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #eef2f9;
+  padding-bottom: 1rem;
+}
+
+.usersHeader h3 {
+  font-size: 1.3rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.userList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+}
+
+.userItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #f0f2f5;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.userItem:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.userAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e8ecf7;
+}
+
+.userInfo {
+  flex-grow: 1;
+}
+
+.userName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.userUsername {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.profileLink {
+  text-decoration: none;
+}
+
+.viewProfileBtn {
+  background: linear-gradient(135deg, #eef2f9 0%, #e0e5f0 100%);
+  color: #475569;
+  border: 1px solid #dbe2ef;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.viewProfileBtn:hover {
+  background: linear-gradient(135deg, #e0e5f0 0%, #d3d9e8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 992px) {
+  .profileContainer {
+    margin: 1rem;
+  }
+  .profileCover {
+    height: 160px;
+  }
+  .profileAvatarContainer {
+    bottom: -45px;
+    width: 100px;
+    height: 100px;
+  }
+  .profileInfo {
+    padding-top: 60px;
+  }
+  .profileName {
+    font-size: 2rem;
+  }
+  .profileUsername {
+    font-size: 1rem;
+  }
+  .profileBio {
+    font-size: 0.95rem;
+  }
+  .profileStats {
+    padding: 1rem 0;
+    gap: 1rem;
+  }
+  .statValue {
+    font-size: 1.3rem;
+  }
+  .statLabel {
+    font-size: 0.8rem;
+  }
+  .profileContent {
+    padding: 1.5rem;
+  }
+  .profileTabs {
+    flex-wrap: wrap;
+    padding: 0.4rem;
+  }
+  .tabButton {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    flex: 1 1 auto;
+    text-align: center;
+  }
+  .postsModernLayout {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  .aboutItem {
+    padding: 1.2rem;
+  }
+  .aboutItemTitle {
+    font-size: 1.2rem;
+  }
+  .infoLabel,
+  .infoValue {
+    font-size: 0.9rem;
+  }
+  .savedTabs {
+    padding: 0.3rem;
+  }
+  .savedTabButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  .postsContainer {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  .userList {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .appContainer {
+    padding: 1rem 0;
+  }
+  .profileContainer {
+    margin: 0.5rem;
+    border-radius: 15px;
+  }
+  .profileCover {
+    height: 140px;
+  }
+  .profileAvatarContainer {
+    bottom: -40px;
+    width: 90px;
+    height: 90px;
+    padding: 4px;
+  }
+  .profileInfo {
+    padding: 50px 1rem 1rem;
+  }
+  .profileName {
+    font-size: 1.8rem;
+  }
+  .profileUsername {
+    font-size: 0.95rem;
+  }
+  .profileBio {
+    font-size: 0.9rem;
+    margin-top: 0.8rem;
+  }
+  .profileActions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  .editProfileBtn,
+  .followBtn,
+  .unfollowBtn,
+  .requestCancelBtn {
+    width: 80%;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  .profileStats {
+    flex-wrap: wrap;
+    padding: 1rem;
+    gap: 0.8rem;
+    justify-content: space-around;
+  }
+  .stat {
+    flex-basis: 45%; 
+  }
+  .statDivider {
+    display: none; 
+  }
+  .profileContent {
+    padding: 1rem;
+  }
+  .profileTabs {
+    flex-direction: column;
+    width: 100%;
+    padding: 0.5rem;
+  }
+  .tabButton {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  .postsModernLayout {
+    grid-template-columns: 1fr;
+  }
+  .emptyState {
+    padding: 2rem 0.8rem;
+    gap: 0.8rem;
+  }
+  .emptyStateTitle {
+    font-size: 1.3rem;
+  }
+  .emptyStateText {
+    font-size: 0.9rem;
+  }
+  .createPostButton {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  .aboutSection {
+    grid-template-columns: 1fr;
+  }
+  .usersSection {
+    padding: 1rem;
+  }
+  .userList {
+    grid-template-columns: 1fr;
+  }
+  .userItem {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem 0.8rem;
+  }
+  .userAvatar {
+    margin-bottom: 0.5rem;
+  }
+  .userInfo {
+    margin-bottom: 0.5rem;
+  }
+  .viewProfileBtn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profileContainer {
+    border-radius: 10px;
+  }
+  .profileCover {
+    height: 100px;
+  }
+  .profileAvatarContainer {
+    bottom: -30px;
+    width: 70px;
+    height: 70px;
+  }
+  .profileInfo {
+    padding: 40px 0.8rem 0.8rem;
+  }
+  .profileName {
+    font-size: 1.5rem;
+  }
+  .profileUsername {
+    font-size: 0.85rem;
+  }
+  .profileBio {
+    font-size: 0.8rem;
+  }
+  .editProfileBtn,
+  .followBtn,
+  .unfollowBtn,
+  .requestCancelBtn {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+  }
+  .profileStats {
+    padding: 0.8rem 0;
+    gap: 0.5rem;
+  }
+  .statValue {
+    font-size: 1.1rem;
+  }
+  .statLabel {
+    font-size: 0.75rem;
+  }
+  .profileContent {
+    padding: 0.8rem;
+  }
+  .tabButton {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+  }
+  .emptyStateTitle {
+    font-size: 1.1rem;
+  }
+  .emptyStateText {
+    font-size: 0.8rem;
+  }
+  .createPostButton {
+    font-size: 0.8rem;
+  }
+  .aboutItem {
+    padding: 1rem;
+  }
+  .aboutItemTitle {
+    font-size: 1.1rem;
+  }
+  .infoLabel,
+  .infoValue {
+    font-size: 0.85rem;
+  }
+  .savedTabButton {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
+  }
+  .usersSection {
+    padding: 0.8rem;
+  }
+  .usersHeader h3 {
+    font-size: 1.1rem;
+  }
+}

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
-import "../styles/FormModal.css";
+import styles from "../styles/EventFormModal.module.css";
 
 export default function EventFormModal({
   onClose,
-  //   user,
+    user,
   onEventCreated,
   my_groups,
   group,
 }) {
   const [eventFormInput, setEventFormInput] = useState({
-    // user_id: user.id,
+    user_id: user.id,
     name: "",
     description: "",
     start_date: "",
@@ -98,22 +98,22 @@ export default function EventFormModal({
     }
   };
 
-  return (
-    <div className="modal-overlay">
-      <div className="modal">
-        <div className="modal-header">
+return (
+    <div className={styles.modalOverlay}>
+      <div className={styles.modal}>
+        <div className={styles.modalHeader}>
           <h3>Create a new event</h3>
-          <button className="close-button" onClick={onClose}>
+          <button className={styles.closeButton} onClick={onClose}>
             &times;
           </button>
         </div>
-        <form className="post-form" onSubmit={handleSubmit}>
-          <div className="form-fields">
-            <div className="form-group">
+        <form className={styles.postForm} onSubmit={handleSubmit}>
+          <div className={styles.formFields}>
+            <div className={styles.formGroup}>
               <label htmlFor="event-name">Event Name</label>
               <input
                 id="event-name"
-                className="form-control"
+                className={styles.formControl}
                 placeholder="Enter event name"
                 required
                 value={eventFormInput.name}
@@ -125,11 +125,11 @@ export default function EventFormModal({
                 }}
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="event-description">Description</label>
               <textarea
                 id="event-description"
-                className="form-control"
+                className={styles.formControl}
                 placeholder="Event Description..."
                 required
                 value={eventFormInput.description}
@@ -141,12 +141,12 @@ export default function EventFormModal({
                 }}
               />
             </div>
-            {/* {my_groups && (
-              <div className="form-group">
+            {my_groups && (
+              <div className={styles.formGroup}>
                 <label htmlFor="event-group">Select Group</label>
                 <select
                   id="event-group"
-                  className="form-control"
+                  className={styles.formControl}
                   value={eventFormInput.group_id}
                   onChange={(e) => {
                     setEventFormInput({
@@ -163,13 +163,13 @@ export default function EventFormModal({
                   ))}
                 </select>
               </div>
-            )}{" "} */}
-            <div className="form-group">
+            )}{" "}
+            <div className={styles.formGroup}>
               <label htmlFor="event-start-datetime">Start Date & Time</label>
               <input
                 id="event-start-datetime"
                 type="datetime-local"
-                className="form-control"
+                className={styles.formControl}
                 required
                 value={eventFormInput.start_date}
                 onChange={(e) => {
@@ -181,12 +181,12 @@ export default function EventFormModal({
                 }}
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="event-end-datetime">End Date & Time</label>
               <input
                 id="event-end-datetime"
                 type="datetime-local"
-                className="form-control"
+                className={styles.formControl}
                 value={eventFormInput.end_date}
                 onChange={(e) => {
                   setEventFormInput({
@@ -196,11 +196,11 @@ export default function EventFormModal({
                 }}
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label htmlFor="event-location">Location</label>
               <input
                 id="event-location"
-                className="form-control"
+                className={styles.formControl}
                 placeholder="Enter event location"
                 required
                 value={eventFormInput.location}
@@ -212,16 +212,16 @@ export default function EventFormModal({
                 }}
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label>Upload Event Image</label>
               {eventFormInput.eventImage ? (
-                <div className="image-preview">
+                <div className={styles.imagePreview}>
                   <img
                     src={URL.createObjectURL(eventFormInput.eventImage)}
                     alt="Selected Event Image"
                   />
                   <button
-                    className="remove-image-button"
+                    className={styles.removeImageButton}
                     onClick={(e) => {
                       e.preventDefault();
                       setEventFormInput({
@@ -235,21 +235,21 @@ export default function EventFormModal({
                   </button>
                 </div>
               ) : (
-                <div className="file-upload">
+                <div className={styles.fileUpload}>
                   <input
                     key={imageInputKey}
                     type="file"
                     id="event-image"
-                    className="file-input"
+                    className={styles.fileInput}
                     name="eventImage"
                     onChange={handleImageChange}
                     accept="image/*"
                   />
-                  <label htmlFor="event-image" className="file-label">
+                  <label htmlFor="event-image" className={styles.fileLabel}>
                     <img src="/icons/upload.svg" alt="" />
                     Choose Event Image
                   </label>
-                  <span className="file-name">
+                  <span className={styles.fileName}>
                     {eventFormInput.eventImage
                       ? eventFormInput.eventImage.name
                       : "No file chosen"}
@@ -261,7 +261,7 @@ export default function EventFormModal({
 
           <button
             type="submit"
-            className="submit-button"
+            className={styles.submitButton}
             disabled={isSubmitting}
           >
             {isSubmitting ? "Creating..." : "Create Event"}

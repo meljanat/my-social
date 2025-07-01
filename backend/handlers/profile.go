@@ -150,17 +150,6 @@ func ProfilePostsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	for i := 0; i < len(posts); i++ {
-		posts[i].TotalSaves, err = database.CountSaves(posts[i].ID, posts[i].GroupID)
-		if err != nil {
-			fmt.Println("Failed to count saves", err)
-			response := map[string]string{"error": "Failed to count saves"}
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-	}
-
 	if user_id == user.ID {
 		info.Role = "owner"
 	} else {

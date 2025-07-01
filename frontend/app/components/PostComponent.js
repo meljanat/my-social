@@ -5,7 +5,6 @@ import styles from "../styles/PostComponent.module.css";
 
 export default function PostComponent({ posts: initialPosts }) {
   const [posts, setPosts] = useState(initialPosts);
-  const [savedMessage, setSavedMessage] = useState(null);
   const [activeLikesPopup, setActiveLikesPopup] = useState(null);
   const popupRef = useRef(null);
   const router = useRouter();
@@ -53,24 +52,11 @@ export default function PostComponent({ posts: initialPosts }) {
               : post
           )
         );
-        setSavedMessage({
-          postId: postId,
-          message: updatedPost.saved
-            ? "Post saved successfully!"
-            : "Post unsaved successfully!",
-        });
       }
     } catch (error) {
       console.log(error);
     }
   }
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSavedMessage(null);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [savedMessage]);
 
   async function handleLike(postId) {
     try {
@@ -261,12 +247,6 @@ export default function PostComponent({ posts: initialPosts }) {
               <span>{post.total_saves} Saves</span>
             </button>
           </div>
-
-          {savedMessage?.postId === post.post_id && (
-            <div className={styles.savedMessage}>
-              <p>{savedMessage.message}</p>
-            </div>
-          )}
 
           <a href={`/post?id=${post.post_id}`} className={styles.postLink}>
             <button className={styles.seePostButton}>

@@ -124,7 +124,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				if err := database.CreateNotification(user.ID, invitation.User, 0, 0, 0, "invitation"); err != nil {
+				if err := database.CreateNotification(user.ID, invitation.User, 0, 0, 0, "follow_request"); err != nil {
 					fmt.Println("Failed to create notification", err)
 					response := map[string]string{"error": "Failed to create notification"}
 					w.WriteHeader(http.StatusInternalServerError)
@@ -143,7 +143,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				if err := database.DeleteNotification(user.ID, invitation.User, 0, 0, 0, "invitation"); err != nil {
+				if err := database.DeleteNotification(user.ID, invitation.User, 0, 0, 0, "follow_request"); err != nil {
 					fmt.Println("Failed to create notification", err)
 					response := map[string]string{"error": "Failed to delete notification"}
 					w.WriteHeader(http.StatusInternalServerError)
@@ -219,7 +219,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 					json.NewEncoder(w).Encode(response)
 					return
 				}
-				if err := database.CreateNotification(user.ID, group.AdminID, group.ID, 0, 0, "invitation"); err != nil {
+				if err := database.CreateNotification(user.ID, group.AdminID, group.ID, 0, 0, "join_request"); err != nil {
 					fmt.Println("Failed to create notification", err)
 					response := map[string]string{"error": "Failed to create notification"}
 					w.WriteHeader(http.StatusInternalServerError)
@@ -236,7 +236,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 					json.NewEncoder(w).Encode(response)
 					return
 				}
-				if err := database.DeleteNotification(user.ID, group.AdminID, group.ID, 0, 0, "invitation"); err != nil {
+				if err := database.DeleteNotification(user.ID, group.AdminID, group.ID, 0, 0, "join_request"); err != nil {
 					fmt.Println("Failed to create notification", err)
 					response := map[string]string{"error": "Failed to delete notification"}
 					w.WriteHeader(http.StatusInternalServerError)
@@ -374,6 +374,7 @@ func AcceptInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		isFollowed, err := database.IsFollowed(user.ID, invitation.User)
+		fmt.Println("Checking if user is followed:", invitation.User, user.ID, isFollowed)
 		if err != nil {
 			fmt.Println("Failed to check if user is followed", err)
 			response := map[string]string{"error": "Failed to check if user is followed"}

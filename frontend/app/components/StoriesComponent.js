@@ -272,11 +272,6 @@ export default function StoriesComponent({ storiesUsers }) {
 
   return (
     <div className={styles.storiesWrapper}>
-      <div className={styles.storiesHeader}>
-        <h2>Stories</h2>
-        <button className={styles.storiesViewAllBtn}>View All</button>
-      </div>
-
       <div className={styles.storiesContainer}>
         <div className={styles.storyItem}>
           <div className={styles.addStoryButton} onClick={handleAddStory}>

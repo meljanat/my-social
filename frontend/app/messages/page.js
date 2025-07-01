@@ -72,9 +72,9 @@ const UserCard = ({ user, isActive, onClick }) => {
                 : ""}
           </p>
         </div>
-        {user.message && user.message.total_messages > 0 ? (
+        {user && user.total_messages > 0 ? (
           <div className={styles.unreadBadge}>
-            {user.message.total_messages}
+            {user.total_messages}
           </div>
         ) : user.total_messages > 0 ? (
           <div className={styles.unreadBadge}>{user.total_messages}</div>

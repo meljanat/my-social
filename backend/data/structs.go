@@ -10,36 +10,41 @@ import (
 var Clients = make(map[int64][]*websocket.Conn)
 
 type User struct {
-	ID                 int64     `json:"user_id" sqlite:"user_id"`
-	Username           string    `json:"username" sqlite:"username"`
-	FirstName          string    `json:"first_name" sqlite:"first_name"`
-	LastName           string    `json:"last_name" sqlite:"last_name"`
-	Email              string    `json:"email" sqlite:"email"`
-	DateOfBirth        time.Time `json:"date_of_birth" sqlite:"date_of_birth"`
-	Password           string    `json:"password" sqlite:"password"`
-	ConfirmPass        string    `json:"confirm_pass" sqlite:"confirm_pass"`
-	CreatedAt          time.Time `json:"created_at" sqlite:"created_at"`
-	Avatar             string    `json:"avatar" sqlite:"avatar"`
-	Cover              string    `json:"cover" sqlite:"cover"`
-	Bio                string    `json:"bio" sqlite:"bio"`
-	Role               string    `json:"role" sqlite:"role"`
-	Privacy            string    `json:"privacy" sqlite:"privacy"`
-	Message            Message   `json:"message" sqlite:"message"`
-	IsTyping           bool      `json:"is_typing" sqlite:"is_typing"`
-	Post               Post      `json:"post" sqlite:"post"`
-	TotalFollowers     int64     `json:"total_followers" sqlite:"total_followers"`
-	TotalFollowing     int64     `json:"total_following" sqlite:"total_following"`
-	TotalGroups        int64     `json:"total_groups" sqlite:"total_groups"`
-	TotalEvents        int64     `json:"total_events" sqlite:"total_events"`
-	TotalNotifications int64     `json:"total_notifications" sqlite:"total_notifications"`
-	TotalInvitations   int64     `json:"total_invitations" sqlite:"total_invitations"`
-	IsFollowing        bool      `json:"is_following" sqlite:"is_following"`
-	IsFollower         bool      `json:"is_follower" sqlite:"is_follower"`
-	IsPending          bool      `json:"is_pending" sqlite:"is_pending"`
-	Online             bool      `json:"online" sqlite:"online"`
-	SessionToken       uuid.UUID `json:"session_token" sqlite:"session_token"`
-	Type               string    `json:"type" sqlite:"type"`
-	Stories            []Stories `json:"stories" sqlite:"stories"`
+	ID                  int64     `json:"user_id" sqlite:"user_id"`
+	Username            string    `json:"username" sqlite:"username"`
+	FirstName           string    `json:"first_name" sqlite:"first_name"`
+	LastName            string    `json:"last_name" sqlite:"last_name"`
+	Email               string    `json:"email" sqlite:"email"`
+	DateOfBirth         time.Time `json:"date_of_birth" sqlite:"date_of_birth"`
+	Password            string    `json:"password" sqlite:"password"`
+	ConfirmPass         string    `json:"confirm_pass" sqlite:"confirm_pass"`
+	CreatedAt           time.Time `json:"created_at" sqlite:"created_at"`
+	Avatar              string    `json:"avatar" sqlite:"avatar"`
+	Cover               string    `json:"cover" sqlite:"cover"`
+	Bio                 string    `json:"bio" sqlite:"bio"`
+	Role                string    `json:"role" sqlite:"role"`
+	Privacy             string    `json:"privacy" sqlite:"privacy"`
+	IsTyping            bool      `json:"is_typing" sqlite:"is_typing"`
+	TotalMessages       int64     `json:"total_messages" sqlite:"total_messages"`
+	TotalGroupsMessages int64     `json:"total_groups_messages" sqlite:"total_groups_messages"`
+	TotalChatsMessages  int64     `json:"total_chats_messages" sqlite:"total_chats_messages"`
+	TotalFollowers      int64     `json:"total_followers" sqlite:"total_followers"`
+	TotalFollowing      int64     `json:"total_following" sqlite:"total_following"`
+	TotalGroups         int64     `json:"total_groups" sqlite:"total_groups"`
+	TotalEvents         int64     `json:"total_events" sqlite:"total_events"`
+	TotalPosts          int64     `json:"total_posts" sqlite:"total_posts"`
+	TotalLikes          int64     `json:"total_likes" sqlite:"total_likes"`
+	TotalComments       int64     `json:"total_comments" sqlite:"total_comments"`
+	TotalSaves          int64     `json:"total_saves" sqlite:"total_saves"`
+	TotalNotifications  int64     `json:"total_notifications" sqlite:"total_notifications"`
+	TotalInvitations    int64     `json:"total_invitations" sqlite:"total_invitations"`
+	IsFollowing         bool      `json:"is_following" sqlite:"is_following"`
+	IsFollower          bool      `json:"is_follower" sqlite:"is_follower"`
+	IsPending           bool      `json:"is_pending" sqlite:"is_pending"`
+	Online              bool      `json:"online" sqlite:"online"`
+	SessionToken        uuid.UUID `json:"session_token" sqlite:"session_token"`
+	Type                string    `json:"type" sqlite:"type"`
+	Stories             []Stories `json:"stories" sqlite:"stories"`
 }
 
 type Post struct {

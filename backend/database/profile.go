@@ -10,7 +10,7 @@ func GetProfileInfo(user_id int64, following []structs.User) (structs.User, erro
 	if err != nil {
 		return user, err
 	}
-	user.Post.TotalPosts, err = GetCountUserPosts(user_id, 0)
+	user.TotalPosts, err = GetCountUserPosts(user_id, 0)
 	if err != nil {
 		return user, err
 	}
@@ -22,19 +22,27 @@ func GetProfileInfo(user_id int64, following []structs.User) (structs.User, erro
 	if err != nil {
 		return user, err
 	}
-	user.Post.TotalLikes, err = GetCountUserLikes(user_id)
+	user.TotalLikes, err = GetCountUserLikes(user_id)
 	if err != nil {
 		return user, err
 	}
-	user.Post.TotalComments, err = GetCountUserComments(user_id)
+	user.TotalComments, err = GetCountUserComments(user_id)
 	if err != nil {
 		return user, err
 	}
-	user.Message.TotalChatsMessages, user.Message.TotalGroupsMessages, err = GetCountUserMessages(user_id)
+	user.TotalChatsMessages, user.TotalGroupsMessages, err = GetCountUserMessages(user_id)
 	if err != nil {
 		return user, err
 	}
-	user.Message.TotalMessages = user.Message.TotalChatsMessages + user.Message.TotalGroupsMessages
+	user.TotalFollowers, err = GetCountFollowers(user_id)
+	if err != nil {
+		return user, err
+	}
+	user.TotalFollowing, err = GetCountFollowing(user_id)
+	if err != nil {
+		return user, err
+	}
+	user.TotalMessages = user.TotalChatsMessages + user.TotalGroupsMessages
 	user.TotalNotifications, err = GetCountNotifications(user_id)
 	if err != nil {
 		return user, err

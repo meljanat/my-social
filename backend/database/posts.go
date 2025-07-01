@@ -107,6 +107,7 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 			JOIN users ON posts.user_id = users.id
 			LEFT JOIN post_privacy ON post_privacy.post_id = posts.id
 			WHERE posts.user_id = ?
+			AND posts.group_id = 0
 			AND ((posts.privacy = ? OR posts.privacy = ?))
 			OR (posts.privacy = ? AND post_privacy.user_id = ?)
 			ORDER BY posts.created_at DESC LIMIT ? OFFSET ?
@@ -119,6 +120,7 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 			JOIN categories ON categories.id = posts.category_id
 			JOIN users ON posts.user_id = users.id
 			WHERE posts.user_id = ?
+			AND posts.group_id = 0
 			AND posts.privacy = ?
 			ORDER BY posts.created_at DESC LIMIT ? OFFSET ?
 		`, user_id, "public", 10, offset)
@@ -142,6 +144,10 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 			return nil, err
 		}
 		post.WhoLiked, err = GetUsersLiked(post.ID)
+		if err != nil {
+			return nil, err
+		}
+		post.TotalSaves, err = CountSaves(post.ID, post.GroupID)
 		if err != nil {
 			return nil, err
 		}
@@ -230,12 +236,7 @@ func GetPost(user_id, post_id int64) (structs.Post, error) {
 
 func GetCountUserPosts(user_id, group_id int64) (int64, error) {
 	var count int64
-	var err error
-	if group_id != 0 {
-		err = DB.QueryRow("SELECT COUNT(*) FROM posts WHERE user_id = ? AND group_id = ?", user_id, group_id).Scan(&count)
-	} else {
-		err = DB.QueryRow("SELECT COUNT(*) FROM posts WHERE user_id = ? AND group_id = ?", user_id, 0).Scan(&count)
-	}
+	err := DB.QueryRow("SELECT COUNT(*) FROM posts WHERE user_id = ? AND group_id = ?", user_id, group_id).Scan(&count)
 	return count, err
 }
 

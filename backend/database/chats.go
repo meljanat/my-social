@@ -21,7 +21,7 @@ func GetConnections(user_id, offset int64) ([]structs.User, error) {
 			return nil, err
 		}
 		if connection.ID != user_id {
-			connection.Message.TotalMessages, err = GetCountConversationMessages(connection.ID, user_id)
+			connection.TotalMessages, err = GetCountConversationMessages(connection.ID, user_id)
 			if err != nil {
 				return nil, err
 			}

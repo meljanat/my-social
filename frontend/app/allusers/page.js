@@ -6,15 +6,13 @@ import { handleFollow, handelAccept, handleReject } from "../functions/user"; //
 export default function AllUsersPage() {
   const [activeTab, setActiveTab] = useState("suggested");
   const [suggestedUsers, setSuggestedUsers] = useState([]);
-  const [pendingRequests, setPendingRequests] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState();
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchUsers("suggested");
-    fetchUsers("pending");
-    fetchUsers("received");
   }, []);
 
   const fetchUsers = async (type) => {
@@ -31,8 +29,11 @@ export default function AllUsersPage() {
           credentials: "include",
         }
       );
+      console.log("Pending requests before: " ,pendingRequests);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log(`Fetched ${type} users:`, data);
         if (type === "suggested") {
           setSuggestedUsers(data);
         } else if (type === "pending") {
@@ -201,7 +202,7 @@ export default function AllUsersPage() {
           </div>
         ) : activeTab === "pending" ? (
           <div className={styles.pendingRequestsList}>
-            {!pendingRequests || pendingRequests.length === 0 ? (
+            {!pendingRequests || pendingRequests?.length === 0 ? (
               <div className={styles.emptyState}>
                 <p className={styles.emptyTitle}>No pending requests</p>
                 <p className={styles.emptyDescription}>

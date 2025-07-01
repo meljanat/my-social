@@ -83,10 +83,6 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	var id int64
 	var type_notification = "comment"
 	id, err = database.CreateComment(comment.Content, user.ID, post, imagePath)
-	if comment.GroupID != 0 {
-		type_notification += "comment group"
-	}
-
 	if err != nil {
 		fmt.Println("Failed to create comment", err)
 		response := map[string]string{"error": "Failed to create comment"}

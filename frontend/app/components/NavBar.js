@@ -336,9 +336,9 @@ export default function Navbar() {
         <button className={`${styles.actionIcon} ${styles.messageBadge}`}>
           <Link href="/messages">
             <img src="./icons/message.svg" alt="Messages" />
-            {user.message.total_messages > 0 && (
+            {user.total_messages > 0 && (
               <span className={styles.badge}>
-                {user.message.total_messages || 0}
+                {user.total_messages || 0}
               </span>
             )}
           </Link>

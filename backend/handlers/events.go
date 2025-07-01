@@ -139,7 +139,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	for _, member := range members {
 		if member.ID != user.ID {
-			if err = database.CreateNotification(user.ID, member.ID, 0, event.GroupID, id, "event_created"); err != nil {
+			if err = database.CreateNotification(user.ID, member.ID, 0, event.GroupID, id, "event"); err != nil {
 				fmt.Println("Error creating notification:", err)
 				response := map[string]string{"error": "Failed to create notification"}
 				w.WriteHeader(http.StatusInternalServerError)

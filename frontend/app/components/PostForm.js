@@ -14,30 +14,6 @@ export default function PostForm() {
   });
   const [imageInputKey, setImageInputKey] = useState(Date.now());
 
-  useEffect(() => {
-    if (showModal && postFormInput.privacy === "almost-private") {
-      fetchFollowers();
-    }
-  }, [showModal, postFormInput.privacy]);
-
-  const fetchFollowers = async () => {
-    try {
-      const response = await fetch("http://localhost:8404/followers", {
-        method: "GET",
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setFollowers(data.followers || []);
-      } else {
-        console.error("Failed to fetch followers");
-      }
-    } catch (error) {
-      console.error("Error fetching followers:", error);
-    }
-  };
-
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     setPostFormInput({

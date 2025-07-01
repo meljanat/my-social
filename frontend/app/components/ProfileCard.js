@@ -58,7 +58,7 @@ export default function ProfileCard({ user, onPostCreated, my_groups }) {
             <div className={styles.statLabel}>Following</div>
           </div>
           <div className={styles.stat}>
-            <div className={styles.statValue}>{user.post.total_posts}</div>
+            <div className={styles.statValue}>{user.total_posts}</div>
             <div className={styles.statLabel}>Posts</div>
           </div>
         </div>

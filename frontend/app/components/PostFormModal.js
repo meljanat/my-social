@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import styles from "../styles/PostFormModal.module.css"; 
 
-export default function PostFormModal({ onClose, user, onPostCreated }) {
+export default function PostFormModal({ onClose, onPostCreated }) {
   const [postFormInput, setPostFormInput] = useState({
     title: "",
     content: "",
@@ -129,8 +129,8 @@ export default function PostFormModal({ onClose, user, onPostCreated }) {
         title: data.title || postFormInput.title,
         content: data.content || postFormInput.content,
         privacy: data.privacy || postFormInput.privacy || "public",
-        author: `${user.first_name} ${user.last_name}`,
-        author_id: user.user_id,
+        author: `${data.first_name} ${data.last_name}`,
+        author_id: data.user_id,
         created_at: "Just now",
         category:
           categories.find(
@@ -143,7 +143,7 @@ export default function PostFormModal({ onClose, user, onPostCreated }) {
         is_liked: false,
         saved: false,
         image: data.image || null,
-        avatar: user.avatar || "/avatars/default.jpg",
+        avatar: data.avatar || "/avatars/default.jpg",
       };
 
       console.log("New post object:", newPost);

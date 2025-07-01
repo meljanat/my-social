@@ -132,6 +132,7 @@ func NewPostPost(w http.ResponseWriter, r *http.Request, user *structs.User) {
 
 	if post.Privacy == "almost_private" {
 		users := strings.Split(r.FormValue("users"), ",")
+		users = append(users, strconv.FormatInt(user.ID, 10))
 		for _, usr := range users {
 			usr_id, err := strconv.ParseInt(usr, 10, 64)
 			if err != nil {

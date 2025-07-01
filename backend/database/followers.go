@@ -101,20 +101,20 @@ func GetReceivedUsers(user_id, offset int64) ([]structs.User, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var pendingUsers []structs.User
+	var receivedUsers []structs.User
 	for rows.Next() {
 		var user structs.User
 		err = rows.Scan(&user.ID, &user.Username, &user.Avatar)
 		if err != nil {
 			return nil, err
 		}
-		pendingUsers = append(pendingUsers, user)
+		receivedUsers = append(receivedUsers, user)
 	}
-	return pendingUsers, nil
+	return receivedUsers, nil
 }
 
 func GetPendingUsers(user_id, offset int64) ([]structs.User, error) {
-	rows, err := DB.Query("SELECT u.id, u.username, u.avatar FROM users u JOIN invitations i ON u.id = i.recipient_id WHERE i.invited_id = ? LIMIT ? OFFSET ?", user_id, 10, offset)
+	rows, err := DB.Query("SELECT u.id, u.username, u.avatar FROM users u JOIN invitations i ON u.id = i.recipient_id WHERE i.group_id = 0 AND i.invited_id = ? LIMIT ? OFFSET ?", user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}

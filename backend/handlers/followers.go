@@ -65,7 +65,7 @@ func FollowersHandler(w http.ResponseWriter, r *http.Request) {
 
 	var followers []structs.User
 	if followed || info.Privacy == "public" || user_id == user.ID {
-		followers, err = database.GetFollowers(user.ID, offset)
+		followers, err = database.GetFollowers(user_id, offset)
 		if err != nil {
 			fmt.Println("Failed to retrieve followers", err)
 			response := map[string]string{"error": "Failed to retrieve followers"}
@@ -135,7 +135,7 @@ func FollowingHandler(w http.ResponseWriter, r *http.Request) {
 
 	var following []structs.User
 	if followed || info.Privacy == "public" || user_id == user.ID {
-		following, err = database.GetFollowing(user.ID, offset, 0)
+		following, err = database.GetFollowing(user_id, offset, 0)
 		if err != nil {
 			fmt.Println("Failed to retrieve following", err)
 			response := map[string]string{"error": "Failed to retrieve following"}
@@ -178,7 +178,7 @@ func SuggestedUsersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var users []structs.User
-
+	fmt.Println("Type:", Type)
 	if Type == "suggested" {
 		users, err = database.GetSuggestedUsers(user.ID, offset)
 	} else if Type == "received" {

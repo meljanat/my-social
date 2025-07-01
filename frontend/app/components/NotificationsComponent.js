@@ -70,7 +70,9 @@ const NotificationsComponent = () => {
             : n
         )
       );
-      if (notification.type_notification === "invitation") {
+      if (notification.type_notification === "follow_request"
+        ||notification.type_notification === "follow"
+      ) {
         router.push('/profile?id=' + notification.user_id);
       } else if (notification.type_notification === "like" ||
         notification.type_notification === "comment" ||

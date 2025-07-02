@@ -123,8 +123,6 @@ export default function ChatWidget({ users, groups, myData }) {
     setOpenChatWidget(!openChatWidget);
   };
   const toggleEmojiSection = () => {
-    console.log(openEmojiSection ? 'emo closed' : 'emo opened');
-
     setOpenEmojiSection(!openEmojiSection);
   };
 
@@ -316,7 +314,6 @@ return (
                     user={user}
                     isOnline={user.is_online}
                     onClick={() => {
-                      console.log("user: ", user);
                       showUserTab(user);
                     }}
                   />

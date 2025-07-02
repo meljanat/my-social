@@ -160,8 +160,6 @@ export default function EventsPage() {
   }
 
   if (error) {
-    console.log("Error fetching events:", error);
-
     return (
       <div className={styles.errorContainer}>
         <div className={styles.errorIcon}>!</div>

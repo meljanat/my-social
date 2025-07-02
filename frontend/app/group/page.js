@@ -72,8 +72,6 @@ export default function GroupPage() {
         }
 
         const data = await response.json();
-        console.log("Group dataaa:", data);
-
         setSelectedGroup(data);
         fetchGroupDetails("posts", data.group_id);
         setIsLoading(false);
@@ -102,7 +100,6 @@ export default function GroupPage() {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
-      console.log(`Group ${type} Data:`, data);
       setSelectedGroup((prev) => ({
         ...prev,
         [type]: data,
@@ -155,7 +152,6 @@ export default function GroupPage() {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
-      console.log(`Group Members Data:`, data);
       setUsersToInvite(data);
     } catch (err) {
       console.log(err);
@@ -163,7 +159,6 @@ export default function GroupPage() {
   }
 
   const removeGroup = (groupId) => {
-    console.log("Group to remove:", groupId);
     router.push("/groups");
   };
 
@@ -475,9 +470,7 @@ export default function GroupPage() {
                   : styles.adminActionBtn
                   }`}
                 onClick={() => {
-                  console.log(selectedGroup);
                   handleFollow(selectedGroup.admin_id, selectedGroup.group_id);
-                  // The logic here remains the same, just removed the commented out part for brevity.
                 }}
               >
                 <svg

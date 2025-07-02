@@ -57,11 +57,9 @@ export default function AllUsersPage() {
           credentials: "include",
         }
       );
-      console.log("Pending requests before: ", pendingRequests);
 
       if (response.ok) {
         const data = await response.json();
-        console.log(`Fetched ${type} users:`, data);
         if (type === "suggested") {
           setSuggestedUsers(data);
         } else if (type === "pending") {

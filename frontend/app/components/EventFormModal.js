@@ -40,7 +40,7 @@ export default function EventFormModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+    
     const formData = new FormData();
     formData.append("user_id", eventFormInput.user_id);
     formData.append("name", eventFormInput.name);
@@ -48,7 +48,7 @@ export default function EventFormModal({
     formData.append("start_date", eventFormInput.start_date);
     formData.append("end_date", eventFormInput.end_date);
     formData.append("location", eventFormInput.location);
-    formData.append("group_id", group.group_id);
+    formData.append("group_id", eventFormInput.group_id);
 
     if (eventFormInput.eventImage) {
       formData.append("eventImage", eventFormInput.eventImage);
@@ -152,12 +152,12 @@ return (
                     setEventFormInput({
                       ...eventFormInput,
                       group_id: e.target.value,
-                    });
+                    });                    
                   }}
                 >
                   <option value="0">No Group</option>
                   {my_groups.map((group) => (
-                    <option key={group.group_id} value={group.id}>
+                    <option key={group.group_id} value={group.group_id}>
                       {group.name}
                     </option>
                   ))}

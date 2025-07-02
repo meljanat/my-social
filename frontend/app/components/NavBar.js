@@ -32,8 +32,6 @@ export default function Navbar() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched user data NavBar:", data);
-
           if (data.error) {
             throw new Error(data.error);
           }
@@ -56,7 +54,6 @@ export default function Navbar() {
           ...prevUser,
           total_notifications: prevUser.total_notifications + 1,
         }));
-        console.log("Received notifications:", msg);
       }
     };
 
@@ -86,9 +83,6 @@ export default function Navbar() {
       }
 
       const data = await response.json();
-
-      console.log(data);
-
       if (data.error) {
         throw new Error("Failed to fetch suggestions", data.error);
       }

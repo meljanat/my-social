@@ -19,7 +19,6 @@ export default function EventCard({ event, compact = false }) {
     startDate,
     endDate
   );
-  console.log("Formatted dates", month, day, year, endMonth, endDay, endYear);
 
   const StartRange = `Start Date: ${startDate.toLocaleTimeString([], {
     hour: "2-digit",
@@ -33,8 +32,6 @@ export default function EventCard({ event, compact = false }) {
 
   const JoinToEvent = (eventId, groupId) => {
     try {
-      console.log("Joining event:", eventId, groupId);
-
       fetch(`http://localhost:8404/join_to_event`, {
         method: "POST",
         headers: {

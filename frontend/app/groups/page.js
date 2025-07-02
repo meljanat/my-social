@@ -101,7 +101,6 @@ export default function GroupsPage() {
       } else {
         setGroupData(data);
       }
-      console.log(`Data for ${endpoint}:`, data);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching group data:", error);
@@ -142,7 +141,6 @@ export default function GroupsPage() {
         throw new Error("Failed to fetch invitations data");
       }
       const data = await response.json();
-      console.log("Invitations Data:", data);
       setGroupData(data);
       setIsLoading(false);
     } catch (error) {
@@ -392,7 +390,6 @@ export default function GroupsPage() {
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log("dasdhhhas", group);
                     handleGroupSelect(group);
                   }}
                   onCancel={handleCancelRequest}

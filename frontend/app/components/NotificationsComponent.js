@@ -45,11 +45,7 @@ const NotificationsComponent = ({onMarkAllAsRead}) => {
       );
 
       if (!response.ok) throw new Error("Failed to mark all as read");
-
-      console.log(notifications);
-
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-      console.log(notifications);
     } catch (error) {
       console.error("Error marking notifications as read:", error.message);
     }

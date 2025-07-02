@@ -2,8 +2,6 @@
 import styles from "../styles/NotificationCard.module.css";
 
 export default function NotificationCard({ notification, onClick }) {
-  console.log("NotificationCard props:", notification, onClick);
-
   return (
     <div className={styles.notificationItem} onClick={onClick}>
       <div className={styles.notificationContent}>

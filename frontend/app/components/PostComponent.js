@@ -71,8 +71,6 @@ export default function PostComponent({ posts: initialPosts }) {
 
       if (response.ok) {
         const updatedPost = await response.json();
-        console.log("Updated post: ", updatedPost);
-
         setPosts((prevPosts) =>
           prevPosts.map((post) =>
             post.post_id === postId

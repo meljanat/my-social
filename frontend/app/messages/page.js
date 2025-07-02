@@ -396,8 +396,6 @@ export default function MessagesPage() {
       };
 
     websocket.send(JSON.stringify(mssg));
-    console.log(mssg);
-
     setNewMessage("");
   };
 
@@ -605,8 +603,6 @@ export default function MessagesPage() {
                     placeholder="Type a message..."
                     value={newMessage}
                     onChange={(e) => {
-                      // console.log(newMessage);
-
                       setNewMessage(e.target.value)
                     }}
                     className={styles.messageInput}

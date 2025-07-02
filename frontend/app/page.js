@@ -73,7 +73,6 @@ export default function Home() {
       const data = await response.json();
 
       if (!data.posts || !Array.isArray(data.posts)) {
-        console.log("Posts is not an array or missing", data.posts);
         if (offset === 0) setPosts([]);
         setHasMorePosts(false);
         return [];
@@ -114,7 +113,6 @@ export default function Home() {
         setIsFetchingMore(true);
         fetchHomeData(posts.length).then((newPosts) => {
           if (newPosts.length === 0) {
-            console.log("No more posts to fetch");
             setHasMorePosts(false);
           }
           setIsFetchingMore(false);

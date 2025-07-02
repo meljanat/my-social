@@ -65,8 +65,6 @@ export default function PostForm() {
         console.error(data);
         throw new Error(data.error || "Failed to create the post");
       }
-
-      console.log("Post created successfully");
       setPostFormInput({
         title: "",
         content: "",

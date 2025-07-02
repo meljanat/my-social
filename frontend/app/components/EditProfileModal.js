@@ -3,8 +3,6 @@ import { useState } from "react";
 import styles from "../styles/EditProfileModal.module.css";
 
 export default function EditProfileModal({ user, onClose, onSave }) {
-  console.log("EditProfileModal props:", user, onClose, onSave);
-
   const [formData, setFormData] = useState({
     id: user.user_id || 0,
     username: user.username || "",
@@ -51,9 +49,7 @@ export default function EditProfileModal({ user, onClose, onSave }) {
       if (!response.ok) {
         throw new Error(data.error || "Failed to update profile");
       }
-      console.log(data);
-
-      // onSave(data.user);
+      
       onSave({
         ...user,
         username: formData.username,

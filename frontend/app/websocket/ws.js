@@ -13,8 +13,6 @@ const connectWebSocket = function () {
 
     websocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log("Received message:", data);
-
         if (listeners['message']) {
             listeners['message'].forEach((callback) => callback(data));
         } else if (listeners['notifications']) {

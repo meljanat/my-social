@@ -65,8 +65,6 @@ export default function SearchResults() {
       }
 
       const data = await response.json();
-      console.log("Search results data:", data);
-      
       if (type === "all" || type === "users") {
         setUsers((prev) => [
           ...(offset === 0 ? [] : prev),

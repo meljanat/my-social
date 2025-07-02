@@ -96,7 +96,6 @@ export default function NotificationPage() {
       const newNotifications = await fetchNotifications(currentLength);
 
       if (newNotifications.length === 0) {
-        console.log("No more notifications to fetch");
         setHasMoreNotifications(false);
       }
 

@@ -27,8 +27,6 @@ async function handleLike(postId, setPosts) {
             : post
         )
       );
-
-      //   console.log(updatedPost);
     }
   } catch (error) {
     console.error(error);

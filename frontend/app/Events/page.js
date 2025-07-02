@@ -345,7 +345,7 @@ export default function EventsPage() {
                           onClick={() =>
                             handleInterestedClick(
                               event.event_id,
-                              event.group.group_id
+                              event.group_id
                             )
                           }
                         >

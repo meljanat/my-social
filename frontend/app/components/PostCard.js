@@ -5,12 +5,12 @@ export default function PostCard({ post }) {
     <div className={styles.postCard}>
       <div className={styles.postHeader}>
         <img
-          src={post.user_avatar}
+          src={post.avatar}
           alt={post.username}
           className={styles.userAvatar}
         />
         <div className={styles.userInfo}>
-          <h4 className={styles.userName}>{post.user_name}</h4>
+          <h4 className={styles.userName}>{post.author}</h4>
           <span className={styles.postTime}>{post.created_at}</span>
         </div>
       </div>
@@ -18,11 +18,11 @@ export default function PostCard({ post }) {
       <h3 className={styles.postTitle}>{post.title}</h3>
       <p className={styles.postContent}>{post.content}</p>
 
-      {post.image && (
+      {/* {post.image && (
         <div className={styles.postImage}>
           <img src={post.image} alt="Post" />
         </div>
-      )}
+      )} */}
 
       <div className={styles.postActions}>
         <button className={styles.actionBtn}>

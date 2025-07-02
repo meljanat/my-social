@@ -9,6 +9,7 @@ export default function AllUsersPage() {
   const [activeTab, setActiveTab] = useState("suggested");
   const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [pendingRequests, setPendingRequests] = useState();
+  const [isLoading, setIsLoading] = useState(true);
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -122,6 +123,20 @@ export default function AllUsersPage() {
       setError("Failed to follow user. Please try again.");
     }
   };
+  // {isLoading && (
+  //   <div className={styles.loadingContainer}>
+  //     <div className={styles.loadingSpinner}>Loading...</div>
+  //   </div>
+  // )}
+  
+  if (isLoading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <p className={styles.loadingText}>Loading...</p>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;

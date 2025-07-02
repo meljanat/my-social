@@ -157,7 +157,7 @@ return (
                 >
                   <option value="0">No Group</option>
                   {my_groups.map((group) => (
-                    <option key={group.id} value={group.id}>
+                    <option key={group.group_id} value={group.id}>
                       {group.name}
                     </option>
                   ))}

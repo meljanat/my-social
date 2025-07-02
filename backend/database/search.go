@@ -1,6 +1,10 @@
 package database
 
-import structs "social-network/data"
+import (
+	structs "social-network/data"
+	"strings"
+	"time"
+)
 
 func SearchUsers(query string, offset int64) ([]structs.User, error) {
 	rows, err := DB.Query(`SELECT u.id, u.username, u.avatar, u.firstname, u.lastname, u.privacy FROM users u WHERE u.username LIKE ? LIMIT 5 OFFSET ?`, query+"%", offset)
@@ -21,7 +25,7 @@ func SearchUsers(query string, offset int64) ([]structs.User, error) {
 }
 
 func SearchGroups(query string, offset int64) ([]structs.Group, error) {
-	rows, err := DB.Query(`SELECT g.id, g.name, g.image FROM groups g WHERE g.name LIKE ?`, query+"%")
+	rows, err := DB.Query(`SELECT g.id, g.name, g.image FROM groups g WHERE g.name LIKE ? LIMIT 5 OFFSET ?`, query+"%", offset)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +43,7 @@ func SearchGroups(query string, offset int64) ([]structs.Group, error) {
 }
 
 func SearchEvents(query string, offset int64) ([]structs.Event, error) {
-	rows, err := DB.Query(`SELECT e.id, e.name, e.image FROM group_events e WHERE e.name LIKE ?`, query+"%")
+	rows, err := DB.Query(`SELECT e.id, e.name, e.image FROM group_events e WHERE e.name LIKE ? LIMIT 5 OFFSET ?`, query+"%", offset)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +60,13 @@ func SearchEvents(query string, offset int64) ([]structs.Event, error) {
 	return events, nil
 }
 
-func SearchPosts(query string, offset int64) ([]structs.Post, error) {
-	rows, err := DB.Query(`SELECT p.id, p.title, p.created_at FROM posts p WHERE p.title LIKE ?`, query+"%")
+func SearchPosts(user_id int64, query string, offset int64) ([]structs.Post, error) {
+	rows, err := DB.Query(`SELECT posts.id, posts.title, posts.content, categories.name, categories.color, categories.background, users.id, users.username, users.Avatar,
+	posts.created_at, posts.total_likes, posts.total_comments, posts.privacy, posts.image
+	FROM posts 
+	JOIN categories ON categories.id = posts.category_id
+	JOIN users ON posts.user_id = users.id
+	WHERE posts.title LIKE ? LIMIT 5 OFFSET ?`, query+"%", offset)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +74,25 @@ func SearchPosts(query string, offset int64) ([]structs.Post, error) {
 	var posts []structs.Post
 	for rows.Next() {
 		var post structs.Post
-		err = rows.Scan(&post.ID, &post.Title, &post.CreatedAt)
+		var date time.Time
+		err = rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.CategoryColor, &post.CategoryBackground, &post.UserID, &post.Author, &post.Avatar, &date, &post.TotalLikes, &post.TotalComments, &post.Privacy, &post.Image)
+		if err != nil && !strings.Contains(err.Error(), `name "image": converting NULL to string`) {
+			return nil, err
+		}
+		post.CreatedAt = TimeAgo(date)
+		post.IsLiked, err = PostIsLiked(post.ID, user_id)
+		if err != nil {
+			return nil, err
+		}
+		post.WhoLiked, err = GetUsersLiked(post.ID)
+		if err != nil {
+			return nil, err
+		}
+		post.TotalSaves, err = CountSaves(post.ID, 0)
+		if err != nil {
+			return nil, err
+		}
+		post.IsSaved, err = IsSaved(user_id, post.ID)
 		if err != nil {
 			return nil, err
 		}

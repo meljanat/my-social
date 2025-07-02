@@ -6,7 +6,7 @@ body {
 }
 .app-container {
   width: 100%;
-    min-height: 100vh;
+    min-height: 100%;
     background-color: #F1F4FD;
   }
   .loading-container {
@@ -71,6 +71,7 @@ body {
   }
   
   .left-column, .center-column, .right-column {
+    height: 100;
     display: flex;
     flex-direction: column;
   }
@@ -174,8 +175,6 @@ body {
   overflow-y: auto;
   padding: 1rem;
   box-sizing: border-box;
-    scrollbar-width: thin;
-  scrollbar-color: #679fe2 #dee9f5;
   /* background-color: #fff; */
 }
 

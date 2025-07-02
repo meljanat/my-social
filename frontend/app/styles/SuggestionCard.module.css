@@ -1,0 +1,97 @@
+
+.suggestionCard {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid #eef2f9;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .suggestionCard:hover {
+    background-color: #f8faff;
+  }
+  
+  .suggestionCard:last-child {
+    border-bottom: none; 
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+  }
+  
+  .sugAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-right: 0.8rem;
+    border: 2px solid #e0e5f0;
+  }
+  
+  .avatarImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .suggestionDetails {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+  }
+  
+  .sugName {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+  
+  .sugDetails {
+    font-size: 0.8rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 0.2rem;
+  }
+  
+  @media (max-width: 768px) {
+    .suggestionCard {
+      padding: 0.7rem 0.8rem;
+    }
+    .sugAvatar {
+      width: 35px;
+      height: 35px;
+      margin-right: 0.6rem;
+    }
+    .sugName {
+      font-size: 0.9rem;
+    }
+    .sugDetails {
+      font-size: 0.75rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .suggestionCard {
+      padding: 0.6rem 0.7rem;
+    }
+    .sugAvatar {
+      width: 30px;
+      height: 30px;
+      margin-right: 0.5rem;
+    }
+    .sugName {
+      font-size: 0.85rem;
+    }
+    .sugDetails {
+      font-size: 0.7rem;
+    }
+  }
+  

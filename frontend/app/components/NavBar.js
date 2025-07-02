@@ -197,8 +197,9 @@ export default function Navbar() {
 
         <div className={styles.navLinks}>
           <button
-            className={`${styles.navLink} ${activeLink === "home" ? styles.active : ""
-              }`}
+            className={`${styles.navLink} ${
+              activeLink === "home" ? styles.active : ""
+            }`}
             onClick={() => setActiveLink("home")}
           >
             <Link href="/">
@@ -208,8 +209,9 @@ export default function Navbar() {
           </button>
 
           <button
-            className={`${styles.navLink} ${activeLink === "groups" ? styles.active : ""
-              }`}
+            className={`${styles.navLink} ${
+              activeLink === "groups" ? styles.active : ""
+            }`}
             onClick={() => setActiveLink("groups")}
           >
             <Link href="/groups">
@@ -219,8 +221,9 @@ export default function Navbar() {
           </button>
 
           <button
-            className={`${styles.navLink} ${activeLink === "events" ? styles.active : ""
-              }`}
+            className={`${styles.navLink} ${
+              activeLink === "events" ? styles.active : ""
+            }`}
             onClick={() => setActiveLink("events")}
           >
             <Link href="/Events">
@@ -262,43 +265,48 @@ export default function Navbar() {
             <div className={styles.searchSuggestions}>
               <div className={styles.navLinks}>
                 <button
-                  className={`${styles.navLink} ${activeSugTab === "all" ? styles.active : ""
-                    }`}
+                  className={`${styles.navLink} ${
+                    activeSugTab === "all" ? styles.active : ""
+                  }`}
                   onClick={() => setActiveSugTab("all")}
                 >
                   All
                 </button>
                 <button
-                  className={`${styles.navLink} ${activeSugTab === "users" ? styles.active : ""
-                    }`}
+                  className={`${styles.navLink} ${
+                    activeSugTab === "users" ? styles.active : ""
+                  }`}
                   onClick={() => setActiveSugTab("users")}
                 >
                   Users
                 </button>
                 <button
-                  className={`${styles.navLink} ${activeSugTab === "groups" ? styles.active : ""
-                    }`}
+                  className={`${styles.navLink} ${
+                    activeSugTab === "groups" ? styles.active : ""
+                  }`}
                   onClick={() => setActiveSugTab("groups")}
                 >
                   Groups
                 </button>
                 <button
-                  className={`${styles.navLink} ${activeSugTab === "events" ? styles.active : ""
-                    }`}
+                  className={`${styles.navLink} ${
+                    activeSugTab === "events" ? styles.active : ""
+                  }`}
                   onClick={() => setActiveSugTab("events")}
                 >
                   Events
                 </button>
                 <button
-                  className={`${styles.navLink} ${activeSugTab === "posts" ? styles.active : ""
-                    }`}
+                  className={`${styles.navLink} ${
+                    activeSugTab === "posts" ? styles.active : ""
+                  }`}
                   onClick={() => setActiveSugTab("posts")}
                 >
                   Posts
                 </button>
               </div>
               {suggestions &&
-                Object.values(suggestions).flat()?.length === 0 ? (
+              Object.values(suggestions).flat()?.length === 0 ? (
                 <div className={styles.noSuggestions}>No suggestions found</div>
               ) : (
                 suggestions &&
@@ -328,15 +336,22 @@ export default function Navbar() {
           )}
         </button>
 
-        {showNotifications && <NotificationsComponent />}
+        {showNotifications && (
+          <NotificationsComponent
+            onMarkAllAsRead={() => {
+              setUser((prevUser) => ({
+                ...prevUser,
+                total_notifications: 0,
+              }));
+            }}
+          />
+        )}
 
         <button className={`${styles.actionIcon} ${styles.messageBadge}`}>
           <Link href="/messages">
             <img src="./icons/message.svg" alt="Messages" />
             {user.total_messages > 0 && (
-              <span className={styles.badge}>
-                {user.total_messages || 0}
-              </span>
+              <span className={styles.badge}>{user.total_messages || 0}</span>
             )}
           </Link>
         </button>
@@ -359,8 +374,9 @@ export default function Navbar() {
             <img
               src="./icons/drop-down.svg"
               alt="Menu"
-              className={`${styles.dropdownIcon} ${showProfileMenu ? styles.rotate : ""
-                }`}
+              className={`${styles.dropdownIcon} ${
+                showProfileMenu ? styles.rotate : ""
+              }`}
             />
           </button>
 

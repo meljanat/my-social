@@ -56,7 +56,7 @@ export default function SearchResults() {
             "Content-Type": "application/json",
           },
           credentials: "include",
-        }
+        } 
       );
 
       if (!response.ok) {
@@ -65,7 +65,8 @@ export default function SearchResults() {
       }
 
       const data = await response.json();
-
+      console.log("Search results data:", data);
+      
       if (type === "all" || type === "users") {
         setUsers((prev) => [
           ...(offset === 0 ? [] : prev),
@@ -117,6 +118,7 @@ export default function SearchResults() {
   }, [searchQuery]);
 
   const handleShowMore = async (query, type, currentOffset) => {
+    // setPosts([]);
     setIsLoading(true);
     await fetchSuggestions(query, type, currentOffset);
   };
@@ -275,9 +277,9 @@ export default function SearchResults() {
             <h2 className={styles.sectionTitle}>Posts</h2>
             {posts.length > 0 ? (
               <div className={styles.resultCardsGrid}>
-                {posts.map((post, index) => (
+                {posts.map((post) => (
                   <PostCard
-                    key={post.post_id || index}
+                    key={post.post_id}
                     post={post}
                     onClick={() => router.push(`/post?id=${post.post_id}`)}
                   />

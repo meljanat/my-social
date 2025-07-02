@@ -58,6 +58,7 @@ export default function GroupPage() {
 
   useEffect(() => {
     async function fetchGroup(group_id) {
+      setIsLoading(true);
       try {
         const response = await fetch(
           `http://localhost:8404/group?group_id=${group_id}`,
@@ -176,7 +177,8 @@ export default function GroupPage() {
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
-        <p>Loading...</p>
+        <div className={styles.loadingSpinner}></div>
+        <p className={styles.loadingText}>Loading...</p>
       </div>
     );
   }
@@ -598,6 +600,7 @@ export default function GroupPage() {
                     onClose={() => setShowPostForm(false)}
                     onPostCreated={addNewPost}
                     group_id={selectedGroup.group_id}
+                    action={"group"}
                   />
                 )}
               </div>

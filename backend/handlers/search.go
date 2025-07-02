@@ -120,7 +120,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if post {
-		posts, err = database.SearchPosts(query, offset)
+		posts, err = database.SearchPosts(user.ID, query, offset)
 		if err != nil {
 			fmt.Println("Error searching posts:", err)
 			response := map[string]string{"error": "Failed to search posts"}

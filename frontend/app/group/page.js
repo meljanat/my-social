@@ -47,7 +47,6 @@ export default function GroupPage() {
           setIsLoggedIn(data);
         }
       } catch (error) {
-        // setError(true);
         console.log("Error checking login status:", error);
       } finally {
         setIsLoading(false);
@@ -174,10 +173,6 @@ export default function GroupPage() {
     }));
   };
 
-  if (!isLoggedIn) {
-    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
-  }
-
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -185,6 +180,11 @@ export default function GroupPage() {
       </div>
     );
   }
+
+  if (!isLoggedIn) {
+    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
+
 
   if (!selectedGroup) {
     return (

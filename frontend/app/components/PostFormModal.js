@@ -2,7 +2,12 @@
 import { useState, useEffect } from "react";
 import styles from "../styles/PostFormModal.module.css";
 
-export default function PostFormModal({ onClose, onPostCreated, group_id = 0 }) {
+export default function PostFormModal({
+  onClose,
+  onPostCreated,
+  group_id,
+  action,
+}) {
   const [postFormInput, setPostFormInput] = useState({
     title: "",
     content: "",
@@ -34,10 +39,21 @@ export default function PostFormModal({ onClose, onPostCreated, group_id = 0 }) 
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("http://localhost:8404/new_post", {
-        method: "GET",
-        credentials: "include",
-      });
+      let response;
+      if (group_id && group_id > 0) {
+        response = await fetch(
+          `http://localhost:8404/new_post_group?group_id=${group_id}`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+      } else {
+        response = await fetch("http://localhost:8404/new_post", {
+          method: "GET",
+          credentials: "include",
+        });
+      }
 
       if (response.ok) {
         const data = await response.json();
@@ -108,11 +124,23 @@ export default function PostFormModal({ onClose, onPostCreated, group_id = 0 }) 
     }
 
     try {
-      const response = await fetch("http://localhost:8404/new_post", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+      let response;
+      if (group_id && group_id > 0) {
+        response = await fetch(
+          `http://localhost:8404/new_post_group?group_id=${group_id}`,
+          {
+            method: "POST",
+            body: formData,
+            credentials: "include",
+          }
+        );
+      } else {
+        response = await fetch("http://localhost:8404/new_post", {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
+      }
 
       if (!response.ok) {
         const data = await response.json();
@@ -273,59 +301,60 @@ export default function PostFormModal({ onClose, onPostCreated, group_id = 0 }) 
                 )}
               </select>
             </div>
+            {action !== "groupe" && (
+              <div className={styles.formGroup}>
+                <label>Privacy</label>
+                <div className={styles.privacyOptions}>
+                  <label className={styles.privacyOption}>
+                    <input
+                      type="radio"
+                      value="private"
+                      name="privacy"
+                      checked={postFormInput.privacy === "private"}
+                      onChange={(e) => {
+                        setPostFormInput({
+                          ...postFormInput,
+                          privacy: e.target.value,
+                        });
+                      }}
+                    />
+                    <span>Private</span>
+                  </label>
 
-            <div className={styles.formGroup}>
-              <label>Privacy</label>
-              <div className={styles.privacyOptions}>
-                <label className={styles.privacyOption}>
-                  <input
-                    type="radio"
-                    value="private"
-                    name="privacy"
-                    checked={postFormInput.privacy === "private"}
-                    onChange={(e) => {
-                      setPostFormInput({
-                        ...postFormInput,
-                        privacy: e.target.value,
-                      });
-                    }}
-                  />
-                  <span>Private</span>
-                </label>
+                  <label className={styles.privacyOption}>
+                    <input
+                      type="radio"
+                      value="public"
+                      name="privacy"
+                      checked={postFormInput.privacy === "public"}
+                      onChange={(e) => {
+                        setPostFormInput({
+                          ...postFormInput,
+                          privacy: e.target.value,
+                        });
+                      }}
+                    />
+                    <span>Public</span>
+                  </label>
 
-                <label className={styles.privacyOption}>
-                  <input
-                    type="radio"
-                    value="public"
-                    name="privacy"
-                    checked={postFormInput.privacy === "public"}
-                    onChange={(e) => {
-                      setPostFormInput({
-                        ...postFormInput,
-                        privacy: e.target.value,
-                      });
-                    }}
-                  />
-                  <span>Public</span>
-                </label>
-
-                <label className={styles.privacyOption}>
-                  <input
-                    type="radio"
-                    value="almost_private"
-                    name="privacy"
-                    checked={postFormInput.privacy === "almost_private"}
-                    onChange={(e) => {
-                      setPostFormInput({
-                        ...postFormInput,
-                        privacy: e.target.value,
-                      });
-                    }}
-                  />
-                  <span>Almost Private</span>
-                </label>
+                  <label className={styles.privacyOption}>
+                    <input
+                      type="radio"
+                      value="almost_private"
+                      name="privacy"
+                      checked={postFormInput.privacy === "almost_private"}
+                      onChange={(e) => {
+                        setPostFormInput({
+                          ...postFormInput,
+                          privacy: e.target.value,
+                        });
+                      }}
+                    />
+                    <span>Almost Private</span>
+                  </label>
+                </div>
               </div>
-            </div>
+            )}
 
             {showAudienceSelector && (
               <div className={`${styles.formGroup} ${styles.audienceSelector}`}>

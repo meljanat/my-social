@@ -132,7 +132,6 @@ func NewPostPost(w http.ResponseWriter, r *http.Request, user *structs.User) {
 
 	if post.Privacy == "almost_private" {
 		users := strings.Split(r.FormValue("users"), ",")
-		users = append(users, strconv.FormatInt(user.ID, 10))
 		for _, usr := range users {
 			usr_id, err := strconv.ParseInt(usr, 10, 64)
 			if err != nil {
@@ -269,8 +268,15 @@ func NewPostGroupGet(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+
+	data := struct {
+		Categories []structs.Category
+	}{
+		Categories: categories,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(categories)
+	json.NewEncoder(w).Encode(data)
 }
 
 func NewPostGroupPost(w http.ResponseWriter, r *http.Request, user *structs.User, group_id int64) {

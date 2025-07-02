@@ -97,8 +97,9 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 	var posts []structs.Post
 	var rows *sql.Rows
 	var err error
+	fmt.Println("user_id", user_id, "my_id", my_id, "followed", followed)
 
-	if followed || user_id == my_id {
+	if user_id == my_id || followed {
 		rows, err = DB.Query(`
 			SELECT DISTINCT posts.id, posts.title, posts.content, categories.name, categories.color, categories.background, users.username, users.avatar,
 			posts.created_at, posts.total_likes, posts.total_comments, posts.privacy, posts.image
@@ -108,11 +109,11 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 			LEFT JOIN post_privacy ON post_privacy.post_id = posts.id
 			WHERE posts.user_id = ?
 			AND posts.group_id = 0
-			AND ((posts.privacy = ? OR posts.privacy = ?))
-			OR (posts.privacy = ? AND post_privacy.user_id = ?)
+			AND ((posts.privacy = ? OR posts.privacy = ?)
+			OR (posts.privacy = ? AND post_privacy.user_id = ?))
 			ORDER BY posts.created_at DESC LIMIT ? OFFSET ?
 		`, user_id, "public", "private", "almost_private", my_id, 10, offset)
-	} else {
+	} else if !followed {
 		rows, err = DB.Query(`
 			SELECT DISTINCT posts.id, posts.title, posts.content, categories.name, categories.color, categories.background, users.username, users.avatar,
 			posts.created_at, posts.total_likes, posts.total_comments, posts.privacy, posts.image
@@ -138,6 +139,9 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 		if err != nil && !strings.Contains(err.Error(), `name "image": converting NULL to string`) {
 			return nil, err
 		}
+		fmt.Println("-------------------------------------------")
+		fmt.Println("post", post)
+		fmt.Println("-------------------------------------------")
 		post.CreatedAt = TimeAgo(date)
 		post.IsLiked, err = PostIsLiked(post.ID, my_id)
 		if err != nil {

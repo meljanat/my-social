@@ -53,12 +53,10 @@ export default function StoriesComponent({ storiesUsers }) {
   useEffect(() => {
     if (activeUserIndex !== null && !isPaused) {
       const user = storyUsers[activeUserIndex];
-      // Check if user or stories exist before accessing
       if (!user || !user.stories || user.stories.length === 0) {
         closeStoryModal();
         return;
       }
-      // const story = user.stories[activeStoryIndex]; // 'story' variable not directly used in this effect's logic
 
       clearInterval(progressIntervalRef.current);
       clearTimeout(storyTimeoutRef.current);
@@ -284,7 +282,7 @@ export default function StoriesComponent({ storiesUsers }) {
           <div key={user.user.user_id || index} className={styles.storyItem}>
             <div
               className={`${styles.storyCircle} ${
-                user.unseen_story ? styles.unseenStory : styles.seenStory
+                !user.unseen_story ? styles.unseenStory : styles.seenStory
               }`}
               onClick={() => {
                 handleStoryClick(index);

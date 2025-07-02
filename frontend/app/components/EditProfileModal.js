@@ -6,7 +6,7 @@ export default function EditProfileModal({ user, onClose, onSave }) {
   console.log("EditProfileModal props:", user, onClose, onSave);
 
   const [formData, setFormData] = useState({
-    // id: user.user_id || 0,
+    id: user.user_id || 0,
     username: user.username || "",
     privacy: user.privacy || "public",
     bio: user.bio || "",

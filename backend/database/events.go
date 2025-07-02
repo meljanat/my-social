@@ -94,13 +94,13 @@ func GetCountUserEvents(id int64) (int64, error) {
 	return count, err
 }
 
-func JoinToEvent(user_id, event_id int64) error {
-	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id) VALUES (?, ?)", user_id, event_id)
+func GoingToEvent(user_id, event_id int64) error {
+	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id, type) VALUES (?, ?, ?)", user_id, event_id, "going")
 	return err
 }
 
-func LeaveEvent(user_id, event_id int64) error {
-	_, err := DB.Exec("DELETE FROM event_members WHERE user_id = ? AND event_id = ?", user_id, event_id)
+func NotGoingToEvent(user_id, event_id int64) error {
+	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id, type) VALUES (?, ?, ?)", user_id, event_id, "not_going")
 	return err
 }
 

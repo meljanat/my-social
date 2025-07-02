@@ -316,7 +316,7 @@ export default function EventsPage() {
                     </p>
 
                     <div className={styles.eventActions}>
-                      {event.is_attending ? (
+                      {/* {event.is_attending ? (
                         <button
                           className={`${styles.eventActionButton} ${styles.attending}`}
                         >
@@ -349,7 +349,7 @@ export default function EventsPage() {
                         >
                           Interested
                         </button>
-                      )}
+                      )} */}
 
                       <button
                         className={styles.eventDetailsBtn}

@@ -174,6 +174,7 @@ type Event struct {
 	Name         string    `json:"name" sqlite:"name"`
 	Description  string    `json:"description" sqlite:"description"`
 	Image        string    `json:"image" sqlite:"image"`
+	Type         string    `json:"type" sqlite:"type"`
 	Location     string    `json:"location" sqlite:"location"`
 	StartDate    time.Time `json:"start_date" sqlite:"start_date"`
 	EndDate      time.Time `json:"end_date" sqlite:"end_date"`

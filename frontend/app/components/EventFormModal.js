@@ -9,7 +9,7 @@ export default function EventFormModal({
   group,
 }) {
   const [eventFormInput, setEventFormInput] = useState({
-    user_id: user.id,
+    // user_id: user.id,
     name: "",
     description: "",
     start_date: "",

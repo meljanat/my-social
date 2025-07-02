@@ -55,6 +55,8 @@ export default function EventPage() {
                 }
 
                 const data = await response.json();
+                console.log("Event data:", data);
+                
                 setEvent(data);
             } catch (error) {
                 console.error("Failed to fetch event:", error);

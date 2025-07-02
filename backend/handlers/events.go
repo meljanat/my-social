@@ -174,6 +174,7 @@ func GetEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("GetEventHandler called")
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
 		fmt.Println("Failed to retrieve user", err)
@@ -219,7 +220,7 @@ func GetEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	event, err := database.GetEvent(event_id)
+	event, err := database.GetEvent(event_id, user.ID)
 	if err != nil {
 		fmt.Println("Error retrieving event:", err)
 		response := map[string]string{"error": "Failed to retrieve event"}
@@ -229,6 +230,7 @@ func GetEventHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	event.ID = event_id
 	event.GroupID = group_id
+	fmt.Println("Event retrieved successfully:", event)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(event)
@@ -344,7 +346,7 @@ func JoinToEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = database.GetEvent(event.EventID)
+	_, err = database.GetEvent(event.EventID, user.ID)
 	if err != nil {
 		fmt.Println("Error retrieving event:", err)
 		response := map[string]string{"error": "Failed to retrieve event"}

@@ -50,7 +50,7 @@ func GetEvents(user_id, offset int64, Type string) ([]structs.Event, error) {
 	return events, nil
 }
 
-func GetEvent(id int64) (structs.Event, error) {
+func GetEvent(id, user_id int64) (structs.Event, error) {
 	var event structs.Event
 	var date time.Time
 	err := DB.QueryRow("SELECT u.username, g.name, e.name, e.description, e.start_date, e.end_date, e.location, e.created_at, e.image FROM group_events e JOIN users u ON u.id = e.created_by JOIN groups g ON g.id = e.group_id WHERE e.id = ?", id).Scan(&event.Creator, &event.GroupName, &event.Name, &event.Description, &event.StartDate, &event.EndDate, &event.Location, &date, &event.Image)
@@ -58,6 +58,13 @@ func GetEvent(id int64) (structs.Event, error) {
 		return structs.Event{}, err
 	}
 	event.CreatedAt = TimeAgo(date)
+	isMember, err := IsMemberEvent(user_id, id)
+	if err != nil {
+		return structs.Event{}, err
+	}
+	if isMember {
+		event.Type = TypeMember(user_id, id)
+	}
 	return event, err
 }
 
@@ -86,6 +93,15 @@ func IsMemberEvent(user_id, event_id int64) (bool, error) {
 	var count int64
 	err := DB.QueryRow("SELECT COUNT(*) FROM event_members WHERE user_id = ? AND event_id = ?", user_id, event_id).Scan(&count)
 	return count > 0, err
+}
+
+func TypeMember(user_id, event_id int64) string {
+	var type_member string
+	err := DB.QueryRow("SELECT type FROM event_members WHERE user_id = ? AND event_id = ?", user_id, event_id).Scan(&type_member)
+	if err != nil {
+		return ""
+	}
+	return type_member
 }
 
 func GetCountUserEvents(id int64) (int64, error) {

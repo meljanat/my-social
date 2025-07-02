@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import AuthForm from "../components/AuthForm";
 import "../styles/NotificationPage.css";
 import NotificationCard from "../components/NotificationCard";
 import { useRouter } from "next/navigation";
@@ -7,11 +8,37 @@ import { useRef } from "react";
 import useInfiniteScroll from "../components/useInfiniteScroll";
 
 export default function NotificationPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [hasMoreNotifications, setHasMoreNotifications] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const container = useRef(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch("http://localhost:8404/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsLoggedIn(data);
+        }
+      } catch (error) {
+        console.log("Error checking login status:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, [isLoggedIn]);
 
   useEffect(() => {
     fetchNotifications();
@@ -132,6 +159,10 @@ export default function NotificationPage() {
       currentContainer.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  if (!isLoggedIn) {
+    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
 
   return (
     <div className="notification-container">

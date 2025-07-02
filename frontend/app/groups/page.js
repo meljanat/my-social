@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import AuthForm from "../components/AuthForm";
 import { useRouter } from "next/navigation";
 import GroupCard from "../components/GroupCard";
 import InvitationCard from "../components/InvitationCard";
@@ -33,15 +34,6 @@ export default function GroupsPage() {
 
   const router = useRouter();
 
-  function handleCreateGroup() {
-    setShowGroupForm(true);
-  }
-
-  function handleGroupCreated(newGroup) {
-    setMyGroups([newGroup, ...myGroups]);
-    setShowGroupForm(false);
-  }
-
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
@@ -58,14 +50,23 @@ export default function GroupsPage() {
           setIsLoggedIn(data);
         }
       } catch (error) {
-        console.error("Error checking login status:", error);
+        console.log("Error checking login status:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
     checkLoginStatus();
-  }, []);
+  }, [isLoggedIn]);
+
+  function handleCreateGroup() {
+    setShowGroupForm(true);
+  }
+
+  function handleGroupCreated(newGroup) {
+    setMyGroups([newGroup, ...myGroups]);
+    setShowGroupForm(false);
+  }
 
   useInfiniteScroll({
     fetchMoreCallback: async () => {
@@ -198,6 +199,10 @@ export default function GroupsPage() {
     handleDeleteGroup(groupId);
   };
 
+  if (!isLoggedIn) {
+    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
+
   return (
     <div className={styles.groupsPageContainer}>
       <div className={styles.groupsPageContent}>
@@ -231,33 +236,29 @@ export default function GroupsPage() {
 
           <div className={styles.groupsTabs}>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "my-groups" ? styles.activeTab : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "my-groups" ? styles.activeTab : ""
+                }`}
               onClick={() => handleTabChange("my-groups")}
             >
               My Groups
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "discover" ? styles.activeTab : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "discover" ? styles.activeTab : ""
+                }`}
               onClick={() => handleTabChange("discover")}
             >
               Discover
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "pending-groups" ? styles.activeTab : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "pending-groups" ? styles.activeTab : ""
+                }`}
               onClick={() => handleTabChange("pending-groups")}
             >
               Pending Groups
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "invitations" ? styles.activeTab : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "invitations" ? styles.activeTab : ""
+                }`}
               onClick={() => handleTabChange("invitations")}
             >
               Invitations

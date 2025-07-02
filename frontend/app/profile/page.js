@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import AuthForm from "../components/AuthForm";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import PostsComponent from "@/app/components/PostsComponent";
@@ -32,7 +33,31 @@ export default function ProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-  console.log("Welcome:", id);
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch("http://localhost:8404/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsLoggedIn(data);
+        }
+      } catch (error) {
+        console.log("Error checking login status:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, [isLoggedIn]);
 
   function togglePicPreview(type = null) {
     setPicturePreview(type);
@@ -292,6 +317,10 @@ export default function ProfilePage() {
     console.log("You liked post: ", postID);
   };
 
+  if (!isLoggedIn) {
+    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
+
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -389,9 +418,8 @@ export default function ProfilePage() {
                     <span className={styles.statusOffline}>Offline</span>
                   )}
                 </div>
-                <h1 className={styles.profileName}>{`${
-                  userData.first_name || ""
-                } ${userData.last_name || ""}`}</h1>
+                <h1 className={styles.profileName}>{`${userData.first_name || ""
+                  } ${userData.last_name || ""}`}</h1>
                 <p className={styles.profileUsername}>
                   @{userData.username || "username"}
                   {userData.privacy === "private" && (
@@ -464,20 +492,20 @@ export default function ProfilePage() {
                       userData.is_following
                         ? styles.unfollowBtn
                         : userData.is_pending
-                        ? styles.requestCancelBtn
-                        : styles.followBtn
+                          ? styles.requestCancelBtn
+                          : styles.followBtn
                     }
                     onClick={() => handleFollow(id)}
                   >
                     {userData.is_follower &&
-                    !userData.is_following &&
-                    !userData.is_pending
+                      !userData.is_following &&
+                      !userData.is_pending
                       ? "Follow Back"
                       : userData.is_following
-                      ? "Unfollow"
-                      : userData.is_pending
-                      ? "Pending"
-                      : "Follow"}
+                        ? "Unfollow"
+                        : userData.is_pending
+                          ? "Pending"
+                          : "Follow"}
                   </button>
                 )}
               </div>
@@ -529,42 +557,37 @@ export default function ProfilePage() {
         <div className={styles.profileContent}>
           <div className={styles.profileTabs}>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "posts" ? styles.active : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "posts" ? styles.active : ""
+                }`}
               onClick={() => handleTabChange("posts")}
             >
               Posts
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "about" ? styles.active : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "about" ? styles.active : ""
+                }`}
               onClick={() => handleTabChange("about")}
             >
               About
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "followers" ? styles.active : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "followers" ? styles.active : ""
+                }`}
               onClick={() => handleTabChange("followers")}
             >
               Followers
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "following" ? styles.active : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "following" ? styles.active : ""
+                }`}
               onClick={() => handleTabChange("following")}
             >
               Following
             </button>
             {isOwnProfile && (
               <button
-                className={`${styles.tabButton} ${
-                  activeTab === "saved" ? styles.active : ""
-                }`}
+                className={`${styles.tabButton} ${activeTab === "saved" ? styles.active : ""
+                  }`}
                 onClick={() => handleTabChange("saved")}
               >
                 Saved Posts
@@ -608,9 +631,8 @@ export default function ProfilePage() {
                   <div className={styles.aboutItemContent}>
                     <div className={styles.infoRow}>
                       <span className={styles.infoLabel}>Full Name</span>
-                      <span className={styles.infoValue}>{`${
-                        userData.first_name || ""
-                      } ${userData.last_name || ""}`}</span>
+                      <span className={styles.infoValue}>{`${userData.first_name || ""
+                        } ${userData.last_name || ""}`}</span>
                     </div>
                     <div className={styles.infoRow}>
                       <span className={styles.infoLabel}>Username</span>
@@ -635,7 +657,7 @@ export default function ProfilePage() {
                       <span className={styles.infoValue}>
                         {userData.privacy
                           ? userData.privacy.charAt(0).toUpperCase() +
-                            userData.privacy.slice(1)
+                          userData.privacy.slice(1)
                           : "Public"}
                       </span>
                     </div>
@@ -695,9 +717,8 @@ export default function ProfilePage() {
               <div className={styles.savedContentContainer}>
                 <div className={styles.savedTabs}>
                   <button
-                    className={`${styles.savedTabButton} ${
-                      activeSubTab === "posts" ? styles.active : ""
-                    }`}
+                    className={`${styles.savedTabButton} ${activeSubTab === "posts" ? styles.active : ""
+                      }`}
                     onClick={() => {
                       fetchSavedPosts("post");
                       setActiveSubTab("posts");
@@ -706,9 +727,8 @@ export default function ProfilePage() {
                     Saved Posts
                   </button>
                   <button
-                    className={`${styles.savedTabButton} ${
-                      activeSubTab === "group-posts" ? styles.active : ""
-                    }`}
+                    className={`${styles.savedTabButton} ${activeSubTab === "group-posts" ? styles.active : ""
+                      }`}
                     onClick={() => {
                       fetchSavedPosts("group");
                       setActiveSubTab("group-posts");

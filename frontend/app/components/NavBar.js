@@ -60,24 +60,10 @@ export default function Navbar() {
       }
     };
 
-    const handleClickOutside = (event) => {
-      if (
-        !event.target.closest(`.${styles.profileDropdown}`) &&
-        !event.target.closest(`.${styles.searchInputContainer}`) &&
-        !event.target.closest(`.${styles.notificationButton}`)
-      ) {
-        setShowProfileMenu(false);
-        setShowSearchSuggestions(false);
-        setShowNotifications(false);
-      }
-    };
-
     addToListeners("notifications", handleNotifications);
-    document.addEventListener("click", handleClickOutside);
 
     return () => {
       removeFromListeners("notifications", handleNotifications);
-      document.removeEventListener("click", handleClickOutside);
     };
   }, []);
 
@@ -143,10 +129,6 @@ export default function Navbar() {
     fetchSuggestions();
   }, [searchQuery, activeSugTab]);
 
-  if (!user) {
-    return null;
-  }
-
   const handleLogout = async () => {
     try {
       const response = await fetch("http://localhost:8404/logout", {
@@ -183,18 +165,40 @@ export default function Navbar() {
     setShowNotifications(false);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        !event.target.closest(`.${styles.profileDropdown}`) &&
+        !event.target.closest(`.${styles.searchInputContainer}`) &&
+        !event.target.closest(`.${styles.notificationButton}`)
+      ) {
+        setShowProfileMenu(false);
+        setShowSearchSuggestions(false);
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.navbarLeft}>
         <div className={styles.logo}>
-          <img src="./icons/logo.svg" alt="Logo"/>
+          <img src="./icons/logo.svg" alt="Logo" />
         </div>
 
         <div className={styles.navLinks}>
           <button
-            className={`${styles.navLink} ${
-              activeLink === "home" ? styles.active : ""
-            }`}
+            className={`${styles.navLink} ${activeLink === "home" ? styles.active : ""
+              }`}
             onClick={() => setActiveLink("home")}
           >
             <Link href="/">
@@ -204,9 +208,8 @@ export default function Navbar() {
           </button>
 
           <button
-            className={`${styles.navLink} ${
-              activeLink === "groups" ? styles.active : ""
-            }`}
+            className={`${styles.navLink} ${activeLink === "groups" ? styles.active : ""
+              }`}
             onClick={() => setActiveLink("groups")}
           >
             <Link href="/groups">
@@ -216,9 +219,8 @@ export default function Navbar() {
           </button>
 
           <button
-            className={`${styles.navLink} ${
-              activeLink === "events" ? styles.active : ""
-            }`}
+            className={`${styles.navLink} ${activeLink === "events" ? styles.active : ""
+              }`}
             onClick={() => setActiveLink("events")}
           >
             <Link href="/Events">
@@ -253,55 +255,50 @@ export default function Navbar() {
             type="text"
             placeholder="What's on your mind?"
             value={searchQuery}
-            onFocus={() => setShowSearchSuggestions(true)}
+            onFocus={() => toggleSearchSuggestions()}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           {showSearchSuggestions && (
             <div className={styles.searchSuggestions}>
               <div className={styles.navLinks}>
                 <button
-                  className={`${styles.navLink} ${
-                    activeSugTab === "all" ? styles.active : ""
-                  }`}
+                  className={`${styles.navLink} ${activeSugTab === "all" ? styles.active : ""
+                    }`}
                   onClick={() => setActiveSugTab("all")}
                 >
                   All
                 </button>
                 <button
-                  className={`${styles.navLink} ${
-                    activeSugTab === "users" ? styles.active : ""
-                  }`}
+                  className={`${styles.navLink} ${activeSugTab === "users" ? styles.active : ""
+                    }`}
                   onClick={() => setActiveSugTab("users")}
                 >
                   Users
                 </button>
                 <button
-                  className={`${styles.navLink} ${
-                    activeSugTab === "groups" ? styles.active : ""
-                  }`}
+                  className={`${styles.navLink} ${activeSugTab === "groups" ? styles.active : ""
+                    }`}
                   onClick={() => setActiveSugTab("groups")}
                 >
                   Groups
                 </button>
                 <button
-                  className={`${styles.navLink} ${
-                    activeSugTab === "events" ? styles.active : ""
-                  }`}
+                  className={`${styles.navLink} ${activeSugTab === "events" ? styles.active : ""
+                    }`}
                   onClick={() => setActiveSugTab("events")}
                 >
                   Events
                 </button>
                 <button
-                  className={`${styles.navLink} ${
-                    activeSugTab === "posts" ? styles.active : ""
-                  }`}
+                  className={`${styles.navLink} ${activeSugTab === "posts" ? styles.active : ""
+                    }`}
                   onClick={() => setActiveSugTab("posts")}
                 >
                   Posts
                 </button>
               </div>
               {suggestions &&
-              Object.values(suggestions).flat()?.length === 0 ? (
+                Object.values(suggestions).flat()?.length === 0 ? (
                 <div className={styles.noSuggestions}>No suggestions found</div>
               ) : (
                 suggestions &&
@@ -362,9 +359,8 @@ export default function Navbar() {
             <img
               src="./icons/drop-down.svg"
               alt="Menu"
-              className={`${styles.dropdownIcon} ${
-                showProfileMenu ? styles.rotate : ""
-              }`}
+              className={`${styles.dropdownIcon} ${showProfileMenu ? styles.rotate : ""
+                }`}
             />
           </button>
 

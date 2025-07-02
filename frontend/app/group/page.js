@@ -48,7 +48,7 @@ export default function GroupPage() {
         }
       } catch (error) {
         // setError(true);
-        console.error("Error checking login status:", error);
+        console.log("Error checking login status:", error);
       } finally {
         setIsLoading(false);
       }
@@ -175,7 +175,7 @@ export default function GroupPage() {
   };
 
   if (!isLoggedIn) {
-    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />; // Pass a function to onLoginSuccess
+    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
   }
 
   if (isLoading) {
@@ -577,13 +577,13 @@ export default function GroupPage() {
                 )}
 
                 <div className={styles.postsScrollContainer}>
-                  {(selectedGroup.posts || []).length > 0 ? (
-                    (selectedGroup.posts || []).map((post) => (
+                  {selectedGroup.posts && selectedGroup.posts?.length > 0 ? (
+                    selectedGroup.posts.map((post) => (
                       <PostsComponent
                         post={post}
                         key={post.post_id}
                         groupId={selectedGroup.group_id}
-                        setPosts={setSelectedGroup} // Pass setPosts to update state if handleLike needs it
+                        setPosts={setSelectedGroup}
                       />
                     ))
                   ) : (

@@ -1,9 +1,8 @@
-import React from "react"; 
+import React from "react";
 import styles from "../styles/PostsComponent.module.css";
 import { handleLike } from "../functions/post";
 
 export default function PostsComponent({ post, setPosts }) {
-  console.log("setPosts:", setPosts);
 
   return (
     <div key={post.id} className={styles.postCardModern}>

@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
+import AuthForm from "../components/AuthForm";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "../styles/MessagesPage.module.css";
 import { addToListeners, removeFromListeners } from "../websocket/ws.js";
@@ -87,6 +88,7 @@ const UserCard = ({ user, isActive, onClick }) => {
 };
 
 export default function MessagesPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [activeTab, setActiveTab] = useState("friends");
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -111,8 +113,33 @@ export default function MessagesPage() {
   const selectedGroupId = searchParams.get("group");
 
   useEffect(() => {
-    if (!selectedUserId && !selectedGroupId) return;
-    if (!users?.length && !groups?.length) return;
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch("http://localhost:8404/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsLoggedIn(data);
+        }
+      } catch (error) {
+        console.log("Error checking login status:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (!isLoggedIn || (!selectedUserId && !selectedGroupId)) return;
+    // if (!users?.length && !groups?.length) return;
 
     const user = selectedUserId
       ? users?.find((u) => u.user_id == selectedUserId)
@@ -146,6 +173,8 @@ export default function MessagesPage() {
   }, [selectedUserId, selectedGroupId, users, groups]);
 
   useEffect(() => {
+    if (!isLoggedIn) return;
+
     if (selectedGroupId) {
       setActiveTab("groups");
     } else {
@@ -179,6 +208,8 @@ export default function MessagesPage() {
   };
 
   useEffect(() => {
+    if (!isLoggedIn) return;
+
     const fetchUsers = async () => {
       try {
         const response = await fetch(
@@ -208,6 +239,8 @@ export default function MessagesPage() {
   }, []);
 
   useEffect(() => {
+    if (!isLoggedIn) return;
+
     const fetchGroups = async () => {
       try {
         const response = await fetch(
@@ -227,6 +260,8 @@ export default function MessagesPage() {
   }, []);
 
   useEffect(() => {
+    if (!isLoggedIn) return;
+
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
@@ -251,6 +286,8 @@ export default function MessagesPage() {
   };
 
   useEffect(() => {
+    if (!isLoggedIn) return;
+
     if (selectedUser && usersListRef.current) {
       const selectedElement = usersListRef.current.querySelector(
         `.${styles.userItem}[data-id="${selectedUser.user_id || selectedUser.group_id
@@ -299,6 +336,8 @@ export default function MessagesPage() {
   };
 
   useEffect(() => {
+    if (!isLoggedIn) return;
+
     const handleMessage = (msg) => {
       if (msg.type === "message") {
         setMessages((prevMessages) => [
@@ -365,6 +404,10 @@ export default function MessagesPage() {
   const toggleEmojiSection = () => {
     setOpenEmojiSection(!openEmojiSection);
   };
+
+  if (!isLoggedIn) {
+    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
 
   return (
     <div className={styles.messagesPageContainer}>

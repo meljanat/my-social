@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import styles from "../styles/PostFormModal.module.css"; 
+import styles from "../styles/PostFormModal.module.css";
 
-export default function PostFormModal({ onClose, onPostCreated }) {
+export default function PostFormModal({ onClose, onPostCreated, group_id = 0 }) {
   const [postFormInput, setPostFormInput] = useState({
     title: "",
     content: "",
@@ -41,8 +41,8 @@ export default function PostFormModal({ onClose, onPostCreated }) {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Data from creating post",data);
-        
+        console.log("Data from creating post", data);
+
         if (data.Users && Array.isArray(data.Users)) {
           setFollowers(data.Users);
         }

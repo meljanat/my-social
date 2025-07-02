@@ -6,7 +6,7 @@ async function handleLike(postId, setPosts) {
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ post_id: postId}),
+      body: JSON.stringify({ post_id: postId }),
     });
 
     if (!response.ok) {
@@ -20,10 +20,10 @@ async function handleLike(postId, setPosts) {
         prevPosts.map((post) =>
           post.post_id === postId
             ? {
-                ...post,
-                total_likes: updatedPost.total_likes,
-                is_liked: updatedPost.is_liked,
-              }
+              ...post,
+              total_likes: updatedPost.total_likes,
+              is_liked: updatedPost.is_liked,
+            }
             : post
         )
       );

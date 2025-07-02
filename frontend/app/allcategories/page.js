@@ -1,15 +1,42 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import AuthForm from "../components/AuthForm";
 import PostComponent from "../components/PostComponent";
 import styles from "../styles/AllCategories.module.css";
 
 export default function AllCategories() {
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [categories, setCategories] = useState([]);
   const [posts, setPosts] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch("http://localhost:8404/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsLoggedIn(data);
+        }
+      } catch (error) {
+        console.log("Error checking login status:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, [isLoggedIn]);
 
   async function fetchCategories() {
     setIsLoadingCategories(true);
@@ -78,6 +105,7 @@ export default function AllCategories() {
   }
 
   useEffect(() => {
+    if (!isLoggedIn) return;
     fetchCategories();
   }, []);
 
@@ -111,6 +139,10 @@ export default function AllCategories() {
     );
   }
 
+  if (!isLoggedIn) {
+    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
+
   return (
     <div className={styles.categoriesPageContainer}>
       <div className={styles.leftSidebar}>
@@ -137,11 +169,10 @@ export default function AllCategories() {
             {categories.map((category) => (
               <li
                 key={category.category_id}
-                className={`${styles.categoryItem} ${
-                  activeCategory === category.category_id
-                    ? styles.activeCategory
-                    : ""
-                }`}
+                className={`${styles.categoryItem} ${activeCategory === category.category_id
+                  ? styles.activeCategory
+                  : ""
+                  }`}
                 onClick={() => hundleClick(category.category_id)}
               >
                 <div className={styles.categoryContent}>

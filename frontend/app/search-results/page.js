@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import AuthForm from "../components/AuthForm";
 import { useSearchParams, useRouter } from "next/navigation";
 import UserCard from "../components/UserCard";
 import GroupCard from "../components/GroupCard";
@@ -8,6 +9,7 @@ import PostCard from "../components/PostCard";
 import styles from "../styles/SearchResults.module.css";
 
 export default function SearchResults() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("query") || "";
   const [isLoading, setIsLoading] = useState(true);
@@ -17,6 +19,31 @@ export default function SearchResults() {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch("http://localhost:8404/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsLoggedIn(data);
+        }
+      } catch (error) {
+        console.log("Error checking login status:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, [isLoggedIn]);
 
   const fetchSuggestions = async (query, type = "all", offset = 0) => {
     setError(null);
@@ -93,6 +120,10 @@ export default function SearchResults() {
     setIsLoading(true);
     await fetchSuggestions(query, type, currentOffset);
   };
+
+  if (!isLoggedIn) {
+    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
 
   if (!searchQuery) {
     return (

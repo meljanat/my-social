@@ -1,12 +1,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import AuthForm from "../components/AuthForm";
 import { useSearchParams } from "next/navigation";
-import styles from "../styles/PostPage.module.css"; // Import the CSS Module
+import styles from "../styles/PostPage.module.css";
 
 export default function PostPage() {
   const searchParams = useSearchParams();
   const post_id = searchParams.get("id");
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -14,12 +16,35 @@ export default function PostPage() {
   const [error, setError] = useState(null);
   const [commentImageFile, setCommentImageFile] = useState(null); // Renamed from groupImage for clarity
   // const [homeData, setHomeData] = useState(null); // Unused
-  // const [isLoggedIn, setIsLoggedIn] = useState(false); // Unused
   // const [posts, setPosts] = useState([]); // Unused
   // const [postSaved, setPostSaved] = useState(); // Unused
 
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch("http://localhost:8404/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsLoggedIn(data);
+        }
+      } catch (error) {
+        console.log("Error checking login status:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, [isLoggedIn]);
+
   async function handleSave(postIdToSave) {
-    // Renamed post_id to postIdToSave for clarity
     try {
       const response = await fetch(`http://localhost:8404/save`, {
         method: "POST",
@@ -27,14 +52,10 @@ export default function PostPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ post_id: postIdToSave }),
+        body: JSON.stringify({ post_id: parseInt(postIdToSave) }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Failed to save post:", errorData);
-        setError(errorData.error || "Failed to save post.");
-      } else {
+      if (response.ok) {
         const updatedPost = await response.json();
         setPost({
           ...post,
@@ -51,7 +72,7 @@ export default function PostPage() {
   useEffect(() => {
     const fetchPost = async (id) => {
       setIsLoading(true);
-      setError(null); // Clear previous errors
+      setError(null);
       try {
         const response = await fetch(
           `http://localhost:8404/post?post_id=${id}&offset=0`,
@@ -125,7 +146,6 @@ export default function PostPage() {
   };
 
   const handleLike = async (postIdToLike) => {
-    // Renamed post_id to postIdToLike
     try {
       const response = await fetch(`http://localhost:8404/like`, {
         method: "POST",
@@ -133,25 +153,26 @@ export default function PostPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ post_id: postIdToLike }),
+        body: JSON.stringify({ post_id: parseInt(postIdToLike) }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to like post.");
+      if (response.ok) {
+        const updatedPost = await response.json();
+        setPost({
+          ...post,
+          total_likes: updatedPost.total_likes,
+          is_liked: updatedPost.is_liked,
+        });
       }
-
-      const updatedPost = await response.json();
-      setPost({
-        ...post,
-        total_likes: updatedPost.total_likes,
-        is_liked: updatedPost.is_liked,
-      });
     } catch (err) {
       console.error("Error liking post:", err);
       setError(err.message || "Failed to like post. Please try again.");
     }
   };
+
+  if (!isLoggedIn) {
+    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
 
   if (isLoading) {
     return (
@@ -248,7 +269,7 @@ export default function PostPage() {
             </div>
             <div className={styles.postPrivacy}>
               <img
-                src={`/icons/${post.privacy}.svg`} // Ensure these SVGs exist
+                src={`/icons/${post.privacy}.svg`}
                 width={"32px"}
                 height={"32px"}
                 className={styles.privacyIcon}
@@ -256,7 +277,7 @@ export default function PostPage() {
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = "/icons/default-privacy.svg";
-                }} // Fallback
+                }}
               />
             </div>
           </div>
@@ -280,10 +301,9 @@ export default function PostPage() {
 
           <div className={styles.postActions}>
             <div
-              className={`${styles.actionLike} ${
-                post.is_liked ? styles.likedPost : ""
-              }`}
-              onClick={() => handleLike(post_id)} // Pass post_id to handleLike
+              className={`${styles.actionLike} ${post.is_liked ? styles.likedPost : ""
+                }`}
+              onClick={() => handleLike(post_id)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -317,10 +337,9 @@ export default function PostPage() {
               <p>{post.total_comments} Comments</p>
             </div>
             <div
-              className={`${styles.actionSave} ${
-                post.saved ? styles.savedPost : ""
-              }`}
-              onClick={() => handleSave(post_id)} // Pass post_id to handleSave
+              className={`${styles.actionSave} ${post.saved ? styles.savedPost : ""
+                }`}
+              onClick={() => handleSave(post_id)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -418,7 +437,7 @@ export default function PostPage() {
                     <div key={key} className={styles.commentItem}>
                       <div className={styles.commentHeader}>
                         <img
-                          src={comment.avatar || "/inconnu/avatar.png"} 
+                          src={comment.avatar || "/inconnu/avatar.png"}
                           alt={comment.username}
                           className={styles.commentAvatar}
                         />

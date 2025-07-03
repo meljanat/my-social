@@ -47,8 +47,6 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Invitation received:", invitation)
-
 	isInvitation, err := database.CheckInvitation(user.ID, invitation.User, invitation.Group)
 	if err != nil {
 		fmt.Println("Failed to retrieve invitation", err)

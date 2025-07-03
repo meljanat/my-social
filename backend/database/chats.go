@@ -8,7 +8,7 @@ import (
 )
 
 func GetConnections(user_id, offset int64) ([]structs.User, error) {
-	rows, err := DB.Query("SELECT DISTINCT u.id, u.username, u.firstname, u.lastname, u.avatar FROM users u JOIN follows f ON (u.id = f.follower_id OR u.id = f.following_id) WHERE (f.follower_id  = ? OR f.following_id = ?) LIMIT ? OFFSET ?", user_id, user_id, 10, offset)
+	rows, err := DB.Query("SELECT DISTINCT u.id, u.username, u.firstname, u.lastname, u.avatar, u.privacy FROM users u JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id) WHERE (m.sender_id  = ? OR m.receiver_id = ?) LIMIT ? OFFSET ?", user_id, user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -16,10 +16,15 @@ func GetConnections(user_id, offset int64) ([]structs.User, error) {
 	var connections []structs.User
 	for rows.Next() {
 		var connection structs.User
-		err = rows.Scan(&connection.ID, &connection.Username, &connection.FirstName, &connection.LastName, &connection.Avatar)
+		err = rows.Scan(&connection.ID, &connection.Username, &connection.FirstName, &connection.LastName, &connection.Avatar, &connection.Privacy)
 		if err != nil {
 			return nil, err
 		}
+		connection.IsFollowing, err = IsFollowed(user_id, connection.ID)
+		if err != nil {
+			return nil, err
+		}
+		connection.Online = structs.Clients[connection.ID] != nil
 		if connection.ID != user_id {
 			connection.TotalMessages, err = GetCountConversationMessages(connection.ID, user_id)
 			if err != nil {
@@ -32,7 +37,12 @@ func GetConnections(user_id, offset int64) ([]structs.User, error) {
 }
 
 func SendMessage(sender_id, receiver_id, group_id int64, content, image string) error {
-	_, err := DB.Exec("INSERT INTO messages (sender_id, receiver_id, group_id, content) VALUES (?, ?, ?, ?)", sender_id, receiver_id, 0, content)
+	totalMessages := 0
+	err := DB.QueryRow("SELECT messages_not_read FROM messages WHERE sender_id = ? AND receiver_id = ? AND group_id = ? ORDER BY created_at DESC LIMIT 1", sender_id, receiver_id, group_id).Scan(&totalMessages)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		return err
+	}
+	_, err = DB.Exec("INSERT INTO messages (sender_id, receiver_id, group_id, content, messages_not_read) VALUES (?, ?, ?, ?, ?)", sender_id, receiver_id, group_id, content, totalMessages+1)
 	return err
 }
 
@@ -56,8 +66,8 @@ func GetConversation(user_id, receiver_id, offset int64) ([]structs.Message, err
 	return chats, nil
 }
 
-func GetGroupConversation(group_id, offset int64) ([]structs.Message, error) {
-	rows, err := DB.Query("SELECT c.id, u.username, u.avatar, c.content, c.created_at FROM messages c JOIN users u ON u.id = c.sender_id WHERE c.group_id = ? ORDER BY c.created_at ASC LIMIT ? OFFSET ?", group_id, 10, offset)
+func GetGroupConversation(group_id, user_id, offset int64) ([]structs.Message, error) {
+	rows, err := DB.Query("SELECT c.id, u.username, u.avatar, c.content, c.sender_id, c.created_at FROM messages c JOIN users u ON u.id = c.sender_id WHERE c.group_id = ? AND c.receiver_id = ? ORDER BY c.created_at ASC LIMIT ? OFFSET ?", group_id, user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -66,10 +76,10 @@ func GetGroupConversation(group_id, offset int64) ([]structs.Message, error) {
 	for rows.Next() {
 		var chat structs.Message
 		var date time.Time
-		if err := rows.Scan(&chat.ID, &chat.Username, &chat.Avatar, &chat.Content, &date); err != nil {
+		if err := rows.Scan(&chat.ID, &chat.Username, &chat.Avatar, &chat.Content, &chat.UserID, &date); err != nil {
 			return nil, err
 		}
-
+		chat.CurrentUser = user_id
 		chat.CreatedAt = TimeAgo(date)
 		chats = append(chats, chat)
 	}
@@ -123,14 +133,6 @@ func GetCountConversationMessages(sender_id, user_id int64) (int64, error) {
 }
 
 func ReadMessages(sender_id, reciever_id, group_id int64) error {
-	if group_id != 0 {
-		_, err := DB.Exec("UPDATE group_chats SET status = ? WHERE sender_id = ? AND group_id = ?", "read", sender_id, group_id)
-		if err != nil {
-			return err
-		}
-		_, err = DB.Exec("UPDATE group_status_messages SET messages_not_read = 0 WHERE user_id = ? AND group_id = ?", reciever_id, group_id)
-		return err
-	}
-	_, err := DB.Exec("UPDATE messages SET status = ? WHERE receiver_id = ? AND sender_id = ?", "read", reciever_id, reciever_id)
+	_, err := DB.Exec("UPDATE messages SET messages_not_read = ? WHERE receiver_id = ? AND sender_id = ? AND group_id = ?", 0, reciever_id, reciever_id, group_id)
 	return err
 }

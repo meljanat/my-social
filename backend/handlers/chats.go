@@ -172,7 +172,7 @@ func ChatGroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chats, err := database.GetGroupConversation(group_id, offset)
+	chats, err := database.GetGroupConversation(group_id, user.ID, offset)
 	if err != nil {
 		fmt.Println("Failed to retrieve chats", err)
 		response := map[string]string{"error": "Failed to retrieve chats"}

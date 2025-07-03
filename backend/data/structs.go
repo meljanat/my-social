@@ -124,7 +124,7 @@ type Group struct {
 
 type Message struct {
 	ID                  int64  `json:"message_id" sqlite:"message_id"`
-	SenderID            int64  `json:"sender_id" sqlite:"sender_id"`
+	CurrentUser         int64  `json:"current_user" sqlite:"current_user"`
 	GroupID             int64  `json:"group_id" sqlite:"group_id"`
 	UserID              int64  `json:"user_id" sqlite:"user_id"`
 	Avatar              string `json:"avatar" sqlite:"avatar"`

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, use } from "react";
 import AuthForm from "../components/AuthForm";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "../styles/MessagesPage.module.css";
@@ -95,8 +95,6 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
   const [users, setUsers] = useState([]);
-  const [canSendMessage, setCanSendMessage] = useState(true);
-  const [onlineUsers, setOnlineUsers] = useState(null);
   const [groups, setGroups] = useState([]);
   const [openEmojiSection, setOpenEmojiSection] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -136,41 +134,6 @@ export default function MessagesPage() {
 
     checkLoginStatus();
   }, [isLoggedIn]);
-
-  useEffect(() => {
-    if (!isLoggedIn || (!selectedUserId && !selectedGroupId)) return;
-    // if (!users?.length && !groups?.length) return;
-
-    const user = selectedUserId
-      ? users?.find((u) => u.user_id == selectedUserId)
-      : null;
-    const group = selectedGroupId
-      ? groups?.find((g) => g.group_id == selectedGroupId)
-      : null;
-
-    if (user || group) {
-      setSelectedUser(user || group);
-      handleUserSelect(user || group);
-    } else {
-      getUserChat(selectedUserId, selectedGroupId).then((data) => {
-        if (data) {
-          setSelectedUser(data);
-          handleUserSelect(data);
-          setCanSendMessage(data.can_message);
-        } else {
-          setSelectedUser(null);
-        }
-      });
-    }
-    if (selectedUser) {
-      setSelectedUser((prev) => {
-        return {
-          ...prev,
-          total_messages: 0,
-        };
-      });
-    }
-  }, [selectedUserId, selectedGroupId, users, groups]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -220,17 +183,8 @@ export default function MessagesPage() {
           }
         );
         const data = await response.json();
-
         setUsers(data);
-
-        const onlineUsers = data
-          .filter((user) => user.online)
-          .reduce((acc, user) => {
-            acc[user.user_id] = true;
-            return acc;
-          }, {});
-
-        setOnlineUsers(onlineUsers);
+        console.log("Fetched users:", data);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -258,6 +212,32 @@ export default function MessagesPage() {
     };
     fetchGroups();
   }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn || (!selectedUserId && !selectedGroupId)) return;
+    // if (!users?.length && !groups?.length) return;
+
+    handleUserSelect(selectedUserId, selectedGroupId, 0);
+    // } else {
+    //   getUserChat(selectedUserId, selectedGroupId).then((data) => {
+    //     if (data) {
+    //       setSelectedUser(data);
+    //       handleUserSelect(data);
+    //       setCanSendMessage(data.can_message);
+    //     } else {
+    //       setSelectedUser(null);
+    //     }
+    //   });
+    // }
+    // if (selectedUser) {
+    //   setSelectedUser((prev) => {
+    //     return {
+    //       ...prev,
+    //       total_messages: 0,
+    //     };
+    //   });
+    // }
+  }, [selectedUserId, selectedGroupId, users, groups]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -302,10 +282,23 @@ export default function MessagesPage() {
     }
   }, [selectedUser]);
 
-  const handleUserSelect = (user, offset = 0) => {
-    let fetchMessages = user.group_id
-      ? `chats_group?group_id=${user.group_id}&offset=${offset}`
-      : `chats?id=${user.user_id}&offset=${offset}`;
+  const handleUserSelect = (user_id, group_id, offset = 0) => {
+    console.log("user selected:", user_id, group_id, offset);
+
+    const user = user_id
+      ? users?.find((u) => u.user_id == user_id)
+      : null;
+    const group = group_id
+      ? groups?.find((g) => g.group_id == group_id)
+      : null;
+
+    if (user || group) {
+      setSelectedUser(user || group);
+    }
+
+    let fetchMessages = group_id
+      ? `chats_group?group_id=${group_id}&offset=${offset}`
+      : `chats?id=${user_id}&offset=${offset}`;
     fetch(`http://localhost:8404/${fetchMessages}`, {
       method: "GET",
       credentials: "include",
@@ -313,6 +306,7 @@ export default function MessagesPage() {
       .then((response) => response.json())
       .then((data) => {
         setMessages(data);
+        console.log("Fetched messages:", data);
       })
       .catch((error) => {
         console.error("Error fetching messages:", error);
@@ -340,31 +334,40 @@ export default function MessagesPage() {
 
     const handleMessage = (msg) => {
       if (msg.type === "message") {
+
+    console.log("hna", selectedUser);
         setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            id: Date.now(),
-            content: msg.content,
-            username: msg.username,
-            created_at: "Just now",
-          },
+          ...prevMessages ? prevMessages : [],
+          msg,
         ]);
       }
     };
     const handleNewConnection = (msg) => {
+      console.log("New connection:", msg);
+
       if (msg.type === "new_connection") {
-        setOnlineUsers((prevOnlineUsers) => ({
-          ...prevOnlineUsers,
-          [msg.user_id]: true,
-        }));
+        setUsers((prevUsers) => {
+          const updatedUsers = prevUsers.map((user) => {
+            if (user.user_id === msg.user_id) {
+              return { ...user, online: true };
+            }
+            return user;
+          });
+          return updatedUsers;
+        });
       }
     };
     const handleDisconnection = (msg) => {
       if (msg.type === "disconnection") {
-        setOnlineUsers((prevOnlineUsers) => ({
-          ...prevOnlineUsers,
-          [msg.user_id]: false,
-        }));
+        setUsers((prevUsers) => {
+          const updatedUsers = prevUsers.map((user) => {
+            if (user.user_id === msg.user_id) {
+              return { ...user, online: false };
+            }
+            return user;
+          });
+          return updatedUsers;
+        });
       }
     };
 
@@ -379,21 +382,25 @@ export default function MessagesPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isLoggedIn || !selectedUser) return;
+
+
+
+  }, [selectedUser, messages]);
+
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
+    
     if (!newMessage.trim() || !selectedUser) return;
 
-    const mssg = selectedUser.group_id
-      ? {
-        type: "message",
-        group_id: selectedUser.group_id,
-        content: newMessage,
-      }
-      : {
-        type: "message",
-        user_id: selectedUser.user_id,
-        content: newMessage,
-      };
+    const mssg = {
+      type: "message",
+      group_id: selectedUser.group_id || 0,
+      user_id: selectedUser.user_id || 0,
+      content: newMessage,
+    }
 
     websocket.send(JSON.stringify(mssg));
     setNewMessage("");
@@ -474,10 +481,10 @@ export default function MessagesPage() {
                   />
                 ))}
               {!users?.length && activeTab === "friends" && (
-                <div className={styles.noUsersMessage}>No friends found.</div>
+                <div className={styles.noUsersMessage}>You have no chats yet.</div>
               )}
               {!groups?.length && activeTab === "groups" && (
-                <div className={styles.noUsersMessage}>No groups found.</div>
+                <div className={styles.noUsersMessage}>You haven't joined any groups yet.</div>
               )}
             </ul>
           </div>
@@ -506,18 +513,9 @@ export default function MessagesPage() {
                     {selectedUser.username && (
                       <p className={styles.conversationUserStatus}>
                         <span
-                          className={`${styles.statusDot} ${selectedUser.user_id
-                            ? onlineUsers && onlineUsers[selectedUser.user_id]
-                              ? styles.online
-                              : styles.offline
-                            : styles.offline
-                            }`}
+                          className={`${styles.statusDot} ${selectedUser.online ? styles.online : styles.offline}`}
                         ></span>
-                        {selectedUser.user_id
-                          ? onlineUsers && onlineUsers[selectedUser.user_id]
-                            ? "Online"
-                            : "Offline"
-                          : "Offline"}
+                        {selectedUser.online ? "Online" : "Offline"}
                       </p>
                     )}
                   </div>
@@ -557,7 +555,7 @@ export default function MessagesPage() {
                     <Message
                       key={index}
                       message={message}
-                      isSent={message.username !== selectedUser.username}
+                      isSent={message.current_user ? message.user_id === message.current_user : message.username !== selectedUser.username}
                     />
                   ))
                 ) : (
@@ -568,7 +566,7 @@ export default function MessagesPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {canSendMessage ? (
+              {(selectedUser.is_following || selectedUser.privacy === "public") || (selectedUser.role !== "guest" && selectedUser.group_id) ? (
                 <form
                   className={styles.messageInputForm}
                   onSubmit={handleSendMessage}

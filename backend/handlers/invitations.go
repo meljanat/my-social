@@ -93,6 +93,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		var action string
 		if !isFollowed {
 			if userToFollowing.Privacy == "public" {
 				if err := database.AddFollower(user.ID, invitation.User); err != nil {
@@ -110,9 +111,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 					json.NewEncoder(w).Encode(response)
 					return
 				}
-
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode("unfollow")
+				action = "Unfollow"
 			} else if !isInvitation {
 				if err := database.CreateInvitation(user.ID, invitation.User, invitation.Group); err != nil {
 					fmt.Println("Failed to send invitation", err)
@@ -130,8 +129,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode("cancel")
+				action = "Pending"
 			} else {
 				if err := database.DeleteInvitation(invitation_id); err != nil {
 					fmt.Println("Failed to delete invitation", err)
@@ -148,10 +146,9 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 					json.NewEncoder(w).Encode(response)
 					return
 				}
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode("follow")
+
+				action = "Follow"
 			}
-			return
 		} else {
 			if err := database.RemoveFollower(user.ID, invitation.User); err != nil {
 				fmt.Println("Failed to unfollow user", err)
@@ -168,9 +165,41 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 				json.NewEncoder(w).Encode(response)
 				return
 			}
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode("follow")
+
+			action = "Follow"
 		}
+		total_followers, err := database.GetCountFollowing(user.ID)
+		if err != nil {
+			fmt.Println("Failed to retrieve total following", err)
+			response := map[string]string{"error": "Failed to retrieve total follows"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		isFolowed, err := database.IsFollowed(invitation.User, user.ID)
+		if err != nil {
+			fmt.Println("Failed to check if user is followed", err)
+			response := map[string]string{"error": "Failed to check if user is followed"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		if action == "Follow" && isFolowed {
+			action = "Follow back"
+		}
+
+		data := struct {
+			Action         string `json:"action"`
+			TotalFollowers int64  `json:"total_followers"`
+		}{
+			Action:         action,
+			TotalFollowers: total_followers,
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(data)
 	} else {
 		group, err := database.GetGroupById(invitation.Group)
 		if err != nil {
@@ -372,7 +401,6 @@ func AcceptInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		isFollowed, err := database.IsFollowed(user.ID, invitation.User)
-		fmt.Println("Checking if user is followed:", invitation.User, user.ID, isFollowed)
 		if err != nil {
 			fmt.Println("Failed to check if user is followed", err)
 			response := map[string]string{"error": "Failed to check if user is followed"}

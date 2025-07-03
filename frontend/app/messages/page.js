@@ -47,7 +47,8 @@ const UserCard = ({ user, isActive, onClick }) => {
   //     removeFromListeners("message", handleMessage);
   //   };
   // }, []);
-  console.log("user", user, isActive);
+  // console.log("user", user, isActive);
+  console.log(user.total_messages);
 
   return (
     <li
@@ -148,19 +149,25 @@ export default function MessagesPage() {
     }
   }, [selectedUserId, selectedGroupId]);
 
-  const getUserChat = async (user_id = 0, group_id = 0) => {
-    return await fetch(
-      `http://localhost:8404/get_user?user_id=${user_id}&group_id=${group_id}`,
+  const getUserChat = async (user_id = 0) => {
+    const response = await fetch(
+      `http://localhost:8404/profile?user_id=${user_id}`,
       {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
         credentials: "include",
       }
     )
-      .then((response) => response.json())
-      .catch((error) => {
-        console.error("Error fetching user chat:", error);
-        return null;
-      });
+    if (response.ok) {
+      const data = await response.json();
+      // setUsers([data, ...users]);
+      setSelectedUser(data);
+    } else {
+      console.log("Error fetching user chat:", response.statusText);
+
+    }
   };
 
   const handleSeeProfile = () => {
@@ -173,72 +180,57 @@ export default function MessagesPage() {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8404/connections?offset=${offset}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  const fetchGroups = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8404/groups?type=joined&offset=${offset}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      setGroups(data);
+      console.log("Fetched groups:", data);
+
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+    }
+  };
+
   useEffect(() => {
     if (!isLoggedIn) return;
 
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:8404/connections?offset=${offset}`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-        const data = await response.json();
-        setUsers(data);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
     fetchUsers();
   }, []);
 
   useEffect(() => {
     if (!isLoggedIn) return;
 
-    const fetchGroups = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:8404/groups?type=joined&offset=${offset}`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-        const data = await response.json();
-        setGroups(data);
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-      }
-    };
     fetchGroups();
   }, []);
 
   useEffect(() => {
     if (!isLoggedIn || (!selectedUserId && !selectedGroupId)) return;
-    // if (!users?.length && !groups?.length) return;
 
     handleUserSelect(selectedUserId, selectedGroupId, 0);
-    // } else {
-    //   getUserChat(selectedUserId, selectedGroupId).then((data) => {
-    //     if (data) {
-    //       setSelectedUser(data);
-    //       handleUserSelect(data);
-    //       setCanSendMessage(data.can_message);
-    //     } else {
-    //       setSelectedUser(null);
-    //     }
-    //   });
-    // }
-    // if (selectedUser) {
-    //   setSelectedUser((prev) => {
-    //     return {
-    //       ...prev,
-    //       total_messages: 0,
-    //     };
-    //   });
-    // }
+
   }, [selectedUserId, selectedGroupId, users, groups]);
 
   useEffect(() => {
@@ -294,8 +286,9 @@ export default function MessagesPage() {
 
     if (user || group) {
       setSelectedUser(user || group);
+    } else {
+      getUserChat(user_id)
     }
-
 
     let fetchMessages = group_id
       ? `chats_group?group_id=${group_id}&offset=${offset}`
@@ -343,42 +336,11 @@ export default function MessagesPage() {
       }
 
       if (!selectedUser) {
-        setUsers((prevUsers) => {
-          const updatedUsers = prevUsers.map((user) => {
-            if (
-              (user.username && msg.username === user.username) ||
-              (user.name && msg.name === user.name)
-            ) {
-              return {
-                ...user,
-                total_messages: (user.total_messages || 0) + 1,
-              };
-            }
-            return user;
-          });
-          return updatedUsers;
-        })
+        fetchUsers();
+        fetchGroups();
       }
-    } else if (msg.type === "new_connection") {
-      setUsers((prevUsers) => {
-        const updatedUsers = prevUsers.map((user) => {
-          if (user.user_id === msg.user_id) {
-            return { ...user, online: true };
-          }
-          return user;
-        });
-        return updatedUsers;
-      });
-    } else if (msg.type === "disconnection") {
-      setUsers((prevUsers) => {
-        const updatedUsers = prevUsers.map((user) => {
-          if (user.user_id === msg.user_id) {
-            return { ...user, online: false };
-          }
-          return user;
-        });
-        return updatedUsers;
-      });
+    } else if (msg.type === "new_connection" || msg.type === "disconnection") {
+      fetchUsers();
     }
   };
 

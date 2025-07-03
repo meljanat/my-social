@@ -1,8 +1,9 @@
 package database
 
 import (
-	structs "social-network/data"
 	"time"
+
+	structs "social-network/data"
 )
 
 func CreateInvitation(invited_id, recipient_id, group_id int64) error {
@@ -107,4 +108,30 @@ func GetInvitationID(invited_id, recipient_id, group_id int64) (int64, error) {
 	var invitation_id int64
 	err := DB.QueryRow("SELECT id FROM invitations WHERE recipient_id = ? AND invited_id = ? AND group_id = ?", recipient_id, invited_id, group_id).Scan(&invitation_id)
 	return invitation_id, err
+}
+
+func AcceptAllInvitations(user_id int64) error {
+	rows, err := DB.Query("SELECT id, invited_id, group_id FROM invitations WHERE recipient_id = ?", user_id)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	var ids [][]int64
+	for rows.Next() {
+		var invitation structs.Invitation
+		err = rows.Scan(&invitation.ID, &invitation.User.ID, &invitation.Group.ID)
+		if err != nil {
+			return err
+		}
+		if invitation.Group.ID == 0 {
+			ids = append(ids, []int64{invitation.ID, invitation.User.ID, user_id, 0})
+		}
+	}
+	for _, id := range ids {
+		err = AcceptInvitation(id[0], id[1], id[2], id[3])
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

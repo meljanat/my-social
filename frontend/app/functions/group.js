@@ -13,7 +13,6 @@ async function joinGroup(group_id) {
   }
 }
 
-
 async function InvitUsers(group_id) {
   try {
     const response = await fetch(

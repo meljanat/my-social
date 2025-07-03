@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+
 	structs "social-network/data"
 	"social-network/database"
-	"strconv"
 )
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
@@ -70,13 +71,25 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	info.IsPending, err = database.CheckInvitation(user_id, user.ID, 0)
+	info.IsPending, err = database.CheckInvitation(user.ID, user_id, 0)
 	if err != nil {
 		fmt.Println("Error checking invitation:", err)
 		response := map[string]string{"error": "Failed to retrieve invitation"}
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response)
 		return
+	} 
+
+	info.Online = structs.Clients[user_id] != nil
+
+	if info.IsPending {
+		info.Type = "Pending"
+	} else if info.IsFollowing {
+		info.Type = "Unfollow"
+	} else if info.IsFollower {
+		info.Type = "Follow back"
+	} else {
+		info.Type = "Follow"
 	}
 
 	w.Header().Set("Content-Type", "application/json")

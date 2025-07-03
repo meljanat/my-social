@@ -1,8 +1,6 @@
 package database
 
 import (
-	"fmt"
-
 	structs "social-network/data"
 )
 
@@ -54,7 +52,6 @@ func GetGroupMembers(user_id, group_id, offset int64) ([]structs.User, error) {
 }
 
 func GetMembers(user_id, group_id int64) ([]structs.User, error) {
-	fmt.Println("GetMembers called", user_id, group_id)
 	var users []structs.User
 	rows, err := DB.Query("SELECT DISTINCT u.id, u.username, u.avatar FROM users u JOIN follows f ON u.id = f.follower_id OR u.id = f.following_id WHERE (f.follower_id = ? OR f.following_id = ?) AND u.id NOT IN (SELECT user_id FROM group_members WHERE group_id = ? UNION SELECT recipient_id FROM invitations WHERE group_id = ?)", user_id, user_id, group_id, group_id)
 	if err != nil {

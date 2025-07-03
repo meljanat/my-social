@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+
 	structs "social-network/data"
 	"social-network/database"
-	"strconv"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
@@ -99,15 +100,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// count, err := database.GetCountUserGroups(user.ID)
-	// if err != nil {
-	// 	fmt.Println("Failed to count groups", err)
-	// 	response := map[string]string{"error": "Failed to count groups"}
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	json.NewEncoder(w).Encode(response)
-	// 	return
-	// }
-
 	my_groups, err := database.GetGroups(*user, -1)
 	if err != nil {
 		fmt.Println("Failed to retrieve my groups", err)
@@ -135,8 +127,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
-	var home = struct {
+	home := struct {
 		User           structs.User       `json:"user"`
 		Posts          []structs.Post     `json:"posts"`
 		BestCategories []structs.Category `json:"best_categories"`

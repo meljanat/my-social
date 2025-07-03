@@ -178,7 +178,6 @@ func SuggestedUsersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var users []structs.User
-	fmt.Println("Type:", Type)
 	if Type == "suggested" {
 		users, err = database.GetSuggestedUsers(user.ID, offset)
 	} else if Type == "received" {

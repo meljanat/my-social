@@ -53,7 +53,7 @@ func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
 		if err != nil {
 			return nil, err
 		}
-		group.TotalMessages, err = GetCountConversationMessages(group.ID, user.ID)
+		group.TotalMessages, err = GetCountConversationMessages(0, user.ID, group.ID)
 		if err != nil {
 			return nil, err
 		}

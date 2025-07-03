@@ -45,15 +45,8 @@ func GetConnectionsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Retrieved connections successfully", connections[len(connections)-1].TotalMessages)
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(connections)
-}
-
-func GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	// check if the user is followed by you or if not and his account is private
-	// to show if you can send him a message or not
 }
 
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
@@ -233,6 +226,8 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+
+	SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("success")

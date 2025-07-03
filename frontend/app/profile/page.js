@@ -8,7 +8,7 @@ import EditProfileModal from "@/app/components/EditProfileModal";
 import styles from "../styles/ProfilePage.module.css";
 
 export default function ProfilePage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState();
   const [isFollowing, setIsFollowing] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -85,37 +85,14 @@ export default function ProfilePage() {
 
       if (response.ok) {
         const data = await response.json();
-        const actionType = data;
+        console.log("Follow response data:", data);
+
 
         setUserData((prev) => {
-          let newFollowers = prev.total_followers;
-          let isFollowingStatus = prev.is_following;
-          let isPendingStatus = prev.is_pending;
-
-          if (actionType === "follow") {
-            if (prev.privacy === "private") {
-              isPendingStatus = true;
-              isFollowingStatus = false;
-            } else {
-              isFollowingStatus = true;
-              isPendingStatus = false;
-              newFollowers += 1;
-            }
-          } else if (actionType === "unfollow") {
-            isFollowingStatus = false;
-            isPendingStatus = false;
-            newFollowers -= 1;
-          } else if (actionType === "cancel_request") {
-            isPendingStatus = false;
-            isFollowingStatus = false;
-          }
-
           return {
             ...prev,
-            type: actionType,
-            is_following: isFollowingStatus,
-            is_pending: isPendingStatus,
-            total_followers: newFollowers,
+            type: data.action,
+            total_followers: data.total_followers,
           };
         });
       }
@@ -177,7 +154,7 @@ export default function ProfilePage() {
           setError(data.error || "Failed to fetch user data");
         } else {
           const data = await response.json();
-          console.log("Error fetching user data:", data);
+          console.log("user data:", data);
           setUserData(data);
           setIsOwnProfile(data.role === "owner");
           fetchUserPosts();
@@ -304,11 +281,6 @@ export default function ProfilePage() {
       day: "numeric",
     });
   };
-
-  if (!isLoggedIn) {
-    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
-  }
-
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -317,6 +289,11 @@ export default function ProfilePage() {
       </div>
     );
   }
+  if (!isLoggedIn) {
+    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
+
+
 
   if (error) {
     return (
@@ -399,16 +376,17 @@ export default function ProfilePage() {
           <div className={styles.profileInfo}>
             <div className={styles.profileDetails}>
               <div>
-                <div className={styles.profileStatusBadge}>
-                  {userData.online ? (
-                    <span className={styles.statusOnline}>Online</span>
-                  ) : (
-                    <span className={styles.statusOffline}>Offline</span>
-                  )}
-                </div>
-                <h1 className={styles.profileName}>{`${
-                  userData.first_name || ""
-                } ${userData.last_name || ""}`}</h1>
+                {userData.role !== "owner" &&
+                  <div className={styles.profileStatusBadge}>
+                    {userData.online ? (
+                      <span className={styles.statusOnline}>Online</span>
+                    ) : (
+                      <span className={styles.statusOffline}>Offline</span>
+                    )}
+                  </div>
+                }
+                <h1 className={styles.profileName}>{`${userData.first_name || ""
+                  } ${userData.last_name || ""}`}</h1>
                 <p className={styles.profileUsername}>
                   @{userData.username || "username"}
                   {userData.privacy === "private" && (
@@ -478,23 +456,15 @@ export default function ProfilePage() {
                 ) : (
                   <button
                     className={
-                      userData.is_following
-                        ? styles.unfollowBtn
-                        : userData.is_pending
-                        ? styles.requestCancelBtn
-                        : styles.followBtn
+                      userData.type === "Pending" ?
+                        styles.requestCancelBtn
+                        : userData.type === "Unfollow" ?
+                          styles.unfollowBtn
+                          : styles.followBtn
                     }
                     onClick={() => handleFollow(id)}
                   >
-                    {userData.is_follower &&
-                    !userData.is_following &&
-                    !userData.is_pending
-                      ? "Follow Back"
-                      : userData.is_following
-                      ? "Unfollow"
-                      : userData.is_pending
-                      ? "Pending"
-                      : "Follow"}
+                    {userData.type}
                   </button>
                 )}
               </div>
@@ -546,42 +516,37 @@ export default function ProfilePage() {
         <div className={styles.profileContent}>
           <div className={styles.profileTabs}>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "posts" ? styles.active : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "posts" ? styles.active : ""
+                }`}
               onClick={() => handleTabChange("posts")}
             >
               Posts
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "about" ? styles.active : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "about" ? styles.active : ""
+                }`}
               onClick={() => handleTabChange("about")}
             >
               About
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "followers" ? styles.active : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "followers" ? styles.active : ""
+                }`}
               onClick={() => handleTabChange("followers")}
             >
               Followers
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "following" ? styles.active : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "following" ? styles.active : ""
+                }`}
               onClick={() => handleTabChange("following")}
             >
               Following
             </button>
             {isOwnProfile && (
               <button
-                className={`${styles.tabButton} ${
-                  activeTab === "saved" ? styles.active : ""
-                }`}
+                className={`${styles.tabButton} ${activeTab === "saved" ? styles.active : ""
+                  }`}
                 onClick={() => handleTabChange("saved")}
               >
                 Saved Posts
@@ -625,9 +590,8 @@ export default function ProfilePage() {
                   <div className={styles.aboutItemContent}>
                     <div className={styles.infoRow}>
                       <span className={styles.infoLabel}>Full Name</span>
-                      <span className={styles.infoValue}>{`${
-                        userData.first_name || ""
-                      } ${userData.last_name || ""}`}</span>
+                      <span className={styles.infoValue}>{`${userData.first_name || ""
+                        } ${userData.last_name || ""}`}</span>
                     </div>
                     <div className={styles.infoRow}>
                       <span className={styles.infoLabel}>Username</span>
@@ -652,7 +616,7 @@ export default function ProfilePage() {
                       <span className={styles.infoValue}>
                         {userData.privacy
                           ? userData.privacy.charAt(0).toUpperCase() +
-                            userData.privacy.slice(1)
+                          userData.privacy.slice(1)
                           : "Public"}
                       </span>
                     </div>
@@ -712,9 +676,8 @@ export default function ProfilePage() {
               <div className={styles.savedContentContainer}>
                 <div className={styles.savedTabs}>
                   <button
-                    className={`${styles.savedTabButton} ${
-                      activeSubTab === "posts" ? styles.active : ""
-                    }`}
+                    className={`${styles.savedTabButton} ${activeSubTab === "posts" ? styles.active : ""
+                      }`}
                     onClick={() => {
                       fetchSavedPosts("post");
                       setActiveSubTab("posts");
@@ -723,9 +686,8 @@ export default function ProfilePage() {
                     Saved Posts
                   </button>
                   <button
-                    className={`${styles.savedTabButton} ${
-                      activeSubTab === "group-posts" ? styles.active : ""
-                    }`}
+                    className={`${styles.savedTabButton} ${activeSubTab === "group-posts" ? styles.active : ""
+                      }`}
                     onClick={() => {
                       fetchSavedPosts("group");
                       setActiveSubTab("group-posts");
@@ -880,13 +842,15 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-      {showEditModal && userData && (
-        <EditProfileModal
-          user={userData}
-          onClose={() => setShowEditModal(false)}
-          onSave={handleProfileUpdate}
-        />
-      )}
-    </div>
+      {
+        showEditModal && userData && (
+          <EditProfileModal
+            user={userData}
+            onClose={() => setShowEditModal(false)}
+            onSave={handleProfileUpdate}
+          />
+        )
+      }
+    </div >
   );
 }

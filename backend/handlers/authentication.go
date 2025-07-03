@@ -275,6 +275,15 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if err := database.AcceptAllInvitations(register.ID); err != nil {
+			log.Printf("Error accepting invitations: %v", err)
+			response := map[string]string{"error": "Failed to accept invitations"}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
 		response := map[string]interface{}{
 			"user":    register,
 			"message": "Profile updated successfully!",

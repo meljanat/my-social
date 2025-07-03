@@ -7,8 +7,8 @@ import InvitationCard from "../components/InvitationCard";
 import styles from "../styles/GroupsPage.module.css";
 import PendingGroupRequestCard from "../components/PendingCard";
 import GroupFormModal from "../components/GroupFromModal";
-import { leaveGroup } from "../functions/group";
 import RemoveGroupModal from "../components/RemoveGroupModal";
+import { joinGroup } from "../functions/group";
 import {
   handleFollow,
   handelAccept,
@@ -170,6 +170,7 @@ export default function GroupsPage() {
   };
 
   const handleJoinGroup = (group) => {
+    joinGroup(group.group_id)
     setGroupData((prev) => prev.filter((g) => g.group_id !== group.group_id));
     setMyGroups((prev) => [...prev, { ...group, is_joined: true }]);
   };
@@ -361,7 +362,9 @@ export default function GroupsPage() {
                     key={group.group_id}
                     group={group}
                     isJoined={false}
-                    onJoin={handleJoinGroup}
+                    onJoin={() => {
+                      handleJoinGroup(group);
+                    }}
                     onClick={() => {
                       handleGroupSelect(group);
                     }}

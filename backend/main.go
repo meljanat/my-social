@@ -35,7 +35,6 @@ func main() {
 	http.HandleFunc("/home", handlers.Home)
 	http.HandleFunc("/user", handlers.CheckTheUserHandler)
 	http.HandleFunc("/connections", handlers.GetConnectionsHandler)
-	http.HandleFunc("/get_user", handlers.GetUserHandler)
 	http.HandleFunc("/profile", handlers.ProfileHandler)
 	http.HandleFunc("/profile_posts", handlers.ProfilePostsHandler)
 	http.HandleFunc("/get_saved_posts", handlers.GetSavedPostsHandler)

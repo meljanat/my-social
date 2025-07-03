@@ -15,7 +15,6 @@ var (
 
 func SendWsMessage(user_id int64, message map[string]interface{}) {
 	if clients, ok := Clients[user_id]; ok {
-		fmt.Println(ok, user_id, Clients)
 		for _, client := range clients {
 			err := client.WriteJSON(message)
 			if err != nil {

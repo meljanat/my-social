@@ -97,8 +97,6 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 	var posts []structs.Post
 	var rows *sql.Rows
 	var err error
-	fmt.Println("user_id", user_id, "my_id", my_id, "followed", followed)
-
 	if user_id == my_id || followed {
 		rows, err = DB.Query(`
 			SELECT DISTINCT posts.id, posts.title, posts.content, categories.name, categories.color, categories.background, users.username, users.avatar,
@@ -139,9 +137,7 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 		if err != nil && !strings.Contains(err.Error(), `name "image": converting NULL to string`) {
 			return nil, err
 		}
-		fmt.Println("-------------------------------------------")
-		fmt.Println("post", post)
-		fmt.Println("-------------------------------------------")
+		
 		post.CreatedAt = TimeAgo(date)
 		post.IsLiked, err = PostIsLiked(post.ID, my_id)
 		if err != nil {
@@ -162,7 +158,6 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 
 func GetPostsGroup(group_id, user_id, offset int64, privacy string) ([]structs.Post, error) {
 	var posts []structs.Post
-	fmt.Println(group_id)
 	rows, err := DB.Query("SELECT p.id, p.title, p.content, categories.name, categories.color, categories.background, users.username, users.avatar, p.created_at, p.total_likes, p.total_comments, p.image FROM posts p JOIN categories ON categories.id = p.category_id JOIN users ON p.user_id = users.id WHERE p.group_id = ? ORDER BY p.created_at DESC LIMIT ? OFFSET ? ", group_id, 10, offset)
 	if err != nil {
 		return nil, err

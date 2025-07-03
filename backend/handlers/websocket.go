@@ -119,11 +119,12 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 				Mutex.Unlock()
 			}
 		} else {
-			if _, err := database.GetUserById(message.UserID); err != nil {
+			usr, err := database.GetUserById(message.UserID)
+			if err != nil {
 				fmt.Println("Error getting user by ID:", err)
 				return
 			}
-			if is_followed, err := database.IsFollowed(user_id, message.UserID); err != nil || !is_followed {
+			if is_followed, err := database.IsFollowed(user_id, message.UserID); err != nil || !is_followed && usr.Privacy == "private" {
 				fmt.Println("User is not followed or error checking follow status:", err)
 				return
 			}

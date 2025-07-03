@@ -19,44 +19,37 @@ export default function Navbar() {
   const [user, setUser] = useState();
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/user", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
+  const fetchUser = async () => {
+    try {
+      const response = await fetch("http://localhost:8404/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data.error) {
-            throw new Error(data.error);
-          }
-          setUser(data);
-        } else {
-          throw new Error("Failed to fetch user data");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
         }
-      } catch (error) {
-        console.log("Failed to fetch user data:", error);
+        setUser(data);
+      } else {
+        throw new Error("Failed to fetch user data");
       }
-    };
+    } catch (error) {
+      console.log("Failed to fetch user data:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchUser();
   }, []);
 
   const handleNewMessage = (msg) => {
-    if (msg.type === "message") {
-      setUser((prevUser) => ({
-        ...prevUser,
-        total_messages: prevUser.total_messages + 1,
-      }));
-    } else if (msg.type === "notifications") {
-      setUser((prevUser) => ({
-        ...prevUser,
-        total_notifications: prevUser.total_notifications + 1,
-      }));
+    if ((msg.type === "message" && msg.user_id !== msg.current_user) || msg.type === "notifications" || msg.type === "read_messages") {
+      fetchUser();
     }
   };
 

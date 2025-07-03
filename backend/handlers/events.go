@@ -363,7 +363,7 @@ func JoinToEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if member {
+	if member || event.Type == "not_going" {
 		if err = database.NotGoingToEvent(user.ID, event.EventID); err != nil {
 			fmt.Println("Error leaving event:", err)
 			response := map[string]string{"error": "Failed to leave event"}

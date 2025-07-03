@@ -265,7 +265,18 @@ export default function PostFormModal({
                     accept="image/*"
                   />
                   <label htmlFor="file-input" className={styles.fileLabel}>
-                    <img src="/icons/upload.svg" alt="" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="16"
+                      fill="none"
+                      viewBox="0 0 20 16"
+                    >
+                      <path
+                        fill="#475569"
+                        d="M10 0C6.834.025 3.933 2.153 3.173 5.536 1.232 6.352 0 8.194 0 10.376 0 13.385 2.376 16 5.312 16H6a1 1 0 1 0 0-2h-.688C3.526 14 2 12.321 2 10.375c0-1.493.934-2.734 2.344-3.156a.98.98 0 0 0 .687-.813C5.417 3.7 7.592 2.02 10 2c2.681-.02 5.021 2.287 5 5v1.094c0 .465.296.864.75.968C17.066 9.367 18 10.4 18 11.5c0 1.35-1.316 2.5-3 2.5h-1a1 1 0 0 0 0 2h1c2.734 0 5-1.983 5-4.5 0-1.815-1.215-3.42-3.013-4.115.002-.178.013-.359.013-.385.03-3.836-3.209-7.03-7-7m0 6L6.988 9.013 9 9v6a1 1 0 0 0 2 0V9l2.012.01z"
+                      ></path>
+                    </svg>
                     Choose File
                   </label>
                   <span className={styles.fileName}>

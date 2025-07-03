@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import EventFormModal from "../components/EventFormModal";
 import styles from "../styles/EventsPage.module.css";
 import useInfiniteScroll from "../components/useInfiniteScroll";
+import CardOfEvent from "../components/CardOfEvent";
 
 export default function EventsPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -15,6 +16,7 @@ export default function EventsPage() {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMoreEvents, setHasMoreEvents] = useState(true);
   const [error, setError] = useState(null);
+  const [isDisabled, setIsDisabled] = useState(false);
   const router = useRouter();
 
   const eventsGridRef = useRef(null);
@@ -61,6 +63,8 @@ export default function EventsPage() {
       }
 
       const data = await response.json();
+      console.log("Fetched events:", data);
+      // console.log("Type:", type);
 
       if (currentOffset === 0) {
         setEvents(data);
@@ -118,7 +122,9 @@ export default function EventsPage() {
     setEvents((prevEvents) => [newEvent, ...prevEvents]);
   };
 
-  const handleInterestedClick = async (eventId, groupId) => {
+  const handleInterestedClick = async (eventId, groupId, type) => {
+    // setIsDisabled(true);
+
     try {
       const response = await fetch("http://localhost:8404/join_to_event", {
         method: "POST",
@@ -129,26 +135,25 @@ export default function EventsPage() {
         body: JSON.stringify({
           group_id: groupId,
           event_id: eventId,
+          type: type,
         }),
       });
 
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.error || "Failed to join/leave event.");
-
-      setEvents((prev) =>
-        prev.map((e) =>
-          e.event_id === eventId ? { ...e, is_attending: !e.is_attending } : e
-        )
-      );
+      console.log(eventId, type);
+      
+      setEvents(events.filter((event) => event.event_id !== eventId));
+      // setEvents((prev) =>
+      //   prev.map((e) =>
+      //     e.event_id === eventId ? { ...e, is_attending: !e.is_attending } : e
+      //   )
+      // );
     } catch (err) {
       setError(err.message);
     }
   };
-
-  if (!isLoggedIn) {
-    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
-  }
 
   if (isLoading) {
     return (
@@ -157,6 +162,10 @@ export default function EventsPage() {
         <p className={styles.loadingText}>Loading events...</p>
       </div>
     );
+  }
+
+  if (!isLoggedIn) {
+    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
   }
 
   if (error) {
@@ -190,15 +199,17 @@ export default function EventsPage() {
 
         <div className={styles.eventsTabs}>
           <button
-            className={`${styles.tabButton} ${activeTab === "my-events" ? styles.activeTab : ""
-              }`}
+            className={`${styles.tabButton} ${
+              activeTab === "my-events" ? styles.activeTab : ""
+            }`}
             onClick={() => handleTabChange("my-events")}
           >
             My Events
           </button>
           <button
-            className={`${styles.tabButton} ${activeTab === "discover" ? styles.activeTab : ""
-              }`}
+            className={`${styles.tabButton} ${
+              activeTab === "discover" ? styles.activeTab : ""
+            }`}
             onClick={() => handleTabChange("discover")}
           >
             Discover
@@ -208,163 +219,180 @@ export default function EventsPage() {
         <div className={styles.eventsGrid} ref={eventsGridRef}>
           {events?.length > 0 ? (
             events.map((event) => (
-              <div key={event.event_id} className={styles.eventCardContainer}>
-                <div className={styles.eventCardWrapper}>
-                  <div className={styles.eventCardContent}>
-                    <h3 className={styles.eventTitle}>{event.title}</h3>
+              <CardOfEvent
+                key={event.event_id}
+                event={event}
+                handleInterestedClick={handleInterestedClick}
+                going={event.is_attending}
+              />
+              // <div key={event.event_id} className={styles.eventCardContainer}>
+              //   <div className={styles.eventCardWrapper}>
+              //     <div className={styles.eventCardContent}>
+              //       <h3 className={styles.eventTitle}>{event.title}</h3>
 
-                    <p className={styles.eventInfo}>
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <circle
-                          cx="9"
-                          cy="7"
-                          r="4"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <span className={styles.eventInfoText}>
-                        {event.organizer}
-                      </span>
-                    </p>
+              //       <p className={styles.eventInfo}>
+              //         <svg
+              //           width="16"
+              //           height="16"
+              //           viewBox="0 0 24 24"
+              //           fill="none"
+              //           xmlns="http://www.w3.org/2000/svg"
+              //         >
+              //           <path
+              //             d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
+              //             stroke="currentColor"
+              //             strokeWidth="2"
+              //             strokeLinecap="round"
+              //             strokeLinejoin="round"
+              //           />
+              //           <circle
+              //             cx="9"
+              //             cy="7"
+              //             r="4"
+              //             stroke="currentColor"
+              //             strokeWidth="2"
+              //             strokeLinecap="round"
+              //             strokeLinejoin="round"
+              //           />
+              //         </svg>
+              //         <span className={styles.eventInfoText}>
+              //           {event.username}
+              //         </span>
+              //       </p>
 
-                    <p className={styles.eventInfo}>
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <circle
-                          cx="12"
-                          cy="10"
-                          r="3"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <span className={styles.eventInfoText}>
-                        {event.location}
-                      </span>
-                    </p>
+              //       <p className={styles.eventInfo}>
+              //         <svg
+              //           width="16"
+              //           height="16"
+              //           viewBox="0 0 24 24"
+              //           fill="none"
+              //           xmlns="http://www.w3.org/2000/svg"
+              //         >
+              //           <path
+              //             d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"
+              //             stroke="currentColor"
+              //             strokeWidth="2"
+              //             strokeLinecap="round"
+              //             strokeLinejoin="round"
+              //           />
+              //           <circle
+              //             cx="12"
+              //             cy="10"
+              //             r="3"
+              //             stroke="currentColor"
+              //             strokeWidth="2"
+              //             strokeLinecap="round"
+              //             strokeLinejoin="round"
+              //           />
+              //         </svg>
+              //         <span className={styles.eventInfoText}>
+              //           {event.location}
+              //         </span>
+              //       </p>
 
-                    <p className={styles.eventInfo}>
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M12 6v6l4 2"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <span className={styles.eventInfoText}>
-                        {new Date(event.start_date).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}{" "}
-                        -
-                        {new Date(event.end_date).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </p>
+              //       <p className={styles.eventInfo}>
+              //         <svg
+              //           width="16"
+              //           height="16"
+              //           viewBox="0 0 24 24"
+              //           fill="none"
+              //           xmlns="http://www.w3.org/2000/svg"
+              //         >
+              //           <circle
+              //             cx="12"
+              //             cy="12"
+              //             r="10"
+              //             stroke="currentColor"
+              //             strokeWidth="2"
+              //             strokeLinecap="round"
+              //             strokeLinejoin="round"
+              //           />
+              //           <path
+              //             d="M12 6v6l4 2"
+              //             stroke="currentColor"
+              //             strokeWidth="2"
+              //             strokeLinecap="round"
+              //             strokeLinejoin="round"
+              //           />
+              //         </svg>
+              //         <span className={styles.eventInfoText}>
+              //           {new Date(event.start_date).toLocaleTimeString([], {
+              //             hour: "2-digit",
+              //             minute: "2-digit",
+              //           })}{" "}
+              //           -
+              //           {new Date(event.end_date).toLocaleTimeString([], {
+              //             hour: "2-digit",
+              //             minute: "2-digit",
+              //           })}
+              //         </span>
+              //       </p>
 
-                    <p className={styles.eventDescription}>
-                      {event.description}
-                    </p>
+              //       <p className={styles.eventDescription}>
+              //         {event.description}
+              //       </p>
 
-                    <div className={styles.eventActions}>
-                      {/* {event.is_attending ? (
-                        <button
-                          className={`${styles.eventActionButton} ${styles.attending}`}
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="M20 6L9 17l-5-5"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                          Attending
-                        </button>
-                      ) : (
-                        <button
-                          className={styles.eventActionButton}
-                          onClick={() =>
-                            handleInterestedClick(
-                              event.event_id,
-                              event.group_id
-                            )
-                          }
-                        >
-                          Interested
-                        </button>
-                      )} */}
-
-                      <button
-                        className={styles.eventDetailsBtn}
-                        onClick={() =>
-                          router.push(
-                            `/event?id=${event.group_id}&event=${event.event_id}`
-                          )
-                        }
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              //       <div className={styles.eventActions}>
+              //         {event.is_attending ? (
+              //           <button
+              //             className={`${styles.eventActionButton} ${styles.attending}`}
+              //           >
+              //             <svg
+              //               width="16"
+              //               height="16"
+              //               viewBox="0 0 24 24"
+              //               fill="none"
+              //               xmlns="http://www.w3.org/2000/svg"
+              //             >
+              //               <path
+              //                 d="M20 6L9 17l-5-5"
+              //                 stroke="currentColor"
+              //                 strokeWidth="2"
+              //                 strokeLinecap="round"
+              //                 strokeLinejoin="round"
+              //               />
+              //             </svg>
+              //             Going
+              //           </button>
+              //         ) : (
+              //           <>
+              //             <button
+              //               className={styles.eventActionButton}
+              //               // disabled={isDisabled}
+              //               onClick={() =>
+              //                 handleInterestedClick(
+              //                   event.event_id,
+              //                   event.group_id,
+              //                   "going"
+              //                 )
+              //               }
+              //             >
+              //               Going
+              //             </button>
+              //             <button
+              //               className={styles.eventDetailsBtn}
+              //               // disabled={isDisabled}
+              //               // onClick={() =>
+              //               //   router.push(
+              //               //     `/event?id=${event.group_id}&event=${event.event_id}`
+              //               //   )
+              //               // }
+              //               onClick={() =>
+              //                 handleInterestedClick(
+              //                   event.event_id,
+              //                   event.group_id,
+              //                   "not_going"
+              //                 )
+              //               }
+              //             >
+              //               Not Going
+              //             </button>
+              //           </>
+              //         )}
+              //       </div>
+              //     </div>
+              //   </div>
+              // </div>
             ))
           ) : (
             <div className={styles.noEventsMessage}>
@@ -413,7 +441,7 @@ export default function EventsPage() {
         <EventFormModal
           onClose={() => setShowEventForm(false)}
           onEventCreated={handleEventCreated}
-          my_groups={[]}
+          my_groups={my_groups}
         />
       )}
     </div>

@@ -83,6 +83,19 @@
   color: #334155;
   font-weight: 600;
 }
+.error {
+  background-color: #f8dada;
+  color: #da5353; 
+  border: 1px solid #da5353;
+  border-radius: 8px;
+  padding: 1rem 1rem;
+  text-align: center;
+  font-weight: 500;
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
 
 .formControl {
   width: 100%;

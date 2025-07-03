@@ -61,6 +61,29 @@
   flex: 1;
   min-width: 0;
 }
+.followRequestButton {
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+.acceptRequestButton {
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+  color: white;
+  transition: all 0.3s ease;
+}
+.declineRequestButton{
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  transition: all 0.3s ease;
+}
+.followRequestActions{
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+} 
 
 .notificationMessage {
   font-size: 0.875rem;

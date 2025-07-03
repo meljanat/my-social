@@ -467,7 +467,7 @@ func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if Type == "events" {
 		if member {
-			events, err := database.GetEventGroup(group_id, offset)
+			events, err := database.GetEventGroup(user.ID, group_id, offset)
 			if err != nil {
 				fmt.Println("Failed to retrieve events", err)
 				response := map[string]string{"error": "Failed to retrieve events"}

@@ -28,9 +28,11 @@
 .eventImageContainer {
   position: relative;
   width: 100%;
-  padding-bottom: 56.25%; 
+  height: 200px; 
   overflow: hidden;
   background-color: #eef2f9;
+  border-top-left-radius: 16px; 
+  border-top-right-radius: 16px;
 }
 
 .eventImage {
@@ -41,19 +43,6 @@
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-.eventGradientHeader {
-  position: relative;
-  width: 100%;
-  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 2.5rem;
-  font-weight: 800;
-  text-transform: uppercase;
 }
 
 .eventDateBadge {
@@ -68,8 +57,8 @@
   align-items: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   color: #1e293b;
-  font-weight: 600;
   line-height: 1;
+  font-weight: 600;
 }
 
 .eventMonth {
@@ -82,9 +71,8 @@
   font-weight: 800;
 }
 
-.eventCardCompact .eventImageContainer,
-.eventCardCompact .eventGradientHeader {
-  width: 100px; 
+.eventCardCompact .eventImageContainer {
+  width: 100px;
   min-width: 100px;
   height: 100px;
   padding-bottom: 0;
@@ -94,13 +82,13 @@
 }
 
 .eventCardCompact .eventDateBadge {
-  position: static; 
+  position: static;
   padding: 0.3rem 0.6rem;
   font-size: 0.7rem;
   margin-right: 0.5rem;
   box-shadow: none;
   background-color: transparent;
-  color: inherit; 
+  color: inherit;
   align-items: flex-start;
 }
 
@@ -112,10 +100,6 @@
   font-size: 1.2rem;
 }
 
-.eventCardCompact .eventGradientTitle {
-  font-size: 1.5rem;
-}
-
 .eventCardContent {
   padding: 1.5rem;
   flex-grow: 1;
@@ -124,7 +108,7 @@
 }
 
 .eventCardCompact .eventCardContent {
-  padding: 0; 
+  padding: 0;
   flex-grow: 1;
 }
 
@@ -170,7 +154,7 @@
 .eventIcon {
   width: 18px;
   height: 18px;
-  color: #667eea; 
+  color: #667eea;
   flex-shrink: 0;
 }
 
@@ -194,11 +178,11 @@
   border-top: 1px solid #eef2f9;
   display: flex;
   gap: 1rem;
-  margin-top: auto; 
+  margin-top: auto;
 }
 
 .eventCardCompact .eventCardFooter {
-  display: none; 
+  display: none;
 }
 
 .eventActionButton,
@@ -243,7 +227,7 @@
 .eventButtonIcon {
   width: 18px;
   height: 18px;
-  fill: currentColor; 
+  fill: currentColor;
 }
 
 @media (max-width: 768px) {
@@ -275,7 +259,7 @@
   .eventCardFooter {
     padding: 1.2rem;
     gap: 0.8rem;
-    flex-direction: column; 
+    flex-direction: column;
   }
   .eventActionButton,
   .eventDetailsButton {
@@ -291,8 +275,7 @@
     padding: 0.8rem;
     gap: 0.8rem;
   }
-  .eventCardCompact .eventImageContainer,
-  .eventCardCompact .eventGradientHeader {
+  .eventCardCompact .eventImageContainer {
     width: 80px;
     min-width: 80px;
     height: 80px;
@@ -353,8 +336,7 @@
     padding: 0.6rem;
     gap: 0.6rem;
   }
-  .eventCardCompact .eventImageContainer,
-  .eventCardCompact .eventGradientHeader {
+  .eventCardCompact .eventImageContainer {
     width: 70px;
     min-width: 70px;
     height: 70px;

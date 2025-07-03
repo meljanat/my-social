@@ -43,6 +43,13 @@ func GetEvents(user_id, offset int64, Type string) ([]structs.Event, error) {
 		if err != nil {
 			return nil, err
 		}
+		isMember, err := IsMemberEvent(user_id, event.ID)
+		if err != nil {
+			return nil, err
+		}
+		if isMember {
+			event.Type = TypeMember(user_id, event.ID)
+		}
 		if member {
 			events = append(events, event)
 		}
@@ -68,7 +75,7 @@ func GetEvent(id, user_id int64) (structs.Event, error) {
 	return event, err
 }
 
-func GetEventGroup(group_id, offset int64) ([]structs.Event, error) {
+func GetEventGroup(user_id, group_id, offset int64) ([]structs.Event, error) {
 	rows, err := DB.Query("SELECT e.id, u.username, e.name, e.description, e.start_date, e.end_date, e.location, e.created_at, e.image FROM group_events e JOIN users u ON u.id = e.created_by WHERE  e.group_id = ? ORDER BY e.created_at DESC LIMIT ? OFFSET ?", group_id, 10, offset)
 	if err != nil {
 		return nil, err
@@ -84,6 +91,13 @@ func GetEventGroup(group_id, offset int64) ([]structs.Event, error) {
 		}
 		event.GroupID = group_id
 		event.CreatedAt = TimeAgo(date)
+		isMember, err := IsMemberEvent(user_id, event.ID)
+		if err != nil {
+			return nil, err
+		}
+		if isMember {
+			event.Type = TypeMember(user_id, event.ID)
+		}
 		events = append(events, event)
 	}
 	return events, nil

@@ -29,28 +29,35 @@ const Message = ({ message, isSent }) => {
 };
 
 const UserCard = ({ user, isActive, onClick }) => {
-  useEffect(() => {
-    const handleMessage = (msg) => {
-      if (
-        (user.total_messages || user.total_messages === 0) &&
-        msg.type === "message" &&
-        msg.username === user.username
-      ) {
-        user.total_messages++;
-      }
-    };
+  // const handleMessage = (msg) => {
+  //   console.log(isActive, msg);
 
-    addToListeners("message", handleMessage);
+  //   if (
+  //     !isActive &&
+  //     msg.type === "message" &&
+  //     ((user.username && msg.username === user.username) || (user.name && msg.name === user.name))
+  //   ) {
+  //     user.total_messages++;
+  //   }
+  // };
+  // useEffect(() => {
+  //   addToListeners("message", handleMessage);
 
-    return () => {
-      removeFromListeners("message", handleMessage);
-    };
-  }, [user]);
+  //   return () => {
+  //     removeFromListeners("message", handleMessage);
+  //   };
+  // }, []);
+  console.log("user", user, isActive);
 
   return (
     <li
       className={`${styles.userItem} ${isActive ? styles.activeUser : ""}`}
-      onClick={onClick}
+      onClick={() => {
+        onClick();
+        if (user.total_messages > 0) {
+          user.total_messages = 0;
+        }
+      }}
       data-id={user.user_id || user.group_id}
     >
       <img
@@ -73,14 +80,10 @@ const UserCard = ({ user, isActive, onClick }) => {
                 : ""}
           </p>
         </div>
-        {user && user.total_messages > 0 ? (
+        {user && user.total_messages > 0 && (
           <div className={styles.unreadBadge}>
             {user.total_messages}
           </div>
-        ) : user.total_messages > 0 ? (
-          <div className={styles.unreadBadge}>{user.total_messages}</div>
-        ) : (
-          ""
         )}
       </div>
     </li>
@@ -184,7 +187,6 @@ export default function MessagesPage() {
         );
         const data = await response.json();
         setUsers(data);
-        console.log("Fetched users:", data);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -283,8 +285,6 @@ export default function MessagesPage() {
   }, [selectedUser]);
 
   const handleUserSelect = (user_id, group_id, offset = 0) => {
-    console.log("user selected:", user_id, group_id, offset);
-
     const user = user_id
       ? users?.find((u) => u.user_id == user_id)
       : null;
@@ -295,6 +295,7 @@ export default function MessagesPage() {
     if (user || group) {
       setSelectedUser(user || group);
     }
+
 
     let fetchMessages = group_id
       ? `chats_group?group_id=${group_id}&offset=${offset}`
@@ -329,70 +330,96 @@ export default function MessagesPage() {
       });
   };
 
-  useEffect(() => {
-    if (!isLoggedIn) return;
-
-    const handleMessage = (msg) => {
-      if (msg.type === "message") {
-
-    console.log("hna", selectedUser);
+  const handleMessage = (msg) => {
+    if (msg.type === "message") {
+      if (selectedUser &&
+        ((selectedUser.username && msg.username === selectedUser.username) ||
+          (selectedUser.name && msg.name === selectedUser.name) ||
+          msg.user_id === msg.current_user)) {
         setMessages((prevMessages) => [
           ...prevMessages ? prevMessages : [],
           msg,
         ]);
       }
-    };
-    const handleNewConnection = (msg) => {
-      console.log("New connection:", msg);
 
-      if (msg.type === "new_connection") {
+      if (!selectedUser) {
         setUsers((prevUsers) => {
           const updatedUsers = prevUsers.map((user) => {
-            if (user.user_id === msg.user_id) {
-              return { ...user, online: true };
+            if (
+              (user.username && msg.username === user.username) ||
+              (user.name && msg.name === user.name)
+            ) {
+              return {
+                ...user,
+                total_messages: (user.total_messages || 0) + 1,
+              };
             }
             return user;
           });
           return updatedUsers;
-        });
+        })
       }
-    };
-    const handleDisconnection = (msg) => {
-      if (msg.type === "disconnection") {
-        setUsers((prevUsers) => {
-          const updatedUsers = prevUsers.map((user) => {
-            if (user.user_id === msg.user_id) {
-              return { ...user, online: false };
-            }
-            return user;
-          });
-          return updatedUsers;
+    } else if (msg.type === "new_connection") {
+      setUsers((prevUsers) => {
+        const updatedUsers = prevUsers.map((user) => {
+          if (user.user_id === msg.user_id) {
+            return { ...user, online: true };
+          }
+          return user;
         });
-      }
-    };
+        return updatedUsers;
+      });
+    } else if (msg.type === "disconnection") {
+      setUsers((prevUsers) => {
+        const updatedUsers = prevUsers.map((user) => {
+          if (user.user_id === msg.user_id) {
+            return { ...user, online: false };
+          }
+          return user;
+        });
+        return updatedUsers;
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
 
     addToListeners("message", handleMessage);
-    addToListeners("new_connection", handleNewConnection);
-    addToListeners("disconnection", handleDisconnection);
+    addToListeners("new_connection", handleMessage);
+    addToListeners("disconnection", handleMessage);
 
     return () => {
       removeFromListeners("message", handleMessage);
-      removeFromListeners("new_connection", handleNewConnection);
-      removeFromListeners("disconnection", handleDisconnection);
+      removeFromListeners("new_connection", handleMessage);
+      removeFromListeners("disconnection", handleMessage);
     };
   }, []);
+
+  const readMessages = async () => {
+    await fetch('http://localhost:8404/read_messages', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: selectedUser.user_id || 0,
+        group_id: selectedUser.group_id || 0,
+      }),
+      credentials: "include",
+    });
+  }
 
   useEffect(() => {
     if (!isLoggedIn || !selectedUser) return;
 
-
-
-  }, [selectedUser, messages]);
+    readMessages();
+  }, [messages]);
 
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    
+
     if (!newMessage.trim() || !selectedUser) return;
 
     const mssg = {

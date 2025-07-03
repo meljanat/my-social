@@ -86,28 +86,18 @@ func GetGroupConversation(group_id, user_id, offset int64) ([]structs.Message, e
 	return chats, nil
 }
 
-func GetCountUserMessages(user_id int64) (int64, int64, error) {
+func GetCountUserMessages(user_id int64, groups []structs.Group) (int64, int64, error) {
 	var count int64
 	var count2 int64
-	rows, err := DB.Query("SELECT messages_not_read FROM messages WHERE receiver_id = ? AND group_id = ?", user_id, 0)
-	if err != nil {
+	err := DB.QueryRow("SELECT messages_not_read FROM messages WHERE receiver_id = ? AND group_id = ? ORDER BY created_at DESC LIMIT 1", user_id, 0).Scan(&count)
+	if err != nil && err.Error() != "sql: no rows in result set" {
 		return 0, 0, err
 	}
-	defer rows.Close()
-	var count1 int64
-	for rows.Next() {
-		if err := rows.Scan(&count1); err != nil {
-			return 0, 0, err
-		}
-		count += count1
-	}
-	rows, err = DB.Query("SELECT messages_not_read FROM messages WHERE receiver_id = ? AND group_id != ?", user_id, 0)
-	if err != nil {
-		return 0, 0, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		if err := rows.Scan(&count1); err != nil {
+	
+	for _, group := range groups {
+		var count1 int64
+		err = DB.QueryRow("SELECT messages_not_read FROM messages WHERE receiver_id = ? AND group_id == ? ORDER BY created_at DESC LIMIT 1", user_id, group.ID).Scan(&count1)
+		if err != nil && err.Error() != "sql: no rows in result set" {
 			return 0, 0, err
 		}
 		count2 += count1
@@ -117,7 +107,7 @@ func GetCountUserMessages(user_id int64) (int64, int64, error) {
 
 func GetCountConversationMessages(sender_id, user_id int64) (int64, error) {
 	var count int64
-	rows, err := DB.Query("SELECT messages_not_read FROM messages WHERE sender_id = ? AND receiver_id = ? AND group_id = ?", sender_id, user_id, 0)
+	rows, err := DB.Query("SELECT messages_not_read FROM messages WHERE sender_id = ? AND receiver_id = ? AND group_id = ? ORDER BY created_at DESC LIMIT 1", sender_id, user_id, 0)
 	if err != nil {
 		return 0, err
 	}
@@ -133,6 +123,11 @@ func GetCountConversationMessages(sender_id, user_id int64) (int64, error) {
 }
 
 func ReadMessages(sender_id, reciever_id, group_id int64) error {
-	_, err := DB.Exec("UPDATE messages SET messages_not_read = ? WHERE receiver_id = ? AND sender_id = ? AND group_id = ?", 0, reciever_id, reciever_id, group_id)
+	var err error
+	if group_id == 0 {
+		_, err = DB.Exec("UPDATE messages SET messages_not_read = 0 WHERE receiver_id = ? AND sender_id = ? AND group_id = ?", reciever_id, sender_id, group_id)
+	} else {
+		_, err = DB.Exec("UPDATE messages SET messages_not_read = 0 WHERE receiver_id = ? AND group_id = ?", reciever_id, group_id)
+	}
 	return err
 }

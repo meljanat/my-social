@@ -99,6 +99,7 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 					fmt.Println("Error getting user by ID:", err)
 					return
 				}
+				group, err := database.GetGroupById(message.GroupID)
 				is_member, err := database.IsMemberGroup(id, message.GroupID)
 				if err != nil {
 					fmt.Println("Error checking group membership:", err)
@@ -114,7 +115,7 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 				}
 
 				Mutex.Lock()
-				SendWsMessage(id, map[string]interface{}{"type": msgType, "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": id, "created_at": "Just now"})
+				SendWsMessage(id, map[string]interface{}{"type": msgType, "name": group.Name, "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": id, "created_at": "Just now"})
 				Mutex.Unlock()
 			}
 		} else {
@@ -132,8 +133,8 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 			}
 
 			Mutex.Lock()
-			SendWsMessage(user_id, map[string]interface{}{"type": msgType, "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "created_at": "Just now"})
-			SendWsMessage(message.UserID, map[string]interface{}{"type": msgType, "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "created_at": "Just now"})
+			SendWsMessage(user_id, map[string]interface{}{"type": msgType, "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": user_id, "created_at": "Just now"})
+			SendWsMessage(message.UserID, map[string]interface{}{"type": msgType, "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": message.UserID, "created_at": "Just now"})
 			Mutex.Unlock()
 		}
 	}

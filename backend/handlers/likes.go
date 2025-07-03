@@ -62,7 +62,6 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	post.TotalLikes = count
 	post.IsLiked = !post.IsLiked
-	fmt.Println("Post liked:", post.IsLiked)
 	if post.UserID != user.ID {
 		if post.IsLiked {
 			if err = database.CreateNotification(user.ID, post.UserID, post.ID, post.GroupID, 0, type_notification); err != nil {

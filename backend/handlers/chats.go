@@ -45,6 +45,8 @@ func GetConnectionsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("Retrieved connections successfully", connections[len(connections)-1].TotalMessages)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(connections)
 }
@@ -204,7 +206,7 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var request struct {
-		ID int64 `json:"id"`
+		UserID  int64 `json:"user_id"`
 		GroupID int64 `json:"group_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -215,7 +217,7 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if request.ID == 0 {
+	if request.UserID == 0 && request.GroupID == 0 {
 		fmt.Println("Invalid message ID")
 		response := map[string]string{"error": "Invalid message ID"}
 		w.WriteHeader(http.StatusBadRequest)
@@ -223,7 +225,7 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.ReadMessages(user.ID, request.ID, request.GroupID)
+	err = database.ReadMessages(request.UserID, user.ID, request.GroupID)
 	if err != nil {
 		fmt.Println("Failed to mark messages as read", err)
 		response := map[string]string{"error": "Failed to mark messages as read"}
@@ -232,7 +234,6 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := map[string]string{"status": "success"}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode("success")
 }

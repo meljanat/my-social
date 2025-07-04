@@ -179,7 +179,9 @@ export default function Home() {
               <div className="stories-section">
                 <StoriesComponent storiesUsers={stories} />
               </div>
-              <PostComponent posts={posts} />
+              <PostComponent 
+              // key={posts.post_id}
+              posts={posts} />
             </div>
 
             <div className="right-column">

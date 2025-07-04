@@ -125,12 +125,12 @@ func GetCountUserEvents(id int64) (int64, error) {
 }
 
 func GoingToEvent(user_id, event_id int64) error {
-	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id, type) VALUES (?, ?, ?)", user_id, event_id, "going")
+	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id, type) VALUES (?, ?, ?)", user_id, event_id, "GOING")
 	return err
 }
 
 func NotGoingToEvent(user_id, event_id int64) error {
-	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id, type) VALUES (?, ?, ?)", user_id, event_id, "not_going")
+	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id, type) VALUES (?, ?, ?)", user_id, event_id, "NOT GOING")
 	return err
 }
 

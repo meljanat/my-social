@@ -93,6 +93,7 @@ export default function ProfilePage() {
             ...prev,
             type: data.action,
             total_followers: data.total_followers,
+            
           };
         });
       }

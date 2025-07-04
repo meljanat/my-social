@@ -441,7 +441,7 @@ export default function EventsPage() {
         <EventFormModal
           onClose={() => setShowEventForm(false)}
           onEventCreated={handleEventCreated}
-          my_groups={my_groups}
+          // my_groups={my_groups}
         />
       )}
     </div>

@@ -3,15 +3,12 @@ import styles from "../styles/EventFormModal.module.css";
 
 export default function EventFormModal({
   onClose,
-  user,
+  // user,
   onEventCreated,
   my_groups,
   group,
 }) {
-  // console.log("dasasddasd");
-
   const [eventFormInput, setEventFormInput] = useState({
-    user_id: user.id,
     name: "",
     description: "",
     start_date: "",
@@ -20,6 +17,22 @@ export default function EventFormModal({
     eventImage: null,
     group_id: 0,
   });
+  // console.log(my_groups);
+  const dummydata = [
+    {
+      group_id: 1,
+      name: "Dummy Group 1",
+      description: "This is a dummy group for testing purposes.",
+      total_members: 10,
+    },
+    {
+      group_id: 2,
+      name: "Dummy Group 2",
+      description: "This is another dummy group for testing purposes.",
+      total_members: 5,
+    },
+  ];
+
   const [imageInputKey, setImageInputKey] = useState(Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -43,39 +56,46 @@ export default function EventFormModal({
   };
 
   useEffect(() => {
-    setIsLoading(true);
-    const getGroups = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/new_event", {
-          method: "GET",
-          credentials: "include",
-        });
+    // if (!my_groups) {  
+      setIsLoading(true);
+      const getGroups = async () => {
+        try {
+          const response = await fetch(
+            "http://localhost:8404/groups?type=joined&offset=-1",
+            {
+              method: "GET",
+              credentials: "include",
+            }
+          );
 
-        if (!response.ok) {
-          const data = await response.json();
+          if (!response.ok) {
+            const data = await response.json();
 
-          setError(data.error || "Failed to retreive groups");
-          isLoading(false);
-          return;
+            setError(data.error || "Failed to retreive groups");
+            isLoading(false);
+            return;
+          }
+
+          const responseData = await response.json();
+          console.log("Groups data:", responseData);
+
+          setMyGroups(responseData || []);
+        } catch (error) {
+          console.error("Error creating event:", error);
+        } finally {
+          setIsSubmitting(false);
         }
-
-        const responseData = await response.json();
-        setMyGroups(responseData || []);
-
-      } catch (error) {
-        console.error("Error creating event:", error);
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
-    getGroups()
+      };
+      getGroups();
+    // }
   }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const formData = new FormData();
-    formData.append("user_id", eventFormInput.user_id);
+    // formData.append("user_id", eventFormInput.user_id);
     formData.append("name", eventFormInput.name);
     formData.append("description", eventFormInput.description);
     formData.append("start_date", eventFormInput.start_date);
@@ -104,6 +124,8 @@ export default function EventFormModal({
 
       const responseData = await response.json();
       console.log(responseData);
+      console.log(formData);
+      
 
       const newEvent = {
         event_id: responseData.id || Date.now(),
@@ -112,8 +134,8 @@ export default function EventFormModal({
         start_date: eventFormInput.start_date,
         end_date: eventFormInput.end_date,
         location: eventFormInput.location,
-        creator: `${user.first_name} ${user.last_name}`,
-        creator_id: user.id,
+        // creator: `${user.username}`,
+        // creator_id: user.id,
         created_at: "Just now",
         image: eventFormInput.eventImage
           ? URL.createObjectURL(eventFormInput.eventImage)
@@ -175,7 +197,7 @@ export default function EventFormModal({
                 }}
               />
             </div>
-            {my_groups && (
+            {myGroups && (
               <div className={styles.formGroup}>
                 <label htmlFor="event-group">Select Group</label>
                 <select

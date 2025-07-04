@@ -2,7 +2,6 @@ import React from "react";
 import styles from "../styles/EventsPage.module.css";
 import { useRouter } from "next/navigation";
 
-
 const CardOfEvent = ({ event, handleInterestedClick }) => {
   const router = useRouter();
 
@@ -115,10 +114,10 @@ const CardOfEvent = ({ event, handleInterestedClick }) => {
             }`}
             style={{
               fontSize: "12px",
-              color: event.type === "going" ? "rgb(103, 211, 103)" : "#ef4444",
+              color: event.type === "GOING" ? "rgb(103, 211, 103)" : "#ef4444",
             }}
           >
-            {event.type.toUpperCase().replace("_", " ")}
+            {event.type}
           </span>
           {/* <p>Created At: {event.created_at}</p> */}
 

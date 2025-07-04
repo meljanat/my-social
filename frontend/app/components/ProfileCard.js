@@ -4,20 +4,20 @@ import styles from "../styles/ProfileCard.module.css";
 
 import GroupFormModal from "./GroupFromModal";
 import EventFormModal from "./EventFormModal";
-import PostFormModal from "./PostFormModal"; 
+import PostFormModal from "./PostFormModal";
 
 export default function ProfileCard({ user, onPostCreated, my_groups }) {
   const [showPostForm, setShowPostForm] = useState(false);
-  const [showGroupForm, setShowGroup] = useState(false); 
+  const [showGroupForm, setShowGroup] = useState(false);
   const [showEventForm, setShowEventForm] = useState(false);
   const [groups, setGroups] = useState([]);
-  // const [audience, setAudience] = useState([]); 
+  // const [audience, setAudience] = useState([]);
 
   function handleCreatePost() {
     setShowPostForm(true);
   }
   function handleCreateGroup() {
-    setShowGroup(true); 
+    setShowGroup(true);
   }
   function handleCreateEvent() {
     setShowEventForm(true);
@@ -97,7 +97,7 @@ export default function ProfileCard({ user, onPostCreated, my_groups }) {
       )}
       {showGroupForm && (
         <GroupFormModal
-          onClose={() => setShowGroup(false)} 
+          onClose={() => setShowGroup(false)}
           user={user}
           onGroupCreated={handleGroupCreated}
         />

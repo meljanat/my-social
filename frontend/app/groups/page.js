@@ -22,12 +22,12 @@ export default function GroupsPage() {
   const [activeTab, setActiveTab] = useState("discover");
   const [groupData, setGroupData] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [myGroups, setMyGroups] = useState([]);
   const [showRemoveGroupModal, setShowRemoveGroupModal] = useState(false);
   const [showGroupForm, setShowGroupForm] = useState(false);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState("true");
 
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMorePosts, setHasMorePosts] = useState(true);
@@ -36,6 +36,7 @@ export default function GroupsPage() {
 
   useEffect(() => {
     const checkLoginStatus = async () => {
+      
       try {
         const response = await fetch("http://localhost:8404/", {
           method: "GET",
@@ -96,6 +97,8 @@ export default function GroupsPage() {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
+      console.log("Groups data:", data, endpoint);
+
       if (endpoint === "joined") {
         setMyGroups(data);
       } else {
@@ -170,7 +173,7 @@ export default function GroupsPage() {
   };
 
   const handleJoinGroup = (group) => {
-    joinGroup(group.group_id)
+    joinGroup(group.group_id);
     setGroupData((prev) => prev.filter((g) => g.group_id !== group.group_id));
     setMyGroups((prev) => [...prev, { ...group, is_joined: true }]);
   };
@@ -197,6 +200,14 @@ export default function GroupsPage() {
   const removeGroupForModal = (groupId) => {
     handleDeleteGroup(groupId);
   };
+  if (isLoading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <p className={styles.loadingText}>Loading...</p>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
@@ -235,42 +246,39 @@ export default function GroupsPage() {
 
           <div className={styles.groupsTabs}>
             <button
-              className={`${styles.tabButton} ${activeTab === "my-groups" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "my-groups" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("my-groups")}
             >
               My Groups
             </button>
             <button
-              className={`${styles.tabButton} ${activeTab === "discover" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "discover" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("discover")}
             >
               Discover
             </button>
             <button
-              className={`${styles.tabButton} ${activeTab === "pending-groups" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "pending-groups" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("pending-groups")}
             >
               Pending Groups
             </button>
             <button
-              className={`${styles.tabButton} ${activeTab === "invitations" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "invitations" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("invitations")}
             >
               Invitations
             </button>
           </div>
 
-          <div className={styles.groupsSearch}>
-            <input
-              type="text"
-              placeholder="Search groups..."
-              className={styles.searchInput}
-            />
-          </div>
 
           <div className={styles.groupsGrid}>
             {isLoading ? (

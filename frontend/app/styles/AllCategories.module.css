@@ -29,7 +29,43 @@
     border-bottom: 1px solid #eef2f9;
     padding-bottom: 1rem;
   }
+  .loadingContainer,
+  .errorContainer,
+  .loadingMoreMessage,
+  .endOfEventsMessage {
+    height: 100%;
+    width: 100%;
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 0;
+    color: #64748b;
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
   
+  .loadingSpinner {
+    height: 100%;
+    width: 100%;
+    border: 6px solid #e0e5f0;
+    border-top: 6px solid #667eea;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
   .noCategoriesMessage {
     color: #64748b;
     font-size: 0.95rem;

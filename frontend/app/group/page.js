@@ -15,7 +15,7 @@ import { handleFollow, handelAccept, handleReject } from "../functions/user";
 import { leaveGroup } from "../functions/group";
 
 export default function GroupPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState("true");
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [groupView, setGroupView] = useState("posts");
@@ -181,7 +181,6 @@ export default function GroupPage() {
   if (!isLoggedIn) {
     return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
   }
-
 
   if (!selectedGroup) {
     return (
@@ -464,11 +463,12 @@ export default function GroupPage() {
               </div>
             ) : (
               <button
-                className={` ${selectedGroup.role === "member" ||
+                className={` ${
+                  selectedGroup.role === "member" ||
                   activeTab === "pending-groups"
-                  ? styles.leaveGroupBtn
-                  : styles.adminActionBtn
-                  }`}
+                    ? styles.leaveGroupBtn
+                    : styles.adminActionBtn
+                }`}
                 onClick={() => {
                   handleFollow(selectedGroup.admin_id, selectedGroup.group_id);
                 }}
@@ -498,8 +498,8 @@ export default function GroupPage() {
                 {selectedGroup.role === "member"
                   ? "Leave Group"
                   : activeTab === "pending-groups"
-                    ? "Cancel"
-                    : "Join Group"}
+                  ? "Cancel"
+                  : "Join Group"}
               </button>
             )}
           </div>
@@ -515,8 +515,9 @@ export default function GroupPage() {
       )}
       <div className={styles.groupDetailTabs}>
         <button
-          className={`${styles.tabButton} ${groupView === "posts" ? styles.activeTab : ""
-            }`}
+          className={`${styles.tabButton} ${
+            groupView === "posts" ? styles.activeTab : ""
+          }`}
           onClick={() => {
             fetchGroupDetails("posts", selectedGroup.group_id);
             setGroupView("posts");
@@ -525,8 +526,9 @@ export default function GroupPage() {
           Posts
         </button>
         <button
-          className={`${styles.tabButton} ${groupView === "members" ? styles.activeTab : ""
-            }`}
+          className={`${styles.tabButton} ${
+            groupView === "members" ? styles.activeTab : ""
+          }`}
           onClick={() => {
             fetchGroupDetails("members", selectedGroup.group_id);
             setGroupView("members");
@@ -535,8 +537,9 @@ export default function GroupPage() {
           Members
         </button>
         <button
-          className={`${styles.tabButton} ${groupView === "events" ? styles.activeTab : ""
-            }`}
+          className={`${styles.tabButton} ${
+            groupView === "events" ? styles.activeTab : ""
+          }`}
           onClick={() => {
             fetchGroupDetails("events", selectedGroup.group_id);
             setGroupView("events");
@@ -550,7 +553,7 @@ export default function GroupPage() {
         {groupView === "posts" && (
           <div className={styles.groupPostsContainer}>
             {selectedGroup.role === "guest" &&
-              selectedGroup.privacy === "private" ? (
+            selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
                 <img src="/icons/no-posts.svg" alt="No Posts" />
                 <p>You are not allowed to see Posts</p>
@@ -607,7 +610,7 @@ export default function GroupPage() {
               <h3>Members ({selectedGroup.members?.length || 0})</h3>
             </div>
             {selectedGroup.role === "guest" &&
-              selectedGroup.privacy === "private" ? (
+            selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
                 <p className={styles.emptyTitle}>
                   You are not allowed to see Members
@@ -634,7 +637,7 @@ export default function GroupPage() {
         {groupView === "events" && (
           <div className={styles.groupEventsContainer}>
             {selectedGroup.role === "guest" &&
-              selectedGroup.privacy === "private" ? (
+            selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
                 <p className={styles.emptyTitle}>
                   You are not allowed to see Events
@@ -646,13 +649,13 @@ export default function GroupPage() {
                   <h3>Upcoming Events</h3>
                   {(selectedGroup.role === "admin" ||
                     selectedGroup.role === "member") && (
-                      <button
-                        className={styles.createEventBtn}
-                        onClick={() => setShowEventForm(true)}
-                      >
-                        Create Event
-                      </button>
-                    )}
+                    <button
+                      className={styles.createEventBtn}
+                      onClick={() => setShowEventForm(true)}
+                    >
+                      Create Event
+                    </button>
+                  )}
                 </div>
 
                 <div className={styles.eventsScrollContainer}>

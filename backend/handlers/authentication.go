@@ -56,8 +56,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := database.GetUserByEmail(login.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			fmt.Println("Invalid email or password", err)
-			response := map[string]string{"error": "Invalid email or password"}
+			fmt.Println("Invalid email", err)
+			response := map[string]string{"email": "Invalid email"}
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(response)
 		} else {
@@ -71,7 +71,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password)); err != nil {
 		fmt.Println("Password is incorrect")
-		response := map[string]string{"error": "Password is incorrect"}
+		response := map[string]string{"password": "Password is incorrect"}
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response)
 		return
@@ -209,7 +209,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
 		if err != nil {
 			fmt.Println("Error hashing password:", err)
-			response := map[string]string{"error": "Error hashing password"}
+			response := map[string]string{"password": "Error hashing password"}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(response)
 			return
@@ -227,12 +227,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		if err := database.RegisterUser(register.Username, register.FirstName, register.LastName, register.Email, register.Bio, imagePath, coverPath, register.Privacy, hashedPassword, register.DateOfBirth, sessionToken); err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed: users.email") {
 				fmt.Println("Email already exists")
-				response := map[string]string{"error": "Email already exists"}
+				response := map[string]string{"email": "Email already exists"}
 				w.WriteHeader(http.StatusBadRequest)
 				json.NewEncoder(w).Encode(response)
 			} else if strings.Contains(err.Error(), "UNIQUE constraint failed: users.username") {
 				fmt.Println("Username already exists")
-				response := map[string]string{"error": "Username already exists"}
+				response := map[string]string{"username": "Username already exists"}
 				w.WriteHeader(http.StatusBadRequest)
 				json.NewEncoder(w).Encode(response)
 			} else {
@@ -255,13 +255,13 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		if err := database.UpdateProfile(register.ID, register.Username, register.FirstName, register.LastName, register.Bio, register.Privacy); err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed: users.email") {
 				fmt.Println("Email already exists")
-				response := map[string]string{"error": "Email already exists"}
+				response := map[string]string{"email": "Email already exists"}
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusBadRequest)
 				json.NewEncoder(w).Encode(response)
 			} else if strings.Contains(err.Error(), "UNIQUE constraint failed: users.username") {
 				fmt.Println("Username already exists")
-				response := map[string]string{"error": "Username already exists"}
+				response := map[string]string{"usename": "Username already exists"}
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusBadRequest)
 				json.NewEncoder(w).Encode(response)
@@ -406,16 +406,16 @@ func ValidateInput(username, firstName, lastName, email, password, confirm_pass,
 		}
 
 		if date.IsZero() {
-			errors["date"] = "Date cannot be empty"
+			errors["dateOfBirth"] = "Date cannot be empty"
 		} else {
 			age := time.Since(date).Hours() / 24 / 365.3
 			if age < 18 {
-				errors["date"] = "You must be at least 18 years old"
+				errors["dateOfBirth"] = "You must be at least 18 years old"
 			}
 
 			year1900 := time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC)
 			if date.Before(year1900) {
-				errors["date"] = "Date cannot be before the year 1900"
+				errors["dateOfBirth"] = "Date cannot be before the year 1900"
 			}
 		}
 

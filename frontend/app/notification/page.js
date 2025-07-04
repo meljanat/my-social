@@ -9,6 +9,7 @@ import useInfiniteScroll from "../components/useInfiniteScroll";
 
 export default function NotificationPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const [hasMoreNotifications, setHasMoreNotifications] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -158,6 +159,15 @@ export default function NotificationPage() {
       currentContainer.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="loadingContainer">
+        <div className="loadingSpinner"></div>
+        <p className="loadingText">Loading your profile...</p>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;

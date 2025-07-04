@@ -77,14 +77,12 @@ const UserCard = ({ user, isActive, onClick }) => {
             {user.username
               ? `@${user.username}`
               : user.total_members
-                ? `(${user.total_members}) Members`
-                : ""}
+              ? `(${user.total_members}) Members`
+              : ""}
           </p>
         </div>
         {user && user.total_messages > 0 && (
-          <div className={styles.unreadBadge}>
-            {user.total_messages}
-          </div>
+          <div className={styles.unreadBadge}>{user.total_messages}</div>
         )}
       </div>
     </li>
@@ -92,7 +90,7 @@ const UserCard = ({ user, isActive, onClick }) => {
 };
 
 export default function MessagesPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState();
   const [activeTab, setActiveTab] = useState("friends");
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -103,14 +101,14 @@ export default function MessagesPage() {
   const [openEmojiSection, setOpenEmojiSection] = useState(false);
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(10);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const conversationRef = useRef(null);
   const usersListRef = useRef(null);
   const sidebarRef = useRef(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-
+  const [showNewMessageModal, setShowNewMessageModal] = useState(false);
   const selectedUserId = searchParams.get("user");
   const selectedGroupId = searchParams.get("group");
 
@@ -159,14 +157,13 @@ export default function MessagesPage() {
         },
         credentials: "include",
       }
-    )
+    );
     if (response.ok) {
       const data = await response.json();
       // setUsers([data, ...users]);
       setSelectedUser(data);
     } else {
       console.log("Error fetching user chat:", response.statusText);
-
     }
   };
 
@@ -208,7 +205,6 @@ export default function MessagesPage() {
       const data = await response.json();
       setGroups(data);
       console.log("Fetched groups:", data);
-
     } catch (error) {
       console.error("Error fetching groups:", error);
     }
@@ -230,7 +226,6 @@ export default function MessagesPage() {
     if (!isLoggedIn || (!selectedUserId && !selectedGroupId)) return;
 
     handleUserSelect(selectedUserId, selectedGroupId, 0);
-
   }, [selectedUserId, selectedGroupId, users, groups]);
 
   useEffect(() => {
@@ -264,7 +259,8 @@ export default function MessagesPage() {
 
     if (selectedUser && usersListRef.current) {
       const selectedElement = usersListRef.current.querySelector(
-        `.${styles.userItem}[data-id="${selectedUser.user_id || selectedUser.group_id
+        `.${styles.userItem}[data-id="${
+          selectedUser.user_id || selectedUser.group_id
         }"]`
       );
       if (selectedElement) {
@@ -277,17 +273,13 @@ export default function MessagesPage() {
   }, [selectedUser]);
 
   const handleUserSelect = (user_id, group_id, offset = 0) => {
-    const user = user_id
-      ? users?.find((u) => u.user_id == user_id)
-      : null;
-    const group = group_id
-      ? groups?.find((g) => g.group_id == group_id)
-      : null;
+    const user = user_id ? users?.find((u) => u.user_id == user_id) : null;
+    const group = group_id ? groups?.find((g) => g.group_id == group_id) : null;
 
     if (user || group) {
       setSelectedUser(user || group);
     } else {
-      getUserChat(user_id)
+      getUserChat(user_id);
     }
 
     let fetchMessages = group_id
@@ -325,12 +317,14 @@ export default function MessagesPage() {
 
   const handleMessage = (msg) => {
     if (msg.type === "message") {
-      if (selectedUser &&
+      if (
+        selectedUser &&
         ((selectedUser.username && msg.username === selectedUser.username) ||
           (selectedUser.name && msg.name === selectedUser.name) ||
-          msg.user_id === msg.current_user)) {
+          msg.user_id === msg.current_user)
+      ) {
         setMessages((prevMessages) => [
-          ...prevMessages ? prevMessages : [],
+          ...(prevMessages ? prevMessages : []),
           msg,
         ]);
       }
@@ -359,7 +353,7 @@ export default function MessagesPage() {
   }, []);
 
   const readMessages = async () => {
-    await fetch('http://localhost:8404/read_messages', {
+    await fetch("http://localhost:8404/read_messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -370,14 +364,13 @@ export default function MessagesPage() {
       }),
       credentials: "include",
     });
-  }
+  };
 
   useEffect(() => {
     if (!isLoggedIn || !selectedUser) return;
 
     readMessages();
   }, [messages]);
-
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -389,7 +382,7 @@ export default function MessagesPage() {
       group_id: selectedUser.group_id || 0,
       user_id: selectedUser.user_id || 0,
       content: newMessage,
-    }
+    };
 
     websocket.send(JSON.stringify(mssg));
     setNewMessage("");
@@ -398,6 +391,14 @@ export default function MessagesPage() {
   const toggleEmojiSection = () => {
     setOpenEmojiSection(!openEmojiSection);
   };
+  if (isLoading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <p className={styles.loadingText}>Loading your profile...</p>
+      </div>
+    );
+  }
 
   if (!isLoggedIn) {
     return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
@@ -405,23 +406,92 @@ export default function MessagesPage() {
 
   return (
     <div className={styles.messagesPageContainer}>
+      {showNewMessageModal && (
+        <div className={styles.newMessageModalOverlay}>
+          <div className={styles.newMessageModal}>
+            <h2>Create New Message</h2>
+            <button
+              className={styles.closeButton}
+              onClick={() => setShowNewMessageModal(false)}
+            >
+              &times;
+            </button>
+            <form
+              className={styles.newMessageForm}
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (newMessage.trim()) {
+                  handleSendMessage(e);
+                  setShowNewMessageModal(false);
+                }
+              }}
+            >
+              <input
+                type="textArea"
+                placeholder="Type your message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                className={styles.newMessageInput}
+              />
+              <select
+                className={styles.newMessageSelect}
+                onChange={(e) => {
+                  const userId = e.target.value;
+                  // if (userId) {
+                  //   handleUserSelect(userId, 0, 0);
+                  //   setSelectedUser(users.find((u) => u.user_id == userId));
+                  // } else {
+                  //   setSelectedUser(null);
+                  // }
+                }}
+              >
+                <option value="">Select User</option>
+                {/* {users.map((user) => (
+                  <option key={user.user_id} value={user.user_id}>
+                    {user.first_name ? `${user.first_name} ${user.last_name}` : user.name}
+                  </option>
+                ))} */}
+              </select>
+              <button type="submit" className={styles.sendButton}>
+                Send message
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className={styles.messagesPageContent}>
         <div className={styles.messagesSidebar}>
           <div className={styles.messagesHeader}>
             <h2>Messages</h2>
+            <div
+              className={styles.newMessageButton}
+              onClick={() => setShowNewMessageModal(true)}
+            >
+              <span className={styles.newMessageIconContainer}>
+                {/* <img
+                  src="/icons/message.svg"
+                  alt="User Avatar"
+                  className={styles.newMessageIcon}
+                /> */}
+                +
+              </span>
+            </div>
           </div>
 
           <div className={styles.messagesTabs}>
             <button
-              className={`${styles.tabButton} ${activeTab === "friends" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "friends" ? styles.activeTab : ""
+              }`}
               onClick={() => setActiveTab("friends")}
             >
               Friends
             </button>
             <button
-              className={`${styles.tabButton} ${activeTab === "groups" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "groups" ? styles.activeTab : ""
+              }`}
               onClick={() => setActiveTab("groups")}
             >
               Groups
@@ -444,36 +514,40 @@ export default function MessagesPage() {
             <ul className={styles.usersList} ref={usersListRef}>
               {activeTab === "friends"
                 ? users?.length > 0 &&
-                users.map((user) => (
-                  <UserCard
-                    key={user.user_id}
-                    user={user}
-                    isActive={
-                      selectedUser && selectedUser.user_id === user.user_id
-                    }
-                    onClick={() => {
-                      router.push(`/messages?user=${user.user_id}`);
-                    }}
-                  />
-                ))
+                  users.map((user) => (
+                    <UserCard
+                      key={user.user_id}
+                      user={user}
+                      isActive={
+                        selectedUser && selectedUser.user_id === user.user_id
+                      }
+                      onClick={() => {
+                        router.push(`/messages?user=${user.user_id}`);
+                      }}
+                    />
+                  ))
                 : groups?.length > 0 &&
-                groups.map((group) => (
-                  <UserCard
-                    key={group.group_id}
-                    user={group}
-                    isActive={
-                      selectedUser && selectedUser.group_id === group.group_id
-                    }
-                    onClick={() => {
-                      router.push(`/messages?group=${group.group_id}`);
-                    }}
-                  />
-                ))}
+                  groups.map((group) => (
+                    <UserCard
+                      key={group.group_id}
+                      user={group}
+                      isActive={
+                        selectedUser && selectedUser.group_id === group.group_id
+                      }
+                      onClick={() => {
+                        router.push(`/messages?group=${group.group_id}`);
+                      }}
+                    />
+                  ))}
               {!users?.length && activeTab === "friends" && (
-                <div className={styles.noUsersMessage}>You have no chats yet.</div>
+                <div className={styles.noUsersMessage}>
+                  You have no chats yet.
+                </div>
               )}
               {!groups?.length && activeTab === "groups" && (
-                <div className={styles.noUsersMessage}>You haven't joined any groups yet.</div>
+                <div className={styles.noUsersMessage}>
+                  You haven't joined any groups yet.
+                </div>
               )}
             </ul>
           </div>
@@ -502,7 +576,9 @@ export default function MessagesPage() {
                     {selectedUser.username && (
                       <p className={styles.conversationUserStatus}>
                         <span
-                          className={`${styles.statusDot} ${selectedUser.online ? styles.online : styles.offline}`}
+                          className={`${styles.statusDot} ${
+                            selectedUser.online ? styles.online : styles.offline
+                          }`}
                         ></span>
                         {selectedUser.online ? "Online" : "Offline"}
                       </p>
@@ -544,7 +620,11 @@ export default function MessagesPage() {
                     <Message
                       key={index}
                       message={message}
-                      isSent={message.current_user ? message.user_id === message.current_user : message.username !== selectedUser.username}
+                      isSent={
+                        message.current_user
+                          ? message.user_id === message.current_user
+                          : message.username !== selectedUser.username
+                      }
                     />
                   ))
                 ) : (
@@ -555,7 +635,9 @@ export default function MessagesPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {(selectedUser.is_following || selectedUser.privacy === "public") || (selectedUser.role !== "guest" && selectedUser.group_id) ? (
+              {selectedUser.is_following ||
+              selectedUser.privacy === "public" ||
+              (selectedUser.role !== "guest" && selectedUser.group_id) ? (
                 <form
                   className={styles.messageInputForm}
                   onSubmit={handleSendMessage}
@@ -578,10 +660,7 @@ export default function MessagesPage() {
                     </svg>
                   </button>
                   <div className={styles.emojiToggle}>
-                    <button
-                      type="button"
-                      onClick={toggleEmojiSection}
-                    >
+                    <button type="button" onClick={toggleEmojiSection}>
                       😄
                     </button>
                   </div>
@@ -590,7 +669,7 @@ export default function MessagesPage() {
                     placeholder="Type a message..."
                     value={newMessage}
                     onChange={(e) => {
-                      setNewMessage(e.target.value)
+                      setNewMessage(e.target.value);
                     }}
                     className={styles.messageInput}
                   />

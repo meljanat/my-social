@@ -37,7 +37,7 @@ func SaveImage(image multipart.File, header *multipart.FileHeader, path string) 
 }
 
 func isValidImageExtension(ext string) bool {
-	allowedExtensions := []string{"png", "jpeg", "gif", "bmp", "svg", "raw", "tiff", "webp", "jpg"}
+	allowedExtensions := []string{"png", "jpeg", "gif", "webp", "jpg"}
 	for _, allowed := range allowedExtensions {
 		if ext == allowed {
 			return true

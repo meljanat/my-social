@@ -479,7 +479,7 @@ func AcceptInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if database.AcceptInvitation(invitation_id, invitation.User, user.ID, invitation.Group) != nil {
+	if err := database.AcceptInvitation(invitation_id, invitation.User, user.ID, invitation.Group); err != nil {
 		fmt.Println("Failed to accept invitation", err)
 		response := map[string]string{"error": "Failed to accept invitation"}
 		w.WriteHeader(http.StatusInternalServerError)
@@ -669,6 +669,8 @@ func AcceptOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("Invitation received:", invitation)
+
 	userToFollowing, err := database.GetUserById(invitation.User)
 	if err != nil {
 		fmt.Println("Failed to retrieve follower", err)
@@ -743,7 +745,7 @@ func AcceptOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if database.AcceptInvitation(invitation_id, invitation.User, user.ID, invitation.Group) != nil {
+	if err := database.AcceptInvitation(invitation_id, invitation.User, user.ID, invitation.Group); err != nil {
 		fmt.Println("Failed to accept invitation", err)
 		response := map[string]string{"error": "Failed to accept invitation"}
 		w.WriteHeader(http.StatusInternalServerError)

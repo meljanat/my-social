@@ -4,7 +4,6 @@ import AuthForm from "../components/AuthForm";
 import "../styles/NotificationPage.css";
 import NotificationCard from "../components/NotificationCard";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
 import useInfiniteScroll from "../components/useInfiniteScroll";
 
 export default function NotificationPage() {
@@ -13,7 +12,6 @@ export default function NotificationPage() {
   const [notifications, setNotifications] = useState([]);
   const [hasMoreNotifications, setHasMoreNotifications] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const container = useRef(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -58,14 +56,20 @@ export default function NotificationPage() {
       if (!response.ok) throw new Error("Failed to fetch notifications");
 
       const data = await response.json();
+      console.log("num notification", data);
 
-      if (Array.isArray(data)) {
-        if (offset === 0) {
-          setNotifications(data);
-        } else {
-          setNotifications((prev) => [...prev, ...data]);
-        }
+      if (!Array.isArray(data) || data.length === 0) {
+        setHasMoreNotifications(false);
+        return [];
       }
+
+      setNotifications((prev) => {
+        const existingIds = new Set(prev.map((n) => n.notification_id));
+        const filtered = data.filter((n) => !existingIds.has(n.notification_id));
+        return offset === 0 ? filtered : [...prev, ...filtered];
+      });
+
+      return data;
     } catch (error) {
       console.error("Error fetching notifications:", error.message);
     }
@@ -145,25 +149,24 @@ export default function NotificationPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (container.current) {
-        const { scrollTop, scrollHeight, clientHeight } = container.current;
-        if (scrollHeight - scrollTop <= clientHeight + 1 && !noMoreNotifs) {
-          fetchNotifications(notifications.length);
-        }
+      const nearBottom =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 500;
+
+      if (nearBottom && hasMoreNotifications && !isFetchingMore) {
+        setIsFetchingMore(true);
+
+        fetchNotifications(notifications.length).then((newData) => {
+          if (!newData || newData.length === 0) {
+            setHasMoreNotifications(false);
+          }
+          setIsFetchingMore(false);
+        });
       }
     };
 
-    const currentContainer = container.current;
-
-    if (currentContainer) {
-      currentContainer.addEventListener("scroll", handleScroll);
-
-      return () => {
-        currentContainer.removeEventListener("scroll", handleScroll);
-      };
-    }
-
-  }, []);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [notifications.length, hasMoreNotifications, isFetchingMore]);
 
   if (isLoading) {
     return (
@@ -188,7 +191,7 @@ export default function NotificationPage() {
           </button>
         </div>
 
-        <div className="notification-list" ref={container}>
+        <div className="notification-list">
           {notifications.length
             ? notifications.map((notification) => (
               <NotificationCard

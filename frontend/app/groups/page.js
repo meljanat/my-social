@@ -8,7 +8,6 @@ import styles from "../styles/GroupsPage.module.css";
 import PendingGroupRequestCard from "../components/PendingCard";
 import GroupFormModal from "../components/GroupFromModal";
 import RemoveGroupModal from "../components/RemoveGroupModal";
-import { joinGroup } from "../functions/group";
 import {
   handleFollow,
   handelAccept,
@@ -16,27 +15,47 @@ import {
   handelAcceptOtherGroup,
   handleRejectOtherGroup,
 } from "../functions/user";
-import useInfiniteScroll from "../components/useInfiniteScroll";
 
 export default function GroupsPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState("true");
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("discover");
   const [groupData, setGroupData] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [myGroups, setMyGroups] = useState([]);
   const [showRemoveGroupModal, setShowRemoveGroupModal] = useState(false);
   const [showGroupForm, setShowGroupForm] = useState(false);
-
-  const [isLoggedIn, setIsLoggedIn] = useState("true");
-
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [hasMorePosts, setHasMorePosts] = useState(true);
-
   const router = useRouter();
+
+  async function fetchGroupData(endpoint) {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `http://localhost:8404/groups?type=${endpoint}&offset=0`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch group data");
+      }
+      const data = await response.json();
+      
+      if (endpoint === "joined") {        
+        setMyGroups(data);
+      }
+      setGroupData(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching group data:", error);
+      setGroupData([]);
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
     const checkLoginStatus = async () => {
-      
       try {
         const response = await fetch("http://localhost:8404/", {
           method: "GET",
@@ -59,62 +78,6 @@ export default function GroupsPage() {
 
     checkLoginStatus();
   }, [isLoggedIn]);
-
-  function handleCreateGroup() {
-    setShowGroupForm(true);
-  }
-
-  function handleGroupCreated(newGroup) {
-    setMyGroups([newGroup, ...myGroups]);
-    setShowGroupForm(false);
-  }
-
-  useInfiniteScroll({
-    fetchMoreCallback: async () => {
-      if (!selectedGroup || !selectedGroup.id || !hasMorePosts) return;
-
-      setIsFetchingMore(true);
-      // No actual fetch for more posts implemented here for this page's context.
-      // This part of the hook might need re-evaluation for this specific page.
-      setIsFetchingMore(false);
-    },
-    offset: selectedGroup?.posts?.length || 0,
-    isFetching: isFetchingMore,
-    hasMore: hasMorePosts,
-  });
-
-  async function fetchGroupData(endpoint) {
-    try {
-      setIsLoading(true);
-      const response = await fetch(
-        `http://localhost:8404/groups?type=${endpoint}&offset=0`,
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch group data");
-      }
-      const data = await response.json();
-      console.log("Groups data:", data, endpoint);
-
-      if (endpoint === "joined") {
-        setMyGroups(data);
-      } else {
-        setGroupData(data);
-      }
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching group data:", error);
-      if (endpoint === "joined") {
-        setMyGroups([]);
-      } else {
-        setGroupData([]);
-      }
-      setIsLoading(false);
-    }
-  }
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -157,49 +120,33 @@ export default function GroupsPage() {
     router.push(`/group?id=${group.group_id}`);
   };
 
-  useEffect(() => {
-    handleTabChange("discover");
-  }, []);
-
-  const handleDeleteGroup = (groupId) => {
-    setMyGroups((prevGroups) =>
-      prevGroups.filter((group) => group.group_id !== groupId)
-    );
-    setGroupData((prevGroups) =>
-      prevGroups.filter((group) => group.group_id !== groupId)
-    );
-    setSelectedGroup(null);
+  const handleDeleteGroup = async (groupId) => {
+    await handleFollow(0, groupId);
+    fetchGroupData("joined");
     setShowRemoveGroupModal(false);
   };
 
-  const handleJoinGroup = (group) => {
-    joinGroup(group.group_id);
-    setGroupData((prev) => prev.filter((g) => g.group_id !== group.group_id));
-    setMyGroups((prev) => [...prev, { ...group, is_joined: true }]);
+  const handleJoinGroup = async (group) => {
+    await handleFollow(0, group.group_id);
+    fetchGroupData("suggested");
   };
 
-  const handleLeaveGroup = (group) => {
-    setMyGroups((prev) => prev.filter((g) => g.group_id !== group.group_id));
-    setGroupData((prev) => [...prev, { ...group, is_joined: false }]);
+  const handleLeaveGroup = async (group_id) => {
+    await handleFollow(0, group_id);
+    fetchGroupData("joined");
+    setShowRemoveGroupModal(false);
   };
 
   const handleCancelRequest = (groupId) => {
-    setGroupData((prev) => prev.filter((group) => group.group_id !== groupId));
+    fetchGroupData("pending");
   };
 
-  const handleLeaveGroupAction = async (groupId) => {
-    try {
-      await leaveGroup(groupId);
-      handleLeaveGroup({ group_id: groupId });
-      setShowRemoveGroupModal(false);
-    } catch (error) {
-      console.error("Error leaving group:", error);
-    }
+  const handleGroupCreated = () => {
+    setActiveTab("my-groups");
+    fetchGroupData("joined");
+    setShowGroupForm(false);
   };
 
-  const removeGroupForModal = (groupId) => {
-    handleDeleteGroup(groupId);
-  };
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -221,8 +168,14 @@ export default function GroupsPage() {
             <RemoveGroupModal
               group={selectedGroup}
               onClose={() => setShowRemoveGroupModal(false)}
-              onRemove={removeGroupForModal}
-              onLeave={handleLeaveGroupAction}
+              onRemove={() => {
+                handleDeleteGroup(selectedGroup.group_id);
+                setSelectedGroup(null);
+              }}
+              onLeave={() => {
+                handleLeaveGroup(selectedGroup.group_id);
+                setSelectedGroup(null);
+              }}
               action={selectedGroup?.role === "admin" ? "remove" : "leave"}
             />
           </div>
@@ -232,7 +185,7 @@ export default function GroupsPage() {
             <h1>Groups</h1>
             <button
               className={styles.createGroupBtn}
-              onClick={handleCreateGroup}
+              onClick={() => setShowGroupForm(true)}
             >
               + Create Group
             </button>
@@ -279,7 +232,6 @@ export default function GroupsPage() {
             </button>
           </div>
 
-
           <div className={styles.groupsGrid}>
             {isLoading ? (
               <div className={styles.loadingMessage}>Loading...</div>
@@ -290,15 +242,15 @@ export default function GroupsPage() {
                     <InvitationCard
                       key={invitation.invitation_id}
                       invitation={invitation}
-                      onAccept={() => {
-                        handelAcceptOtherGroup(
+                      onAccept={async () => {
+                        await handelAcceptOtherGroup(
                           invitation.user.user_id,
                           invitation.group.group_id
                         );
                         fetchUserInvitationsData();
                       }}
-                      onDecline={() => {
-                        handleRejectOtherGroup(
+                      onDecline={async () => {
+                        await handleRejectOtherGroup(
                           invitation.user.user_id,
                           invitation.group.group_id
                         );
@@ -309,15 +261,15 @@ export default function GroupsPage() {
                     <InvitationCard
                       key={invitation.invitation_id}
                       invitation={invitation}
-                      onAccept={() => {
-                        handelAccept(
+                      onAccept={async () => {
+                        await handelAccept(
                           invitation.user.user_id,
                           invitation.group.group_id
                         );
                         fetchUserInvitationsData();
                       }}
-                      onDecline={() => {
-                        handleReject(
+                      onDecline={async() => {
+                        await handleReject(
                           invitation.user.user_id,
                           invitation.group.group_id
                         );
@@ -341,12 +293,7 @@ export default function GroupsPage() {
                     onClick={() => {
                       handleGroupSelect(group);
                     }}
-                    isDiscoverTab={false}
-                    onLeave={() => {
-                      setSelectedGroup(group);
-                      setShowRemoveGroupModal(true);
-                    }}
-                    onDelete={() => {
+                    onAction={() => {
                       setSelectedGroup(group);
                       setShowRemoveGroupModal(true);
                     }}

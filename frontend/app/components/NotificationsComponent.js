@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/Notifications.css";
 import NotificationCard from "../components/NotificationCard";
 import { useRouter } from "next/navigation";
@@ -8,7 +8,6 @@ const NotificationsComponent = ({onMarkAllAsRead}) => {
   const [notifications, setNotifications] = useState([]);
   const [notificationType, setNotificationType] = useState("all");
   const [loading, setLoading] = useState(true);
-  const notificationRef = useRef(null);
   const router = useRouter();
 
   const fetchNotifications = async () => {
@@ -96,7 +95,7 @@ const NotificationsComponent = ({onMarkAllAsRead}) => {
   });
 
   return (
-    <div className="notifications-dropdown" ref={notificationRef}>
+    <div className="notifications-dropdown">
       <div className="notifications-header">
         <h3>Notifications</h3>
         <div className="notifications-actions">

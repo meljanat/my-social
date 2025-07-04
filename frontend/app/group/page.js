@@ -122,7 +122,7 @@ export default function GroupPage() {
   // }
 
   async function fetchGroupDetails(type, groupId, offset = 0) {
-    console.log("Fetching posts with offset:", offset, "for group:", groupId);
+    // console.log("Fetching posts with offset:", offset, "for group:", groupId);
     if (isFetchingMore || !hasMorePosts) return;
 
     setIsFetchingMore(true);
@@ -177,7 +177,8 @@ export default function GroupPage() {
       const nearBottom =
         window.innerHeight + window.scrollY >= document.body.offsetHeight - 500;
 
-      if (nearBottom && !isFetchingMore && hasMorePosts && selectedGroup?.id) {
+        const canScroll = document.body.scrollHeight > window.innerHeight;
+      if (nearBottom && !isFetchingMore && hasMorePosts && selectedGroup?.id, canScroll) {
         // console.log("Fetching more posts...");
         fetchGroupDetails("posts", selectedGroup.id, postsOffset);
       }

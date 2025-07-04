@@ -77,6 +77,8 @@ export default function Home() {
       if (!response.ok) throw new Error("Network response was not ok");
 
       const data = await response.json();
+      console.log("num posts", data);
+      
 
       if (!data.posts || !Array.isArray(data.posts)) {
         if (offset === 0) setPosts([]);
@@ -91,9 +93,14 @@ export default function Home() {
       if (offset === 0) {
         setPosts(data.posts);
       } else {
-        setPosts((prev) => [...prev, ...data.posts]);
-      }
-
+       setPosts((prev) => {
+        const existingPostIds = new Set(prev.map((post) => post.post_id));
+        const filteredNewPosts = data.posts.filter(
+          (post) => !existingPostIds.has(post.post_id)
+        );
+        return [...prev, ...filteredNewPosts];
+      });
+    }
       if (data.posts.length === 0) {
         setHasMorePosts(false);
       } else {
@@ -120,8 +127,9 @@ export default function Home() {
     const handleScroll = () => {
       const nearBottom =
         window.innerHeight + window.scrollY >= document.body.offsetHeight - 500;
+        const canScroll = document.body.scrollHeight > window.innerHeight;
 
-      if (nearBottom && !isFetchingMore && hasMorePosts) {
+      if (nearBottom && !isFetchingMore && hasMorePosts, canScroll) {
         setIsFetchingMore(true);
         fetchHomeData(postsCountRef.current).then((newPosts) => {
           if (newPosts.length === 0) {

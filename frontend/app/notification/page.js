@@ -97,6 +97,7 @@ export default function NotificationPage() {
       const newNotifications = await fetchNotifications(currentLength);
 
       if (newNotifications.length === 0) {
+        console.log("No more notifications to fetch");
         setHasMoreNotifications(false);
       }
 
@@ -153,11 +154,15 @@ export default function NotificationPage() {
     };
 
     const currentContainer = container.current;
-    currentContainer.addEventListener("scroll", handleScroll);
 
-    return () => {
-      currentContainer.removeEventListener("scroll", handleScroll);
-    };
+    if (currentContainer) {
+      currentContainer.addEventListener("scroll", handleScroll);
+
+      return () => {
+        currentContainer.removeEventListener("scroll", handleScroll);
+      };
+    }
+
   }, []);
 
   if (isLoading) {

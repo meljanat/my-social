@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import LeftSidebar from "./components/LeftSideBar";
 import ProfileCard from "./components/ProfileCard";
 import TopGroups from "./components/TopGroups";
@@ -20,6 +20,12 @@ export default function Home() {
   const [stories, setStories] = useState([]);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMorePosts, setHasMorePosts] = useState(true);
+
+  const postsCountRef = useRef(0);
+
+  useEffect(() => {
+    postsCountRef.current = posts.length;
+  }, [posts]);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -105,13 +111,19 @@ export default function Home() {
   };
 
   useEffect(() => {
+    document.body.style.minHeight = "200vh";
+  }, []);
+
+  useEffect(() => {
     if (!isLoggedIn) return;
+
     const handleScroll = () => {
       const nearBottom =
         window.innerHeight + window.scrollY >= document.body.offsetHeight - 500;
-      if (nearBottom && !isFetchingMore && hasMorePosts && isLoggedIn) {
+
+      if (nearBottom && !isFetchingMore && hasMorePosts) {
         setIsFetchingMore(true);
-        fetchHomeData(posts.length).then((newPosts) => {
+        fetchHomeData(postsCountRef.current).then((newPosts) => {
           if (newPosts.length === 0) {
             setHasMorePosts(false);
           }
@@ -122,7 +134,7 @@ export default function Home() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [posts, isFetchingMore, hasMorePosts]);
+  }, [isFetchingMore, hasMorePosts, isLoggedIn]);
 
   const addNewPost = (newPost) => {
     setPosts((prevPosts) => {
@@ -179,9 +191,9 @@ export default function Home() {
               <div className="stories-section">
                 <StoriesComponent storiesUsers={stories} />
               </div>
-              <PostComponent 
-              // key={posts.post_id}
-              posts={posts} />
+              <PostComponent
+                // key={posts.post_id}
+                posts={posts} />
             </div>
 
             <div className="right-column">

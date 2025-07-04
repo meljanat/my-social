@@ -45,10 +45,10 @@ export default function PostComponent({ posts: initialPosts }) {
           prevPosts.map((post) =>
             post.post_id === postId
               ? {
-                  ...post,
-                  saved: updatedPost.saved,
-                  total_saves: updatedPost.total_saves,
-                }
+                ...post,
+                saved: updatedPost.saved,
+                total_saves: updatedPost.total_saves,
+              }
               : post
           )
         );
@@ -75,11 +75,11 @@ export default function PostComponent({ posts: initialPosts }) {
           prevPosts.map((post) =>
             post.post_id === postId
               ? {
-                  ...post,
-                  total_likes: updatedPost.total_likes,
-                  is_liked: updatedPost.is_liked,
-                  who_liked: updatedPost.who_liked || post.who_liked,
-                }
+                ...post,
+                total_likes: updatedPost.total_likes,
+                is_liked: updatedPost.is_liked,
+                who_liked: updatedPost.who_liked || post.who_liked,
+              }
               : post
           )
         );
@@ -99,8 +99,8 @@ export default function PostComponent({ posts: initialPosts }) {
 
   return (
     <div className={styles.postsContainer}>
-      {posts?.map((post) => (
-        <div key={post.post_id} className={styles.postCard}>
+      {posts?.map((post, index) => (
+        <div key={`${post.post_id}-${index}`} className={styles.postCard}>
           <div className={styles.header}>
             <div className={styles.postHeader}>
               <img
@@ -155,9 +155,8 @@ export default function PostComponent({ posts: initialPosts }) {
           <div className={styles.postActions}>
             <div className={styles.likeActionContainer}>
               <button
-                className={`${styles.actionButton} ${styles.actionLike} ${
-                  post.is_liked ? styles.liked : ""
-                }`}
+                className={`${styles.actionButton} ${styles.actionLike} ${post.is_liked ? styles.liked : ""
+                  }`}
                 onClick={() => handleLike(post.post_id)}
               >
                 <svg
@@ -221,9 +220,8 @@ export default function PostComponent({ posts: initialPosts }) {
             </button>
 
             <button
-              className={`${styles.actionButton} ${styles.actionSave} ${
-                post.saved ? styles.saved : ""
-              }`}
+              className={`${styles.actionButton} ${styles.actionSave} ${post.saved ? styles.saved : ""
+                }`}
               onClick={() => handleSave(post.post_id)}
             >
               <svg

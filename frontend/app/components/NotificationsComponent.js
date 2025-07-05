@@ -4,7 +4,7 @@ import "../styles/Notifications.css";
 import NotificationCard from "../components/NotificationCard";
 import { useRouter } from "next/navigation";
 
-const NotificationsComponent = ({onMarkAllAsRead}) => {
+const NotificationsComponent = ({ onMarkAllAsRead }) => {
   const [notifications, setNotifications] = useState([]);
   const [notificationType, setNotificationType] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -67,7 +67,7 @@ const NotificationsComponent = ({onMarkAllAsRead}) => {
         )
       );
       if (notification.type_notification === "follow_request"
-        ||notification.type_notification === "follow"
+        || notification.type_notification === "follow"
       ) {
         router.push('/profile?id=' + notification.user_id);
       } else if (notification.type_notification === "like" ||

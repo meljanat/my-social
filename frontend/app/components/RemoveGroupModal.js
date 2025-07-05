@@ -1,6 +1,6 @@
 "use client";
-import React from "react"; 
-import styles from "../styles/RemoveGroupModal.module.css"; 
+import React from "react";
+import styles from "../styles/RemoveGroupModal.module.css";
 
 export default function RemoveGroupModal({ group, onClose, onRemove, onLeave, action }) {
   function handleGroupAction() {
@@ -24,9 +24,8 @@ export default function RemoveGroupModal({ group, onClose, onRemove, onLeave, ac
         <div className={styles.modalActions}>
           <button
             onClick={() => handleGroupAction()}
-            className={`${styles.actionButton} ${
-              action === "remove" ? styles.removeButton : styles.leaveButton
-            }`}
+            className={`${styles.actionButton} ${action === "remove" ? styles.removeButton : styles.leaveButton
+              }`}
           >
             {action === "remove"
               ? "Remove Group"

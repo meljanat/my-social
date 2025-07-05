@@ -8,18 +8,6 @@ import EditProfileModal from "@/app/components/EditProfileModal";
 import styles from "../styles/ProfilePage.module.css";
 
 export default function ProfilePage() {
-
-  const [postsOffset, setPostsOffset] = useState(0);
-  const [followersOffset, setFollowersOffset] = useState(0);
-  const [followingOffset, setFollowingOffset] = useState(0);
-  const [savedPostsOffset, setSavedPostsOffset] = useState(0);
-  const [savedGroupPostsOffset, setSavedGroupPostsOffset] = useState(0);
-  const [hasMorePosts, setHasMorePosts] = useState(true);
-  const [hasMoreFollowers, setHasMoreFollowers] = useState(true);
-  const [hasMoreFollowing, setHasMoreFollowing] = useState(true);
-  const [hasMoreSavedPosts, setHasMoreSavedPosts] = useState(true);
-  const [hasMoreSavedGroupPosts, setHasMoreSavedGroupPosts] = useState(true);
-
   const [isLoggedIn, setIsLoggedIn] = useState();
   const [isFollowing, setIsFollowing] = useState();
   const [isLoading, setIsLoading] = useState(true);
@@ -82,41 +70,7 @@ export default function ProfilePage() {
     });
   };
 
-  // async function handleFollow(user_id) {
-  //   try {
-  //     const response = await fetch(`http://localhost:8404/follow`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         user_id: parseInt(user_id),
-  //       }),
-  //       credentials: "include",
-  //     });
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       console.log("Follow response data:", data);
-
-
-  //       setUserData((prev) => {
-  //         return {
-  //           ...prev,
-  //           type: data.action,
-  //           total_followers: data.total_followers,
-
-  //         };
-  //       });
-  //     }
-  //     fetchUserPosts();
-  //   } catch (error) {
-  //     console.error("Error following user:", error);
-  //   }
-  // }
-
   async function handleFollow(user_id) {
-    console.log(`Following user Id: ${user_id}`);
     try {
       const response = await fetch(`http://localhost:8404/follow`, {
         method: "POST",
@@ -131,40 +85,17 @@ export default function ProfilePage() {
 
       if (response.ok) {
         const data = await response.json();
-        const actionType = data;
+        console.log("Follow response data:", data);
+
 
         setUserData((prev) => {
-          let newFollowers = prev.total_followers;
-          let isFollowingStatus = prev.is_following;
-          let isPendingStatus = prev.is_pending;
-
-          if (actionType === "follow") {
-            if (prev.privacy === "private") {
-              isPendingStatus = true;
-              isFollowingStatus = false;
-            } else {
-              isFollowingStatus = true;
-              isPendingStatus = false;
-              newFollowers += 1;
-            }
-          } else if (actionType === "unfollow") {
-            isFollowingStatus = false;
-            isPendingStatus = false;
-            newFollowers -= 1;
-          } else if (actionType === "cancel_request") {
-            isPendingStatus = false;
-            isFollowingStatus = false;
-          }
-
           return {
             ...prev,
-            type: actionType,
-            is_following: isFollowingStatus,
-            is_pending: isPendingStatus,
-            total_followers: newFollowers,
+            type: data.action,
+            total_followers: data.total_followers,
+            
           };
         });
-        console.log("Follow action successful:", actionType);
       }
       fetchUserPosts();
     } catch (error) {
@@ -172,48 +103,13 @@ export default function ProfilePage() {
     }
   }
 
-  // async function fetchSavedPosts(type) {
-  //   if (type === "post") setIsLoadingSavedPosts(true);
-  //   else if (type === "group") setIsLoadingSavedGroupPosts(true);
-
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:8404/get_saved_posts?type=${type}&offset=0`,
-  //       {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         credentials: "include",
-  //       }
-  //     );
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       if (type === "post") {
-  //         setSavedPosts(data || []);
-  //       } else if (type === "group") {
-  //         setSavedGroupPosts(data || []);
-  //       }
-  //     } else {
-  //       console.error("Failed to fetch saved posts");
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   } finally {
-  //     if (type === "post") setIsLoadingSavedPosts(false);
-  //     else if (type === "group") setIsLoadingSavedGroupPosts(false);
-  //   }
-  // }
-
-  async function fetchSavedPosts(type, loadMore) {
+  async function fetchSavedPosts(type) {
     if (type === "post") setIsLoadingSavedPosts(true);
     else if (type === "group") setIsLoadingSavedGroupPosts(true);
 
     try {
-      const offset = type === "post" ? savedPostsOffset : savedGroupPostsOffset;
       const response = await fetch(
-        `http://localhost:8404/get_saved_posts?type=${type}&offset=${loadMore ? offset : 0}`,
+        `http://localhost:8404/get_saved_posts?type=${type}&offset=0`,
         {
           method: "GET",
           headers: {
@@ -225,25 +121,10 @@ export default function ProfilePage() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("num savepost", data);
-
-        if (!data || !Array.isArray(data)) {
-          if (type === "post") setHasMoreSavedPosts(false);
-          else setHasMoreSavedGroupPosts(false);
-          return;
-        }
-
-        if (data.length === 0) {
-          if (isPostType) setHasMoreSavedPosts(false);
-          else setHasMoreSavedGroupPosts(false);
-          return;
-        }
         if (type === "post") {
-          setSavedPosts(prev => loadMore ? [...prev, ...data] : data);
-          setSavedPostsOffset(prev => prev + data.length);
+          setSavedPosts(data || []);
         } else if (type === "group") {
-          setSavedGroupPosts(prev => loadMore ? [...prev, ...data] : data);
-          setSavedGroupPostsOffset(prev => prev + data.length);
+          setSavedGroupPosts(data || []);
         }
       } else {
         console.error("Failed to fetch saved posts");
@@ -288,283 +169,86 @@ export default function ProfilePage() {
     fetchUserData(id);
   }, [id]);
 
-  // const fetchUserPosts = async () => {
-  //   setIsLoadingPosts(true);
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:8404/profile_posts?user_id=${id}&offset=0`,
-  //       {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         credentials: "include",
-  //       }
-  //     );
-  //     if (!response.ok) {
-  //       const dataError = await response.json();
-  //       throw new Error(dataError.error || "Failed to fetch Posts");
-  //     }
-  //     const data = await response.json();
-  //     setUserPosts(data);
-  //   } catch (error) {
-  //     console.log(error);
-  //     setError(error);
-  //   } finally {
-  //     setIsLoadingPosts(false);
-  //   }
-  // };
-
-  const fetchUserPosts = async (loadMore = false) => {
-    if (!loadMore) {
-      setIsLoadingPosts(true);
-      setPostsOffset(0);
-      setHasMorePosts(true);
-    }
-
-    const currentOffset = loadMore ? postsOffset : 0;
-
+  const fetchUserPosts = async () => {
+    setIsLoadingPosts(true);
     try {
       const response = await fetch(
-        `http://localhost:8404/profile_posts?user_id=${id}&offset=${currentOffset}`,
-        { credentials: "include" }
-      );
-      const newPosts = await response.json();
-      console.log("num posts:", newPosts.length, "offset:", currentOffset);
-
-      if (newPosts.length === 0) {
-        setHasMorePosts(false);
-        if (loadMore) return;
-      }
-
-      setUserPosts(prev => {
-        if (loadMore) {
-          const existingPostIds = new Set(prev.map(p => p.post_id));
-
-          const filteredNewPosts = newPosts.filter(post =>
-            !existingPostIds.has(post.post_id)
-          );
-          return [...prev, ...filteredNewPosts];
+        `http://localhost:8404/profile_posts?user_id=${id}&offset=0`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
         }
-        return newPosts;
-      });
-
-      if (loadMore) setPostsOffset(prev => prev + newPosts.length);
+      );
+      if (!response.ok) {
+        const dataError = await response.json();
+        throw new Error(dataError.error || "Failed to fetch Posts");
+      }
+      const data = await response.json();
+      setUserPosts(data);
     } catch (error) {
-      console.error("Error fetching posts:", error);
-      setHasMorePosts(false);
+      console.log(error);
+      setError(error);
     } finally {
       setIsLoadingPosts(false);
     }
   };
 
-  function throttle(func, limit) {
-    let lastFunc;
-    let lastRan;
-    return function () {
-      const context = this;
-      const args = arguments;
-      if (!lastRan) {
-        func.apply(context, args);
-        lastRan = Date.now();
-      } else {
-        clearTimeout(lastFunc);
-        lastFunc = setTimeout(function () {
-          if ((Date.now() - lastRan) >= limit) {
-            func.apply(context, args);
-            lastRan = Date.now();
-          }
-        }, limit - (Date.now() - lastRan));
-      }
-    }
-  }
+  const fetchFollowers = async () => {
+    if (followers.length > 0) return;
 
-  useEffect(() => {
-    document.body.style.minHeight = "200vh";
-  }, []);
-
-  useEffect(() => {
-    let isFetching = false;
-
-    const handleScroll = () => {
-      if (isFetching) return;
-
-      const nearBottom =
-        window.innerHeight + window.scrollY >= document.body.offsetHeight - 500;
-
-      if (!nearBottom) return;
-
-      if (activeTab === "posts" && hasMorePosts && !isLoadingPosts) {
-        isFetching = true;
-        fetchUserPosts(true).finally(() => isFetching = false);
-      }
-      else if (activeTab === "followers" && hasMoreFollowers && !isLoadingFollowers) {
-        isFetching = true;
-        fetchFollowers(true).finally(() => isFetching = false);
-      }
-      else if (activeTab === "following" && hasMoreFollowing && !isLoadingFollowing) {
-        isFetching = true;
-        fetchFollowing(true).finally(() => isFetching = false);
-      }
-      else if (activeTab === "saved") {
-        if (activeSubTab === "posts" && hasMoreSavedPosts && !isLoadingSavedPosts) {
-          isFetching = true;
-          fetchSavedPosts("post", true).finally(() => isFetching = false);
-        }
-        else if (activeSubTab === "group-posts" && hasMoreSavedGroupPosts && !isLoadingSavedGroupPosts) {
-          isFetching = true;
-          fetchSavedPosts("group", true).finally(() => isFetching = false);
-        }
-      }
-    };
-
-    const throttledScroll = throttle(handleScroll, 300);
-    window.addEventListener("scroll", throttledScroll);
-    return () => window.removeEventListener("scroll", throttledScroll);
-  }, [
-    activeTab,
-    activeSubTab,
-    hasMorePosts, hasMoreFollowers, hasMoreFollowing,
-    hasMoreSavedPosts, hasMoreSavedGroupPosts,
-    isLoadingPosts, isLoadingFollowers, isLoadingFollowing,
-    isLoadingSavedPosts, isLoadingSavedGroupPosts
-  ]);
-
-  // const fetchFollowers = async () => {
-  //   if (followers.length > 0) return;
-
-  //   setIsLoadingFollowers(true);
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:8404/followers?user_id=${id}&offset=0`,
-  //       {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         credentials: "include",
-  //       }
-  //     );
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       setFollowers(data || []);
-  //     } else {
-  //       console.error("Failed to fetch followers");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching followers:", error);
-  //   } finally {
-  //     setIsLoadingFollowers(false);
-  //   }
-  // };
-
-  const fetchFollowers = async (loadMore = false) => {
-    if (!loadMore) {
-      setIsLoadingFollowers(true);
-      setFollowersOffset(0);
-      setHasMoreFollowers(true);
-    }
-
-    const currentOffset = loadMore ? followersOffset : 0;
-
+    setIsLoadingFollowers(true);
     try {
       const response = await fetch(
-        `http://localhost:8404/followers?user_id=${id}&offset=${currentOffset}`,
-        { credentials: "include" }
-      );
-      const newFollowers = await response.json();
-
-      if (!newFollowers || newFollowers.length === 0) {
-        setHasMoreFollowers(false);
-        if (loadMore) return;
-      }
-
-      setFollowers(prev => {
-        if (loadMore) {
-          const existingFollowerIds = new Set(prev.map(f => f.user_id));
-          const filteredNewFollowers = newFollowers.filter(follower =>
-            !existingFollowerIds.has(follower.user_id)
-          );
-          return [...prev, ...filteredNewFollowers];
+        `http://localhost:8404/followers?user_id=${id}&offset=0`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
         }
-        return newFollowers;
-      });
+      );
 
-      if (loadMore) setFollowersOffset(prev => prev + newFollowers.length);
+      if (response.ok) {
+        const data = await response.json();
+        setFollowers(data || []);
+      } else {
+        console.error("Failed to fetch followers");
+      }
     } catch (error) {
       console.error("Error fetching followers:", error);
-      setHasMoreFollowers(false);
     } finally {
       setIsLoadingFollowers(false);
     }
   };
 
-  // const fetchFollowing = async () => {
-  //   if (following.length > 0) return;
+  const fetchFollowing = async () => {
+    if (following.length > 0) return;
 
-  //   setIsLoadingFollowing(true);
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:8404/following?user_id=${id}&offset=0`,
-  //       {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         credentials: "include",
-  //       }
-  //     );
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       setFollowing(data || []);
-  //     } else {
-  //       console.error("Failed to fetch following");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching following:", error);
-  //   } finally {
-  //     setIsLoadingFollowing(false);
-  //   }
-  // };
-
-  const fetchFollowing = async (loadMore = false) => {
-    if (!loadMore) {
-      setIsLoadingFollowing(true);
-      setFollowingOffset(0);
-      setHasMoreFollowing(true);
-    }
-
-    const currentOffset = loadMore ? followingOffset : 0;
-
+    setIsLoadingFollowing(true);
     try {
       const response = await fetch(
-        `http://localhost:8404/following?user_id=${id}&offset=${currentOffset}`,
-        { credentials: "include" }
-      );
-      const newFollowing = await response.json();
-
-      if (!newFollowing || newFollowing.length === 0) {
-        setHasMoreFollowing(false);
-        if (loadMore) return;
-      }
-
-      setFollowing(prev => {
-        if (loadMore) {
-          const existingFollowingIds = new Set(prev.map(f => f.user_id));
-          const filteredNewFollowing = newFollowing.filter(following =>
-            !existingFollowingIds.has(following.user_id)
-          );
-          return [...prev, ...filteredNewFollowing];
+        `http://localhost:8404/following?user_id=${id}&offset=0`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
         }
-        return newFollowing;
-      });
+      );
 
-      if (loadMore) setFollowingOffset(prev => prev + newFollowing.length);
+      if (response.ok) {
+        const data = await response.json();
+        setFollowing(data || []);
+      } else {
+        console.error("Failed to fetch following");
+      }
     } catch (error) {
       console.error("Error fetching following:", error);
-      setHasMoreFollowing(false);
     } finally {
       setIsLoadingFollowing(false);
     }
@@ -1022,9 +706,9 @@ export default function ProfilePage() {
                     </div>
                   ) : savedPosts.length > 0 ? (
                     <div className={styles.postsContainer}>
-                      {savedPosts.map((post, index) => (
+                      {savedPosts.map((post) => (
                         <PostsComponent
-                          key={`${post.post_id}-${index}`}
+                          key={post.post_id}
                           post={post}
                           setPosts={setSavedPosts}
                         />
@@ -1061,7 +745,7 @@ export default function ProfilePage() {
                   <div className={styles.loadingSpinner}></div>
                   <p>Loading followers...</p>
                 </div>
-              ) : followers && followers.length > 0 ? (
+              ) : followers.length > 0 ? (
                 <div className={styles.usersSection}>
                   <div className={styles.usersHeader}>
                     <h3>People who follow you</h3>
@@ -1109,7 +793,7 @@ export default function ProfilePage() {
                   <div className={styles.loadingSpinner}></div>
                   <p>Loading following...</p>
                 </div>
-              ) : following && following.length > 0 ? (
+              ) : following.length > 0 ? (
                 <div className={styles.usersSection}>
                   <div className={styles.usersHeader}>
                     <h3>People you follow</h3>

@@ -41,8 +41,8 @@ export default function GroupsPage() {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
-      
-      if (endpoint === "joined") {        
+
+      if (endpoint === "joined") {
         setMyGroups(data);
       }
       setGroupData(data);
@@ -137,7 +137,7 @@ export default function GroupsPage() {
     setShowRemoveGroupModal(false);
   };
 
-  const handleCancelRequest = (groupId) => {
+  const handleCancelRequest = () => {
     fetchGroupData("pending");
   };
 
@@ -199,33 +199,29 @@ export default function GroupsPage() {
 
           <div className={styles.groupsTabs}>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "my-groups" ? styles.activeTab : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "my-groups" ? styles.activeTab : ""
+                }`}
               onClick={() => handleTabChange("my-groups")}
             >
               My Groups
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "discover" ? styles.activeTab : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "discover" ? styles.activeTab : ""
+                }`}
               onClick={() => handleTabChange("discover")}
             >
               Discover
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "pending-groups" ? styles.activeTab : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "pending-groups" ? styles.activeTab : ""
+                }`}
               onClick={() => handleTabChange("pending-groups")}
             >
               Pending Groups
             </button>
             <button
-              className={`${styles.tabButton} ${
-                activeTab === "invitations" ? styles.activeTab : ""
-              }`}
+              className={`${styles.tabButton} ${activeTab === "invitations" ? styles.activeTab : ""
+                }`}
               onClick={() => handleTabChange("invitations")}
             >
               Invitations
@@ -268,7 +264,7 @@ export default function GroupsPage() {
                         );
                         fetchUserInvitationsData();
                       }}
-                      onDecline={async() => {
+                      onDecline={async () => {
                         await handleReject(
                           invitation.user.user_id,
                           invitation.group.group_id
@@ -344,7 +340,7 @@ export default function GroupsPage() {
                   group={group}
                   onCancelRequest={() => {
                     handleFollow(0, group.group_id);
-                    handleCancelRequest(group.group_id);
+                    handleCancelRequest();
                   }}
                   onClick={(e) => {
                     e.stopPropagation();

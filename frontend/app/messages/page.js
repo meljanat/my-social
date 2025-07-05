@@ -77,8 +77,8 @@ const UserCard = ({ user, isActive, onClick }) => {
             {user.username
               ? `@${user.username}`
               : user.total_members
-                ? `(${user.total_members}) Members`
-                : ""}
+              ? `(${user.total_members}) Members`
+              : ""}
           </p>
         </div>
         {user && user.total_messages > 0 && (
@@ -109,7 +109,6 @@ export default function MessagesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
-  const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const selectedUserId = searchParams.get("user");
   const selectedGroupId = searchParams.get("group");
 
@@ -241,19 +240,17 @@ export default function MessagesPage() {
     if (conversationRef.current) {
       const { scrollTop } = conversationRef.current;
       if (scrollTop === 0) {
-        // fetchMoreMessages(selectedUser, messages.length);
-        fetchMoreMessages(selectedUser, messages ? messages.length : 0);
-        setHasMoreMessages(false);
+        fetchMoreMessages(selectedUser, messages.length);
       }
     }
   };
 
   const handleSidebarScroll = () => {
     if (!sidebarRef.current) return;
+
     const { scrollTop, scrollHeight, clientHeight } = sidebarRef.current;
 
     if (scrollHeight - (scrollTop + clientHeight) < 50 && !isLoading) {
-      loadMoreUsersOrGroups();
     }
   };
 
@@ -262,7 +259,8 @@ export default function MessagesPage() {
 
     if (selectedUser && usersListRef.current) {
       const selectedElement = usersListRef.current.querySelector(
-        `.${styles.userItem}[data-id="${selectedUser.user_id || selectedUser.group_id
+        `.${styles.userItem}[data-id="${
+          selectedUser.user_id || selectedUser.group_id
         }"]`
       );
       if (selectedElement) {
@@ -302,21 +300,6 @@ export default function MessagesPage() {
       });
   };
 
-  // const fetchMoreMessages = (user, offset) => {
-  //   let fetchMessages = `id=${user.user_id}&offset=${offset}`;
-  //   fetch(`http://localhost:8404/chats?${fetchMessages}`, {
-  //     method: "GET",
-  //     credentials: "include",
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       setMessages(messages ? [...data, ...messages] : data);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching messages:", error);
-  //     });
-  // };
-
   const fetchMoreMessages = (user, offset) => {
     let fetchMessages = `id=${user.user_id}&offset=${offset}`;
     fetch(`http://localhost:8404/chats?${fetchMessages}`, {
@@ -325,16 +308,7 @@ export default function MessagesPage() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("num message:", data);
-
-        if (Array.isArray(data) && data.length > 0) {
-          console.log(`num message: ${data.length}`);
-          setMessages(messages ? [...data, ...messages] : data);
-        } else {
-
-          setHasMoreMessages(false);
-          console.log("No more messages to fetch");
-        }
+        setMessages(messages ? [...data, ...messages] : data);
       })
       .catch((error) => {
         console.error("Error fetching messages:", error);
@@ -507,15 +481,17 @@ export default function MessagesPage() {
 
           <div className={styles.messagesTabs}>
             <button
-              className={`${styles.tabButton} ${activeTab === "friends" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "friends" ? styles.activeTab : ""
+              }`}
               onClick={() => setActiveTab("friends")}
             >
               Friends
             </button>
             <button
-              className={`${styles.tabButton} ${activeTab === "groups" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "groups" ? styles.activeTab : ""
+              }`}
               onClick={() => setActiveTab("groups")}
             >
               Groups
@@ -538,31 +514,31 @@ export default function MessagesPage() {
             <ul className={styles.usersList} ref={usersListRef}>
               {activeTab === "friends"
                 ? users?.length > 0 &&
-                users.map((user) => (
-                  <UserCard
-                    key={user.user_id}
-                    user={user}
-                    isActive={
-                      selectedUser && selectedUser.user_id === user.user_id
-                    }
-                    onClick={() => {
-                      router.push(`/messages?user=${user.user_id}`);
-                    }}
-                  />
-                ))
+                  users.map((user) => (
+                    <UserCard
+                      key={user.user_id}
+                      user={user}
+                      isActive={
+                        selectedUser && selectedUser.user_id === user.user_id
+                      }
+                      onClick={() => {
+                        router.push(`/messages?user=${user.user_id}`);
+                      }}
+                    />
+                  ))
                 : groups?.length > 0 &&
-                groups.map((group) => (
-                  <UserCard
-                    key={group.group_id}
-                    user={group}
-                    isActive={
-                      selectedUser && selectedUser.group_id === group.group_id
-                    }
-                    onClick={() => {
-                      router.push(`/messages?group=${group.group_id}`);
-                    }}
-                  />
-                ))}
+                  groups.map((group) => (
+                    <UserCard
+                      key={group.group_id}
+                      user={group}
+                      isActive={
+                        selectedUser && selectedUser.group_id === group.group_id
+                      }
+                      onClick={() => {
+                        router.push(`/messages?group=${group.group_id}`);
+                      }}
+                    />
+                  ))}
               {!users?.length && activeTab === "friends" && (
                 <div className={styles.noUsersMessage}>
                   You have no chats yet.
@@ -600,8 +576,9 @@ export default function MessagesPage() {
                     {selectedUser.username && (
                       <p className={styles.conversationUserStatus}>
                         <span
-                          className={`${styles.statusDot} ${selectedUser.online ? styles.online : styles.offline
-                            }`}
+                          className={`${styles.statusDot} ${
+                            selectedUser.online ? styles.online : styles.offline
+                          }`}
                         ></span>
                         {selectedUser.online ? "Online" : "Offline"}
                       </p>
@@ -659,8 +636,8 @@ export default function MessagesPage() {
               </div>
 
               {selectedUser.is_following ||
-                selectedUser.privacy === "public" ||
-                (selectedUser.role !== "guest" && selectedUser.group_id) ? (
+              selectedUser.privacy === "public" ||
+              (selectedUser.role !== "guest" && selectedUser.group_id) ? (
                 <form
                   className={styles.messageInputForm}
                   onSubmit={handleSendMessage}

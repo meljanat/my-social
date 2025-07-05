@@ -27,10 +27,6 @@ export default function GroupPage() {
   const [usersToInvite, setUsersToInvite] = useState([]);
   const [activeTab, setActiveTab] = useState("my-groups");
 
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const [hasMorePosts, setHasMorePosts] = useState(true);
-  const [postsOffset, setPostsOffset] = useState(0);
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const group_id = searchParams.get("id");
@@ -76,13 +72,7 @@ export default function GroupPage() {
         }
 
         const data = await response.json();
-        console.log("Group data from server:", data);
-
         setSelectedGroup(data);
-        setSelectedGroup({
-          ...data,
-          id: data.group_id,
-        });
         fetchGroupDetails("posts", data.group_id);
         setIsLoading(false);
       } catch (error) {
@@ -96,97 +86,30 @@ export default function GroupPage() {
     }
   }, [group_id]);
 
-  // async function fetchGroupDetails(type, groupId) {
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await fetch(
-  //       `http://localhost:8404/group_details?group_id=${groupId}&type=${type}&offset=0`,
-  //       {
-  //         method: "GET",
-  //         credentials: "include",
-  //       }
-  //     );
-  //     if (!response.ok) {
-  //       throw new Error("Failed to fetch group data");
-  //     }
-  //     const data = await response.json();
-  //     setSelectedGroup((prev) => ({
-  //       ...prev,
-  //       [type]: data,
-  //     }));
-  //     setIsLoading(false);
-  //   } catch (error) {
-  //     console.error("Error fetching group data:", error);
-  //     setIsLoading(false);
-  //   }
-  // }
-
-  async function fetchGroupDetails(type, groupId, offset = 0) {
-    // console.log("Fetching posts with offset:", offset, "for group:", groupId);
-    if (isFetchingMore || !hasMorePosts) return;
-
-    setIsFetchingMore(true);
-
+  async function fetchGroupDetails(type, groupId) {
     try {
+      setIsLoading(true);
       const response = await fetch(
-        `http://localhost:8404/group_details?group_id=${groupId}&type=${type}&offset=${offset}`,
+        `http://localhost:8404/group_details?group_id=${groupId}&type=${type}&offset=0`,
         {
           method: "GET",
           credentials: "include",
         }
       );
-
-      if (!response.ok) throw new Error("Failed to fetch more posts");
-
-      const morePosts = await response.json();
-      console.log("num post:", morePosts);
-
-
-      if (!Array.isArray(morePosts) || morePosts.length === 0) {
-        setHasMorePosts(false);
-        // console.log("No more posts or invalid data.");
-        return;
+      if (!response.ok) {
+        throw new Error("Failed to fetch group data");
       }
-
+      const data = await response.json();
       setSelectedGroup((prev) => ({
         ...prev,
-        posts: offset === 0 ? morePosts : [...(prev.posts || []), ...morePosts],
+        [type]: data,
       }));
-
-      setPostsOffset((prevOffset) => prevOffset + morePosts.length);
+      setIsLoading(false);
     } catch (error) {
-      console.error("Error fetching more posts:", error);
-    } finally {
-      setIsFetchingMore(false);
+      console.error("Error fetching group data:", error);
+      setIsLoading(false);
     }
   }
-
-  useEffect(() => {
-    document.body.style.minHeight = "300vh";
-    return () => {
-      document.body.style.minHeight = "";
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isLoggedIn || groupView !== "posts") return;
-
-    const handleScroll = () => {
-      // console.log("selectedGroup?.id:", selectedGroup?.id);
-      // console.log("Scroll event triggered");
-      const nearBottom =
-        window.innerHeight + window.scrollY >= document.body.offsetHeight - 500;
-
-        const canScroll = document.body.scrollHeight > window.innerHeight;
-      if (nearBottom && !isFetchingMore && hasMorePosts && selectedGroup?.id, canScroll) {
-        // console.log("Fetching more posts...");
-        fetchGroupDetails("posts", selectedGroup.id, postsOffset);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isLoggedIn, isFetchingMore, hasMorePosts, groupView, selectedGroup?.id]);
 
   function handleCreatePost() {
     setShowPostForm(true);
@@ -540,11 +463,12 @@ export default function GroupPage() {
               </div>
             ) : (
               <button
-                className={` ${selectedGroup.role === "member" ||
+                className={` ${
+                  selectedGroup.role === "member" ||
                   activeTab === "pending-groups"
-                  ? styles.leaveGroupBtn
-                  : styles.adminActionBtn
-                  }`}
+                    ? styles.leaveGroupBtn
+                    : styles.adminActionBtn
+                }`}
                 onClick={() => {
                   handleFollow(selectedGroup.admin_id, selectedGroup.group_id);
                 }}
@@ -574,8 +498,8 @@ export default function GroupPage() {
                 {selectedGroup.role === "member"
                   ? "Leave Group"
                   : activeTab === "pending-groups"
-                    ? "Cancel"
-                    : "Join Group"}
+                  ? "Cancel"
+                  : "Join Group"}
               </button>
             )}
           </div>
@@ -591,8 +515,9 @@ export default function GroupPage() {
       )}
       <div className={styles.groupDetailTabs}>
         <button
-          className={`${styles.tabButton} ${groupView === "posts" ? styles.activeTab : ""
-            }`}
+          className={`${styles.tabButton} ${
+            groupView === "posts" ? styles.activeTab : ""
+          }`}
           onClick={() => {
             fetchGroupDetails("posts", selectedGroup.group_id);
             setGroupView("posts");
@@ -601,8 +526,9 @@ export default function GroupPage() {
           Posts
         </button>
         <button
-          className={`${styles.tabButton} ${groupView === "members" ? styles.activeTab : ""
-            }`}
+          className={`${styles.tabButton} ${
+            groupView === "members" ? styles.activeTab : ""
+          }`}
           onClick={() => {
             fetchGroupDetails("members", selectedGroup.group_id);
             setGroupView("members");
@@ -611,8 +537,9 @@ export default function GroupPage() {
           Members
         </button>
         <button
-          className={`${styles.tabButton} ${groupView === "events" ? styles.activeTab : ""
-            }`}
+          className={`${styles.tabButton} ${
+            groupView === "events" ? styles.activeTab : ""
+          }`}
           onClick={() => {
             fetchGroupDetails("events", selectedGroup.group_id);
             setGroupView("events");
@@ -626,7 +553,7 @@ export default function GroupPage() {
         {groupView === "posts" && (
           <div className={styles.groupPostsContainer}>
             {selectedGroup.role === "guest" &&
-              selectedGroup.privacy === "private" ? (
+            selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
                 <img src="/icons/no-posts.svg" alt="No Posts" />
                 <p>You are not allowed to see Posts</p>
@@ -649,10 +576,10 @@ export default function GroupPage() {
 
                 <div className={styles.postsScrollContainer}>
                   {selectedGroup.posts && selectedGroup.posts?.length > 0 ? (
-                    selectedGroup.posts.map((post, index) => (
+                    selectedGroup.posts.map((post) => (
                       <PostsComponent
                         post={post}
-                        key={`${post.post_id}-${index}`}
+                        key={post.post_id}
                         groupId={selectedGroup.group_id}
                         setPosts={setSelectedGroup}
                       />
@@ -683,7 +610,7 @@ export default function GroupPage() {
               <h3>Members ({selectedGroup.members?.length || 0})</h3>
             </div>
             {selectedGroup.role === "guest" &&
-              selectedGroup.privacy === "private" ? (
+            selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
                 <p className={styles.emptyTitle}>
                   You are not allowed to see Members
@@ -710,7 +637,7 @@ export default function GroupPage() {
         {groupView === "events" && (
           <div className={styles.groupEventsContainer}>
             {selectedGroup.role === "guest" &&
-              selectedGroup.privacy === "private" ? (
+            selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
                 <p className={styles.emptyTitle}>
                   You are not allowed to see Events
@@ -722,13 +649,13 @@ export default function GroupPage() {
                   <h3>Upcoming Events</h3>
                   {(selectedGroup.role === "admin" ||
                     selectedGroup.role === "member") && (
-                      <button
-                        className={styles.createEventBtn}
-                        onClick={() => setShowEventForm(true)}
-                      >
-                        Create Event
-                      </button>
-                    )}
+                    <button
+                      className={styles.createEventBtn}
+                      onClick={() => setShowEventForm(true)}
+                    >
+                      Create Event
+                    </button>
+                  )}
                 </div>
 
                 <div className={styles.eventsScrollContainer}>

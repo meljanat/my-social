@@ -1,5 +1,5 @@
-import {React, useState} from "react";
-import styles from"../styles/GroupCard.module.css";
+import { React, useState } from "react";
+import styles from "../styles/GroupCard.module.css";
 
 export default function GroupCard({
   group,
@@ -14,7 +14,7 @@ export default function GroupCard({
   const handleAction = (id) => {
     setIsProcessing(true);
     try {
-      if (group.role === "admin" || onAction) {
+      if (group.role === "admin") {
         onAction(id);
       } else {
         onJoin(id);
@@ -24,7 +24,7 @@ export default function GroupCard({
     }
   };
 
-return (
+  return (
     <div className={styles.groupCard} onClick={onClick}>
       <div className={styles.groupCardContent}>
         <div className={styles.groupHeader}>
@@ -40,9 +40,8 @@ return (
         </div>
 
         <div className={styles.groupDetails}>
-          <p className={styles.groupMeta}>{`${group.total_members || 0} members - ${
-            group.total_posts
-          } posts - ${group.privacy}`}</p>
+          <p className={styles.groupMeta}>{`${group.total_members || 0} members - ${group.total_posts
+            } posts - ${group.privacy}`}</p>
         </div>
 
         <div className={styles.groupActions}>

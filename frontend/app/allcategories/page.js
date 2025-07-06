@@ -1,11 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import AuthForm from "../components/AuthForm";
 import PostComponent from "../components/PostComponent";
 import styles from "../styles/AllCategories.module.css";
 
 export default function AllCategories() {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [categories, setCategories] = useState([]);
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -13,31 +11,6 @@ export default function AllCategories() {
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedIn(data);
-        }
-      } catch (error) {
-        console.log("Error checking login status:", error);
-      } finally {
-        setIsLoading(true);
-      }
-    };
-
-    checkLoginStatus();
-  }, [isLoggedIn]);
 
   async function fetchCategories() {
     setIsLoadingCategories(false);
@@ -106,7 +79,6 @@ export default function AllCategories() {
   }
 
   useEffect(() => {
-    if (!isLoggedIn) return;
     fetchCategories();
   }, []);
 
@@ -146,10 +118,6 @@ export default function AllCategories() {
         <p className={styles.loadingText}>Loading...</p>
       </div>
     );
-  }
-
-  if (!isLoggedIn) {
-    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
   }
 
   return (

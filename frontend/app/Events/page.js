@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import AuthForm from "../components/AuthForm";
 import { useRouter } from "next/navigation";
 import EventFormModal from "../components/EventFormModal";
 import styles from "../styles/EventsPage.module.css";
@@ -8,7 +7,6 @@ import useInfiniteScroll from "../components/useInfiniteScroll";
 import CardOfEvent from "../components/CardOfEvent";
 
 export default function EventsPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState("my-events");
   const [showEventForm, setShowEventForm] = useState(false);
   const [events, setEvents] = useState([]);
@@ -20,31 +18,6 @@ export default function EventsPage() {
   const router = useRouter();
 
   const eventsGridRef = useRef(null);
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedIn(data);
-        }
-      } catch (error) {
-        console.log("Error checking login status:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLoginStatus();
-  }, [isLoggedIn]);
 
   const fetchEvents = async (type, currentOffset = 0) => {
     setError(null);
@@ -143,7 +116,7 @@ export default function EventsPage() {
       if (!response.ok)
         throw new Error(data.error || "Failed to join/leave event.");
       console.log(eventId, type);
-      
+
       setEvents(events.filter((event) => event.event_id !== eventId));
       // setEvents((prev) =>
       //   prev.map((e) =>
@@ -162,10 +135,6 @@ export default function EventsPage() {
         <p className={styles.loadingText}>Loading events...</p>
       </div>
     );
-  }
-
-  if (!isLoggedIn) {
-    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
   }
 
   if (error) {
@@ -199,17 +168,15 @@ export default function EventsPage() {
 
         <div className={styles.eventsTabs}>
           <button
-            className={`${styles.tabButton} ${
-              activeTab === "my-events" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${activeTab === "my-events" ? styles.activeTab : ""
+              }`}
             onClick={() => handleTabChange("my-events")}
           >
             My Events
           </button>
           <button
-            className={`${styles.tabButton} ${
-              activeTab === "discover" ? styles.activeTab : ""
-            }`}
+            className={`${styles.tabButton} ${activeTab === "discover" ? styles.activeTab : ""
+              }`}
             onClick={() => handleTabChange("discover")}
           >
             Discover
@@ -441,7 +408,7 @@ export default function EventsPage() {
         <EventFormModal
           onClose={() => setShowEventForm(false)}
           onEventCreated={handleEventCreated}
-          // my_groups={my_groups}
+        // my_groups={my_groups}
         />
       )}
     </div>

@@ -1,14 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
-import AuthForm from "../components/AuthForm";
-import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PostsComponent from "@/app/components/PostsComponent";
 import EditProfileModal from "@/app/components/EditProfileModal";
 import styles from "../styles/ProfilePage.module.css";
 
 export default function ProfilePage() {
-  const [isLoggedIn, setIsLoggedIn] = useState();
   const [isFollowing, setIsFollowing] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -28,37 +25,11 @@ export default function ProfilePage() {
   const [error, setError] = useState(null);
   const [activeSubTab, setActiveSubTab] = useState("posts");
   const [savedGroupPosts, setSavedGroupPosts] = useState([]);
-  const [isLoadingSavedGroupPosts, setIsLoadingSavedGroupPosts] =
-    useState(false);
+  const [isLoadingSavedGroupPosts, setIsLoadingSavedGroupPosts] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedIn(data);
-        }
-      } catch (error) {
-        console.log("Error checking login status:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLoginStatus();
-  }, [isLoggedIn]);
 
   function togglePicPreview(type = null) {
     setPicturePreview(type);
@@ -93,7 +64,7 @@ export default function ProfilePage() {
             ...prev,
             type: data.action,
             total_followers: data.total_followers,
-            
+
           };
         });
       }
@@ -282,6 +253,7 @@ export default function ProfilePage() {
       day: "numeric",
     });
   };
+
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -290,11 +262,6 @@ export default function ProfilePage() {
       </div>
     );
   }
-  if (!isLoggedIn) {
-    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
-  }
-
-
 
   if (error) {
     return (

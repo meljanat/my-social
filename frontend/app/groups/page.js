@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import AuthForm from "../components/AuthForm";
 import { useRouter } from "next/navigation";
 import GroupCard from "../components/GroupCard";
 import InvitationCard from "../components/InvitationCard";
@@ -17,7 +16,6 @@ import {
 } from "../functions/user";
 
 export default function GroupsPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState("true");
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("discover");
   const [groupData, setGroupData] = useState([]);
@@ -53,31 +51,6 @@ export default function GroupsPage() {
       setIsLoading(false);
     }
   }
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedIn(data);
-        }
-      } catch (error) {
-        console.log("Error checking login status:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLoginStatus();
-  }, [isLoggedIn]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -154,10 +127,6 @@ export default function GroupsPage() {
         <p className={styles.loadingText}>Loading...</p>
       </div>
     );
-  }
-
-  if (!isLoggedIn) {
-    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
   }
 
   return (

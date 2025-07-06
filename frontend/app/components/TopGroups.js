@@ -1,29 +1,9 @@
 "use client";
-import React from "react"; 
-import styles from "../styles/TopGroups.module.css"; 
+import React from "react";
+import styles from "../styles/TopGroups.module.css";
+import { handleFollow } from "../functions/user";
 
 export default function TopGroups({ groups }) {
-  async function handleJoinGroupt(group_id) {
-    try {
-      const response = await fetch(`http://localhost:8404/join`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(parseInt(group_id)),
-      });
-      console.log(group_id);
-
-      if (response.ok) {
-        console.log("Joined group successfully");
-      } else {
-        console.error("Failed to join the group.");
-      }
-    } catch (error) {
-      console.error("Error joining group:", error);
-    }
-  }
   return (
     <div className={styles.topGroups}>
       <div className={styles.sectionHeader}>
@@ -57,7 +37,7 @@ export default function TopGroups({ groups }) {
               </div>
               <button
                 className={styles.joinButton}
-                onClick={() => handleJoinGroupt(group.group_id)}
+                onClick={() => handleFollow(0, group.group_id)}
               >
                 Join
               </button>

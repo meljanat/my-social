@@ -1,11 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import AuthForm from "../components/AuthForm";
 import styles from "../styles/AllUsersPage.module.css";
 import { handleFollow, handelAccept, handleReject } from "../functions/user";
 
 export default function AllUsersPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState("suggested");
   const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [pendingRequests, setPendingRequests] = useState();
@@ -13,31 +11,6 @@ export default function AllUsersPage() {
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedIn(data);
-        }
-      } catch (error) {
-        console.log("Error checking login status:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLoginStatus();
-  }, [isLoggedIn]);
 
   useEffect(() => {
     fetchUsers("suggested");
@@ -126,7 +99,7 @@ export default function AllUsersPage() {
   //     <div className={styles.loadingSpinner}>Loading...</div>
   //   </div>
   // )}
-  
+
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -134,10 +107,6 @@ export default function AllUsersPage() {
         <p className={styles.loadingText}>Loading...</p>
       </div>
     );
-  }
-
-  if (!isLoggedIn) {
-    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
   }
 
   return (

@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/PostComponent.module.css";
 
-export default function PostComponent({ posts: initialPosts, postsRef }) {
+export default function PostComponent({ posts: initialPosts }) {
   const [posts, setPosts] = useState(initialPosts);
   const [activeLikesPopup, setActiveLikesPopup] = useState(null);
   const popupRef = useRef(null);
@@ -98,7 +98,7 @@ export default function PostComponent({ posts: initialPosts, postsRef }) {
   }
 
   return (
-    <div className={styles.postsContainer} ref={postsRef}>
+    <div className={styles.postsContainer}>
       {posts?.map((post) => (
         <div key={post.post_id} className={styles.postCard}>
           <div className={styles.header}>

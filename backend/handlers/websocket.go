@@ -56,7 +56,6 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 	user, err := database.GetProfileInfo(user_id, nil)
 	if err != nil {
 		fmt.Println(err)
-		return
 	}
 
 	for {
@@ -75,23 +74,23 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 		}
 
 		if !LastTime(w, r, "messages") {
-			return
+			continue
 		}
 
 		var users_ids []int64
 		if message.GroupID != 0 {
 			if _, err := database.GetGroupById(message.GroupID); err != nil {
 				fmt.Println(err)
-				return
+				continue
 			}
 			if member, err := database.IsMemberGroup(user_id, message.GroupID); err != nil || !member {
 				fmt.Println(err)
-				return
+				continue
 			}
 			users_ids, err = database.GetAllMembers(message.GroupID, user_id)
 			if err != nil {
 				fmt.Println(err)
-				return
+				continue
 			}
 
 			for _, id := range users_ids {
@@ -103,15 +102,15 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 				is_member, err := database.IsMemberGroup(id, message.GroupID)
 				if err != nil {
 					fmt.Println("Error checking group membership:", err)
-					return
+					continue
 				}
 				if !is_member {
 					fmt.Println("User is not a member of the group")
-					return
+					continue
 				}
 				if err = database.SendMessage(user_id, id, message.GroupID, message.Content, ""); err != nil && user_id != id {
 					fmt.Println("Error sending message:", err)
-					return
+					continue
 				}
 
 				Mutex.Lock()
@@ -126,11 +125,11 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 			}
 			if is_followed, err := database.IsFollowed(user_id, message.UserID); err != nil || !is_followed && usr.Privacy == "private" {
 				fmt.Println("User is not followed or error checking follow status:", err)
-				return
+				continue
 			}
 			if err = database.SendMessage(user_id, message.UserID, message.GroupID, message.Content, ""); err != nil {
 				fmt.Println("Error sending message:", err)
-				return
+				continue
 			}
 
 			Mutex.Lock()

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef } from "react";
 import LeftSidebar from "./components/LeftSideBar";
 import ProfileCard from "./components/ProfileCard";
 import TopGroups from "./components/TopGroups";
@@ -15,16 +15,21 @@ export default function Home() {
   const [homeData, setHomeData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [stories, setStories] = useState([]);
-  const [offset, setOffset] = useState(0);
   const [msgOffset, setMsgOffset] = useState(0);
-  const postsRef = useRef([]);
-  const msgsRef = useRef([]);
+  const [isFetchingMorePosts, setIsFetchingMorePosts] = useState(true);
+  const postsRef = useRef(null);
+  const msgsRef = useRef(null);
+  const lastPostsRef = useRef(null);
+  const postsScroll = postsRef.current;
+  const msgsScroll = msgsRef.current;
 
   useEffect(() => {
     fetchHomeData();
   }, []);
 
   const fetchHomeData = async (offset = 0, msgOffset = 0) => {
+    console.log("fethomedata called with offset:", offset, isFetchingMorePosts);
+
     try {
       const response = await fetch(
         `http://localhost:8404/home?offset=${offset}&offset_messages=${msgOffset}`,
@@ -38,40 +43,51 @@ export default function Home() {
       if (!response.ok) throw new Error("Network response was not ok");
 
       const data = await response.json();
-
+      setHomeData(data);
       if (data.user.stories) {
         setStories(data.user.stories);
       }
-      setPosts(data.posts);
-      setHomeData(data);
+      if (posts?.length === 0) setPosts(data.posts);
+      else {
+        setPosts(posts ? [...posts, ...data.posts] : data.posts)
+      }
+      if (data.posts.length < 10) {
+        setIsFetchingMorePosts(false);
+      }
     } catch (error) {
-      setError(true);
-      console.error("Error fetching posts:", error);
+      console.log("Error fetching posts:", error);
+      setError("Error fetching data.")
     } finally {
       setIsLoading(false);
+      setError(null)
     }
   };
 
-  const addNewPost = (newPost) => {
-    setPosts((prevPosts) => {
-      const updatedPosts = [newPost, ...prevPosts];
-      return updatedPosts;
-    });
+  const addNewPost = () => {
+    fetchHomeData(0, msgOffset)
+  };
+
+  const handleScroll = () => {
+    console.log(postsScroll.scrollTop, postsScroll.scrollHeight);
+    console.log(postsScroll.scrollHeight / 3);
+
+
+    if (postsScroll.scrollTop == postsScroll.scrollHeight - (postsScroll.scrollHeight / 3)) {
+      console.log(posts.length);
+
+      fetchHomeData(posts.length, msgOffset)
+    }
   };
 
   useEffect(() => {
-    const postsScroll = postsRef.current.scrollTop;
-    const handleScroll = () => {
-      console.log("Posts Ref Updated:", postsRef.current.scrollTop);
-    }
+    if (!postsScroll || !isFetchingMorePosts) return;
 
-    // handleScroll();
-    if (postsScroll) {
-      postsScroll.addEventListener("scroll", handleScroll);
-    }
+    postsScroll.addEventListener("scroll", handleScroll);
 
-
-  }, []);
+    return () => {
+      postsScroll.removeEventListener("scroll", handleScroll);
+    };
+  }, [posts]);
 
   if (isLoading) {
     return (
@@ -110,11 +126,11 @@ export default function Home() {
               />
             </div>
 
-            <div className="center-column">
+            <div className="center-column" ref={postsRef}>
               <div className="stories-section">
                 <StoriesComponent storiesUsers={stories} />
               </div>
-              <PostComponent posts={posts} postsRef={postsRef} />
+              <PostComponent posts={posts} />
             </div>
 
             <div className="right-column">

@@ -1,6 +1,5 @@
 "use client";
 import styles from "../styles/GroupPage.module.css";
-import AuthForm from "../components/AuthForm";
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import InviteUsersModal from "../components/UsersToInviteModal";
@@ -15,7 +14,6 @@ import { handleFollow, handelAccept, handleReject } from "../functions/user";
 import { leaveGroup } from "../functions/group";
 
 export default function GroupPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState("true");
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [groupView, setGroupView] = useState("posts");
@@ -26,65 +24,40 @@ export default function GroupPage() {
   const [showEventForm, setShowEventForm] = useState(false);
   const [usersToInvite, setUsersToInvite] = useState([]);
   const [activeTab, setActiveTab] = useState("my-groups");
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const group_id = searchParams.get("id");
 
+  
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedIn(data);
-        }
-      } catch (error) {
-        console.log("Error checking login status:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLoginStatus();
-  }, [isLoggedIn]);
-
-  useEffect(() => {
-    async function fetchGroup(group_id) {
-      setIsLoading(true);
-      try {
-        const response = await fetch(
-          `http://localhost:8404/group?group_id=${group_id}`,
-          {
-            credentials: "include",
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch group details");
-        }
-
-        const data = await response.json();
-        setSelectedGroup(data);
-        fetchGroupDetails("posts", data.group_id);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching group details:", error);
-        setIsLoading(false);
-      }
-    }
-
     if (group_id) {
       fetchGroup(group_id);
     }
   }, [group_id]);
+
+  async function fetchGroup(group_id) {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `http://localhost:8404/group?group_id=${group_id}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch group details");
+      }
+
+      const data = await response.json();
+      setSelectedGroup(data);
+      fetchGroupDetails("posts", data.group_id);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching group details:", error);
+      setIsLoading(false);
+    }
+  }
 
   async function fetchGroupDetails(type, groupId) {
     try {
@@ -176,10 +149,6 @@ export default function GroupPage() {
         <p className={styles.loadingText}>Loading...</p>
       </div>
     );
-  }
-
-  if (!isLoggedIn) {
-    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
   }
 
   if (!selectedGroup) {
@@ -463,12 +432,11 @@ export default function GroupPage() {
               </div>
             ) : (
               <button
-                className={` ${
-                  selectedGroup.role === "member" ||
+                className={` ${selectedGroup.role === "member" ||
                   activeTab === "pending-groups"
-                    ? styles.leaveGroupBtn
-                    : styles.adminActionBtn
-                }`}
+                  ? styles.leaveGroupBtn
+                  : styles.adminActionBtn
+                  }`}
                 onClick={() => {
                   handleFollow(selectedGroup.admin_id, selectedGroup.group_id);
                 }}
@@ -498,8 +466,8 @@ export default function GroupPage() {
                 {selectedGroup.role === "member"
                   ? "Leave Group"
                   : activeTab === "pending-groups"
-                  ? "Cancel"
-                  : "Join Group"}
+                    ? "Cancel"
+                    : "Join Group"}
               </button>
             )}
           </div>
@@ -515,9 +483,8 @@ export default function GroupPage() {
       )}
       <div className={styles.groupDetailTabs}>
         <button
-          className={`${styles.tabButton} ${
-            groupView === "posts" ? styles.activeTab : ""
-          }`}
+          className={`${styles.tabButton} ${groupView === "posts" ? styles.activeTab : ""
+            }`}
           onClick={() => {
             fetchGroupDetails("posts", selectedGroup.group_id);
             setGroupView("posts");
@@ -526,9 +493,8 @@ export default function GroupPage() {
           Posts
         </button>
         <button
-          className={`${styles.tabButton} ${
-            groupView === "members" ? styles.activeTab : ""
-          }`}
+          className={`${styles.tabButton} ${groupView === "members" ? styles.activeTab : ""
+            }`}
           onClick={() => {
             fetchGroupDetails("members", selectedGroup.group_id);
             setGroupView("members");
@@ -537,9 +503,8 @@ export default function GroupPage() {
           Members
         </button>
         <button
-          className={`${styles.tabButton} ${
-            groupView === "events" ? styles.activeTab : ""
-          }`}
+          className={`${styles.tabButton} ${groupView === "events" ? styles.activeTab : ""
+            }`}
           onClick={() => {
             fetchGroupDetails("events", selectedGroup.group_id);
             setGroupView("events");
@@ -553,7 +518,7 @@ export default function GroupPage() {
         {groupView === "posts" && (
           <div className={styles.groupPostsContainer}>
             {selectedGroup.role === "guest" &&
-            selectedGroup.privacy === "private" ? (
+              selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
                 <img src="/icons/no-posts.svg" alt="No Posts" />
                 <p>You are not allowed to see Posts</p>
@@ -610,7 +575,7 @@ export default function GroupPage() {
               <h3>Members ({selectedGroup.members?.length || 0})</h3>
             </div>
             {selectedGroup.role === "guest" &&
-            selectedGroup.privacy === "private" ? (
+              selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
                 <p className={styles.emptyTitle}>
                   You are not allowed to see Members
@@ -637,7 +602,7 @@ export default function GroupPage() {
         {groupView === "events" && (
           <div className={styles.groupEventsContainer}>
             {selectedGroup.role === "guest" &&
-            selectedGroup.privacy === "private" ? (
+              selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
                 <p className={styles.emptyTitle}>
                   You are not allowed to see Events
@@ -649,13 +614,13 @@ export default function GroupPage() {
                   <h3>Upcoming Events</h3>
                   {(selectedGroup.role === "admin" ||
                     selectedGroup.role === "member") && (
-                    <button
-                      className={styles.createEventBtn}
-                      onClick={() => setShowEventForm(true)}
-                    >
-                      Create Event
-                    </button>
-                  )}
+                      <button
+                        className={styles.createEventBtn}
+                        onClick={() => setShowEventForm(true)}
+                      >
+                        Create Event
+                      </button>
+                    )}
                 </div>
 
                 <div className={styles.eventsScrollContainer}>

@@ -333,10 +333,32 @@ func GroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	invited, err := database.CheckInvitation(0, user.ID, group_id)
+	if err != nil {
+		fmt.Println("Failed to check if user has been invited to join the group", err)
+		response := map[string]string{"error": "Failed to check if user has been invited to join the group"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	requested, err := database.CheckInvitation(user.ID, 0, group_id)
+	if err != nil {
+		fmt.Println("Failed to check if user has requested to join the group", err)
+		response := map[string]string{"error": "Failed to check if user has requested to join the group"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
 	if group.Admin == user.Username {
 		group.Role = "admin"
 	} else if member {
 		group.Role = "member"
+	} else if requested {
+		group.Role = "requested"
+	} else if invited {
+		group.Role = "invited"
 	} else {
 		group.Role = "guest"
 	}

@@ -1,14 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import AuthForm from "../components/AuthForm";
 import { useSearchParams } from "next/navigation";
 import styles from "../styles/PostPage.module.css";
 
 export default function PostPage() {
   const searchParams = useSearchParams();
   const post_id = searchParams.get("id");
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -18,31 +15,6 @@ export default function PostPage() {
   // const [homeData, setHomeData] = useState(null); // Unused
   // const [posts, setPosts] = useState([]); // Unused
   // const [postSaved, setPostSaved] = useState(); // Unused
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:8404/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setIsLoggedIn(data);
-        }
-      } catch (error) {
-        console.log("Error checking login status:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLoginStatus();
-  }, [isLoggedIn]);
 
   async function handleSave(postIdToSave) {
     try {
@@ -169,10 +141,6 @@ export default function PostPage() {
       setError(err.message || "Failed to like post. Please try again.");
     }
   };
-
-  if (!isLoggedIn) {
-    return <AuthForm onLoginSuccess={() => setIsLoggedIn(true)} />;
-  }
 
   if (isLoading) {
     return (

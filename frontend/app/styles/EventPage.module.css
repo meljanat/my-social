@@ -1,0 +1,149 @@
+
+
+.eventPageContainer {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; 
+    min-height: 100vh;
+    background-color: #f0f2f5;
+    padding: 2rem 1rem;
+  }
+  
+  .eventContentWrapper {
+    width: 100%;
+    max-width: 800px; 
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  
+  .loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 1.5rem;
+    text-align: center;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    margin: 2rem auto;
+    max-width: 500px;
+  }
+  
+  .loadingSpinner {
+    border: 6px solid #e0e5f0;
+    border-top: 6px solid #667eea;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .loadingText {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+  
+  .notFoundContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 1.5rem;
+    text-align: center;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    margin: 2rem auto;
+    max-width: 500px;
+  }
+  .isAttending{
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+  
+  .notFoundText {
+    font-size: 1.2rem;
+    color: #ef4444; 
+    font-weight: 600;
+  }
+  
+  .goBackButton {
+    background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+
+    width: 8rem;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.8rem 1.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+  
+  .goBackButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45);
+  }
+  
+  
+  @media (max-width: 768px) {
+    .eventPageContainer {
+      padding: 1.5rem 0.8rem;
+    }
+    .loadingContainer,
+    .notFoundContainer {
+      min-height: 300px;
+      padding: 1.5rem;
+      max-width: 90%;
+    }
+    .loadingText,
+    .notFoundText {
+      font-size: 1rem;
+    }
+    .goBackButton {
+      padding: 0.7rem 1.5rem;
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .eventPageContainer {
+      padding: 1rem 0.5rem;
+    }
+    .loadingContainer,
+    .notFoundContainer {
+      min-height: 250px;
+      padding: 1rem;
+      max-width: 95%;
+    }
+    .loadingText,
+    .notFoundText {
+      font-size: 0.9rem;
+    }
+    .goBackButton {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.85rem;
+    }
+  }
+  

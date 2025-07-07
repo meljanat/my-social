@@ -297,7 +297,8 @@
 .editProfileBtn,
 .followBtn,
 .unfollowBtn,
-.requestCancelBtn {
+.requestCancelBtn, 
+.messageBtn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -309,6 +310,20 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.messageBtn {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+  color: white;
+}
+.messageBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+.followActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
 }
 
 .editProfileBtn {
@@ -693,6 +708,92 @@
   background: linear-gradient(135deg, #e0e5f0 0%, #d3d9e8 100%);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.modalOverlay {
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modalContent {
+  /* width: 200px; */
+  /* height: 200px; */
+  background-color: #ffffff;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+}
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+.modalTitle{
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin: 0;
+  font-weight: 700;
+  
+}
+
+
+.closeModalButton {
+  /* position: absolute; */
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #475569;
+  cursor: pointer;
+}
+.messageForm{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.sendMessageButton {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sendMessageButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+
+.messageInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #dbe2ef;
+  border-radius: 10px;
+  font-size: 1rem;
+  color: #475569;
+  margin-bottom: 1rem;  
+}
+.messageInput:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
 }
 
 @media (max-width: 992px) {

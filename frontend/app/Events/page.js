@@ -168,14 +168,16 @@ export default function EventsPage() {
 
         <div className={styles.eventsTabs}>
           <button
-            className={`${styles.tabButton} ${activeTab === "my-events" ? styles.activeTab : ""
+            className={`${styles.tabButton} ${
+              activeTab === "my-events" ? styles.activeTab : ""
               }`}
             onClick={() => handleTabChange("my-events")}
           >
             My Events
           </button>
           <button
-            className={`${styles.tabButton} ${activeTab === "discover" ? styles.activeTab : ""
+            className={`${styles.tabButton} ${
+              activeTab === "discover" ? styles.activeTab : ""
               }`}
             onClick={() => handleTabChange("discover")}
           >

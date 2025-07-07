@@ -16,7 +16,7 @@ import {
 } from "../functions/user";
 
 export default function GroupsPage() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("discover");
   const [groupData, setGroupData] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -24,6 +24,10 @@ export default function GroupsPage() {
   const [showRemoveGroupModal, setShowRemoveGroupModal] = useState(false);
   const [showGroupForm, setShowGroupForm] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    fetchGroupData("suggested");
+  }, []);
 
   async function fetchGroupData(endpoint) {
     try {
@@ -49,6 +53,7 @@ export default function GroupsPage() {
       console.error("Error fetching group data:", error);
       setGroupData([]);
       setIsLoading(false);
+
     }
   }
 
@@ -90,6 +95,8 @@ export default function GroupsPage() {
   };
 
   const handleGroupSelect = (group) => {
+    console.log("Selected group:", group);
+
     router.push(`/group?id=${group.group_id}`);
   };
 
@@ -282,9 +289,7 @@ export default function GroupsPage() {
                     key={group.group_id}
                     group={group}
                     isJoined={false}
-                    onJoin={() => {
-                      handleJoinGroup(group);
-                    }}
+                    onJoin={handleJoinGroup}
                     onClick={() => {
                       handleGroupSelect(group);
                     }}

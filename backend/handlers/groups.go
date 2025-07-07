@@ -333,7 +333,7 @@ func GroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	invited, err := database.CheckInvitation(0, user.ID, group_id)
+	invited, err := database.CheckInvitation(group.AdminID, user.ID, group_id)
 	if err != nil {
 		fmt.Println("Failed to check if user has been invited to join the group", err)
 		response := map[string]string{"error": "Failed to check if user has been invited to join the group"}
@@ -342,7 +342,7 @@ func GroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	requested, err := database.CheckInvitation(user.ID, 0, group_id)
+	requested, err := database.CheckInvitation(user.ID, group.AdminID, group_id)
 	if err != nil {
 		fmt.Println("Failed to check if user has requested to join the group", err)
 		response := map[string]string{"error": "Failed to check if user has requested to join the group"}
@@ -353,14 +353,19 @@ func GroupHandler(w http.ResponseWriter, r *http.Request) {
 
 	if group.Admin == user.Username {
 		group.Role = "admin"
+		group.Action = "Delete group"
 	} else if member {
 		group.Role = "member"
+		group.Action = "Leave group"
 	} else if requested {
 		group.Role = "requested"
+		group.Action = "Cancel request"
 	} else if invited {
 		group.Role = "invited"
+		group.Action = "Accept invitation"
 	} else {
 		group.Role = "guest"
+		group.Action = "Join group"
 	}
 
 	w.Header().Set("Content-Type", "application/json")

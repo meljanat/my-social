@@ -7,6 +7,7 @@ export default function EventFormModal({
   onEventCreated,
   my_groups,
   group,
+  action,
 }) {
   const [eventFormInput, setEventFormInput] = useState({
     name: "",
@@ -17,21 +18,6 @@ export default function EventFormModal({
     eventImage: null,
     group_id: 0,
   });
-  // console.log(my_groups);
-  const dummydata = [
-    {
-      group_id: 1,
-      name: "Dummy Group 1",
-      description: "This is a dummy group for testing purposes.",
-      total_members: 10,
-    },
-    {
-      group_id: 2,
-      name: "Dummy Group 2",
-      description: "This is another dummy group for testing purposes.",
-      total_members: 5,
-    },
-  ];
 
   const [imageInputKey, setImageInputKey] = useState(Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -197,7 +183,7 @@ export default function EventFormModal({
                 }}
               />
             </div>
-            {myGroups && (
+            {myGroups && action !== "group" && (
               <div className={styles.formGroup}>
                 <label htmlFor="event-group">Select Group</label>
                 <select

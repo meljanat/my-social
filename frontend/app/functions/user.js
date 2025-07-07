@@ -15,10 +15,16 @@ export async function handleFollow(user_id, group_id) {
       throw new Error("Failed to follow user");
     }
     const data = await response.json();
+    // console.log("Follow response data:", data);
+
     if (data.error) {
       throw new Error(data.error);
     }
-    return data === "unfollow" ? "Following" : data === "follow" ? "Follow" : "Pending";
+    return data === "unfollow"
+      ? "Following"
+      : data === "follow"
+        ? "Follow"
+        : "Pending";
   } catch (error) {
     console.error("Error following user:", error);
   }
@@ -37,8 +43,9 @@ export async function handelAccept(user_id, group_id) {
       }),
       credentials: "include",
     });
-  }
-  catch (error) {
+    const data = await response.json();
+    console.log("Accept response data:", data);
+  } catch (error) {
     console.error("Error accepting user:", error);
   }
 }
@@ -56,9 +63,7 @@ export async function handleReject(user_id, group_id) {
       }),
       credentials: "include",
     });
-
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error rejecting user:", error);
   }
 }
@@ -76,8 +81,7 @@ export async function handelAcceptOtherGroup(user_id, group_id) {
       }),
       credentials: "include",
     });
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error accepting user:", error);
   }
 }
@@ -95,8 +99,7 @@ export async function handleRejectOtherGroup(user_id, group_id) {
       }),
       credentials: "include",
     });
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error rejecting user:", error);
   }
 }

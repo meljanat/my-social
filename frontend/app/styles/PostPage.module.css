@@ -2,6 +2,7 @@
 .postPageContainer {
   display: flex;
   justify-content: center;
+  align-content: center;
   background-color: #f0f2f5;
   min-height: 100vh;
   padding: 2rem 0;
@@ -9,7 +10,7 @@
 
 .postPageContent {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1000px;
   background-color: #ffffff;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -69,18 +70,18 @@
   font-weight: 500;
 }
 
-.errorIcon {
-  width: 80px;
-  height: 80px;
+/* .errorIcon {
+  width: 800px;
+  height: 800px;
   margin-bottom: 1rem;
-}
+} */
 
 .errorMessage {
-  font-size: 1.1rem;
+  font-size: 3rem;
   color: #ef4444;
-  font-weight: 500;
+  font-weight: 900;
   text-align: center;
-  margin-top: 1rem;
+  /* margin-top: 1rem; */
 }
 
 .retryButton {
@@ -506,7 +507,6 @@
   font-style: italic;
 }
 
-/* Responsive Adjustments */
 @media (max-width: 768px) {
   .postPageContainer {
     padding: 1rem 0;

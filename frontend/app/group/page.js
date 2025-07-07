@@ -10,11 +10,11 @@ import MemberCard from "../components/MemberCard";
 import PostFormModal from "../components/PostFormModal";
 import PostsComponent from "../components/PostsComponent";
 import EventFormModal from "../components/EventFormModal";
-import { handleFollow, handelAccept, handleReject } from "../functions/user";
-import { leaveGroup } from "../functions/group";
+import { handelAccept, handleReject } from "../functions/user";
 
 export default function GroupPage() {
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [groupPosts, setGroupPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [groupView, setGroupView] = useState("posts");
   const [showPostForm, setShowPostForm] = useState(false);
@@ -28,7 +28,6 @@ export default function GroupPage() {
   const searchParams = useSearchParams();
   const group_id = searchParams.get("id");
 
-  
   useEffect(() => {
     if (group_id) {
       fetchGroup(group_id);
@@ -50,12 +49,43 @@ export default function GroupPage() {
       }
 
       const data = await response.json();
+      console.log("Group data:", data);
+      
       setSelectedGroup(data);
       fetchGroupDetails("posts", data.group_id);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching group details:", error);
       setIsLoading(false);
+    }
+  }
+
+  async function handleFollow(user_id, group_id) {
+    try {
+      const response = await fetch(`http://localhost:8404/follow`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: parseInt(user_id),
+          group_id: parseInt(group_id),
+        }),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to follow user");
+      }
+      const data = await response.json();
+      // console.log("Follow response data:", data);
+      // fetchGroupDetails(groupView, group_id);
+      fetchGroup(group_id);
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error("Error following user:", error);
     }
   }
 
@@ -73,10 +103,15 @@ export default function GroupPage() {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
+      console.log("Group details data:", data);
+      
       setSelectedGroup((prev) => ({
         ...prev,
         [type]: data,
       }));
+      if (type === "posts") {
+        setGroupPosts(data);
+      }
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching group data:", error);
@@ -161,13 +196,28 @@ export default function GroupPage() {
 
   return (
     <div className={styles.groupDetailContainer}>
+      {showEventForm && (
+        <EventFormModal
+          onClose={() => setShowEventForm(false)}
+          group={selectedGroup}
+          action={"group"}
+        />
+      )}
+      {showPostForm && (
+        <PostFormModal
+          onClose={() => setShowPostForm(false)}
+          onPostCreated={addNewPost}
+          group_id={selectedGroup.group_id}
+          action={"group"}
+        />
+      )}
       {showRemoveGroupModal && (
         <div className={styles.modalOverlay}>
           <RemoveGroupModal
             group={selectedGroup}
             onClose={() => setShowRemoveGroupModal(false)}
             onRemove={removeGroup}
-            onLeave={leaveGroup}
+            // onLeave={leaveGroup}
             action={selectedGroup?.role === "admin" ? "remove" : "leave"}
           />
         </div>
@@ -431,44 +481,62 @@ export default function GroupPage() {
                 </button>
               </div>
             ) : (
-              <button
-                className={` ${selectedGroup.role === "member" ||
-                  activeTab === "pending-groups"
-                  ? styles.leaveGroupBtn
-                  : styles.adminActionBtn
-                  }`}
-                onClick={() => {
-                  handleFollow(selectedGroup.admin_id, selectedGroup.group_id);
-                }}
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+              <>
+                {selectedGroup.role === "member" && (
+                  <button
+                    className={styles.adminActionBtn}
+                    onClick={() => {
+                      setShowUsersToInviteModal(true);
+                      InvitUsers(selectedGroup.group_id);
+                    }}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <circle
+                        cx="8.5"
+                        cy="7"
+                        r="4"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M20 8v6M23 11h-6"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    Invite Users
+                  </button>
+                )}
+                <button
+                  className={` ${selectedGroup.role === "member" ||
+                    activeTab === "pending-groups"
+                    ? styles.leaveGroupBtn
+                    : styles.adminActionBtn
+                    }`}
+                  onClick={() => {
+                    handleFollow(selectedGroup.admin_id, selectedGroup.group_id);
+                  }}
                 >
-                  <path
-                    d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M16 17l5-5-5-5M21 12H9"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                {selectedGroup.role === "member"
-                  ? "Leave Group"
-                  : activeTab === "pending-groups"
-                    ? "Cancel"
-                    : "Join Group"}
-              </button>
+                  {selectedGroup.type}
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -540,13 +608,13 @@ export default function GroupPage() {
                 )}
 
                 <div className={styles.postsScrollContainer}>
-                  {selectedGroup.posts && selectedGroup.posts?.length > 0 ? (
-                    selectedGroup.posts.map((post) => (
+                  {groupPosts && groupPosts?.length > 0 ? (
+                    groupPosts.map((post) => (
                       <PostsComponent
                         post={post}
                         key={post.post_id}
                         groupId={selectedGroup.group_id}
-                        setPosts={setSelectedGroup}
+                        setPosts={setGroupPosts}
                       />
                     ))
                   ) : (
@@ -555,15 +623,6 @@ export default function GroupPage() {
                     </div>
                   )}
                 </div>
-
-                {showPostForm && (
-                  <PostFormModal
-                    onClose={() => setShowPostForm(false)}
-                    onPostCreated={addNewPost}
-                    group_id={selectedGroup.group_id}
-                    action={"group"}
-                  />
-                )}
               </div>
             )}
           </div>
@@ -641,12 +700,6 @@ export default function GroupPage() {
                   )}
                 </div>
               </>
-            )}
-            {showEventForm && (
-              <EventFormModal
-                onClose={() => setShowEventForm(false)}
-                group={selectedGroup}
-              />
             )}
           </div>
         )}

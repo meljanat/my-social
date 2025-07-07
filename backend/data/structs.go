@@ -117,6 +117,7 @@ type Group struct {
 	AdminID       int64  `json:"admin_id" sqlite:"admin_id"`
 	Privacy       string `json:"privacy" sqlite:"privacy"`
 	Role          string `json:"role" sqlite:"role"`
+	Action        string `json:"type" sqlite:"type"`
 	TotalMembers  int64  `json:"total_members" sqlite:"total_members"`
 	TotalPosts    int64  `json:"total_posts" sqlite:"total_posts"`
 	TotalMessages int64  `json:"total_messages" sqlite:"total_messages"`

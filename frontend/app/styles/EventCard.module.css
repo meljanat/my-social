@@ -146,6 +146,37 @@
   font-size: 0.95rem;
   color: #475569;
 }
+.eventActionButton:disabled,
+.eventActionButton[disabled]{
+  /* border: 1px solid #999999; */
+  background-color: #cccccc;
+  color: #ffffff;
+}
+.eventActionButton:disabled,
+.eventActionButton[disabled]:hover {
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+
+.goBackButton {
+  background: linear-gradient(135deg, #eef2f9 0%, #e0e5f0 100%);
+  color: #475569;
+  border: 1px solid #dbe2ef;
+  border-radius: 12px;
+  padding: 0.8rem 1.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.goBackButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
 
 .eventCardCompact .eventMetaItem {
   font-size: 0.85rem;

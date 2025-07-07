@@ -52,10 +52,13 @@ const NotificationsComponent = ({ onMarkAllAsRead }) => {
 
   const markAsRead = async (notification) => {
     try {
-      const response = await fetch(`http://localhost:8404/read_notification?id=${notification.notification_id}`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:8404/read_notification?id=${notification.notification_id}`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to mark notification as read");
 
@@ -66,19 +69,24 @@ const NotificationsComponent = ({ onMarkAllAsRead }) => {
             : n
         )
       );
-      if (notification.type_notification === "follow_request"
-        || notification.type_notification === "follow"
+      if (
+        notification.type_notification === "follow_request" ||
+        notification.type_notification === "follow"
       ) {
-        router.push('/profile?id=' + notification.user_id);
-      } else if (notification.type_notification === "like" ||
+        router.push("/profile?id=" + notification.user_id);
+      } else if (
+        notification.type_notification === "like" ||
         notification.type_notification === "comment" ||
-        notification.type_notification === "save") {
-        router.push('/post?id=' + notification.post_id);
+        notification.type_notification === "save"
+      ) {
+        router.push("/post?id=" + notification.post_id);
       } else if (notification.type_notification === "event") {
-        router.push('/event?id=' + notification.event_id);
-      } else if (notification.type_notification === "group" ||
-        notification.type_notification === "join_request") {
-        router.push('/group?id=' + notification.group_id);
+        router.push("/event?id=" + notification.event_id);
+      } else if (
+        notification.type_notification === "group" ||
+        notification.type_notification === "join_request"
+      ) {
+        router.push("/group?id=" + notification.group_id);
       }
     } catch (error) {
       console.error("Error marking notification as read:", error.message);

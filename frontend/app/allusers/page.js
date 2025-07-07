@@ -9,7 +9,7 @@ export default function AllUsersPage() {
   const [pendingRequests, setPendingRequests] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [receivedRequests, setReceivedRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function AllUsersPage() {
   }, []);
 
   const fetchUsers = async (type) => {
-    setLoading(true);
+    // setLoading(true);
     setError(null);
     try {
       const response = await fetch(
@@ -47,7 +47,7 @@ export default function AllUsersPage() {
     } catch (error) {
       setError(`Network error while fetching ${type} users.`);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -94,20 +94,22 @@ export default function AllUsersPage() {
       setError("Failed to follow user. Please try again.");
     }
   };
-  // {isLoading && (
-  //   <div className={styles.loadingContainer}>
-  //     <div className={styles.loadingSpinner}>Loading...</div>
-  //   </div>
-  // )}
 
-  if (isLoading) {
-    return (
+  {isLoading && (
       <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner}></div>
-        <p className={styles.loadingText}>Loading...</p>
+        <div className={styles.loadingSpinner}>Loading...</div>
       </div>
-    );
+    )
   }
+
+  // if (loading) {
+  //   return (
+  //     <div className={styles.loadingContainer}>
+  //       <div className={styles.loadingSpinner}></div>
+  //       <p className={styles.loadingText}>Loading...</p>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className={styles.allUsersContainer}>
@@ -159,7 +161,7 @@ export default function AllUsersPage() {
       </div>
 
       <div className={styles.tabContent}>
-        {loading ? (
+        {isLoading ? (
           <div className={styles.loadingState}>
             <div className={styles.loadingSpinner}></div>
             <p className={styles.loadingText}>Loading users...</p>

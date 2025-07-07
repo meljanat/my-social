@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export default function RootLayout({ children }) {
-  const [isLoggedIn, setIsLoggedIn] = useState('chil3ba');
+  const [isLoggedIn, setIsLoggedIn] = useState('temp');
 
   useEffect(() => {
     const checkLoginStatus = async () => {

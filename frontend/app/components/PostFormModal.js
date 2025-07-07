@@ -312,7 +312,7 @@ export default function PostFormModal({
                 )}
               </select>
             </div>
-            {action !== "groupe" && (
+            {action !== "group" && (
               <div className={styles.formGroup}>
                 <label>Privacy</label>
                 <div className={styles.privacyOptions}>

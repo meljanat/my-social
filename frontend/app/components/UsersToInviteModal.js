@@ -13,7 +13,9 @@ export default function InviteUsersModal({
     setLocalUsers(users);
   }, [users]);
 
-  const handleInvite = async (userId) => {
+  const handleInvite = async (userId, groupId) => {
+    console.log("Inviting user:", userId, "to group:", groupId);
+    
     try {
       await onInvite(userId, groupId);
       setLocalUsers(prevUsers =>
@@ -55,7 +57,7 @@ export default function InviteUsersModal({
                 <div className="user-actions">
                   <button
                     className="invite-button"
-                    onClick={() => handleInvite(user.user_id)}
+                    onClick={() => handleInvite(user.user_id, groupId)}
                   >
                     Invite
                   </button>

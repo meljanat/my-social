@@ -17,13 +17,13 @@ async function handleLike(postId, setPosts) {
       const updatedPost = await response.json();
 
       setPosts((prevPosts) =>
-        prevPosts.map((post) =>
+        prevPosts?.map((post) =>
           post.post_id === postId
             ? {
-              ...post,
-              total_likes: updatedPost.total_likes,
-              is_liked: updatedPost.is_liked,
-            }
+                ...post,
+                total_likes: updatedPost.total_likes,
+                is_liked: updatedPost.is_liked,
+              }
             : post
         )
       );

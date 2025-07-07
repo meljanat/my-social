@@ -3,22 +3,37 @@ import React, { useState, useEffect } from "react";
 import "../styles/NotificationPage.css";
 import NotificationCard from "../components/NotificationCard";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
-import useInfiniteScroll from "../components/useInfiniteScroll";
 
 export default function NotificationPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
-  const [hasMoreNotifications, setHasMoreNotifications] = useState(true);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const container = useRef(null);
+  const [isFetchingMore, setIsFetchingMore] = useState(true);
   const router = useRouter();
+
+  const handleScroll = () => {
+    if (window.scrollY >= window.innerHeight * .7 &&
+      window.scrollY <= window.innerHeight * .7 + 50 &&
+      notifications.length % 20 === 0 && isFetchingMore) {
+      fetchNotifications(notifications.length);
+    }
+  }
 
   useEffect(() => {
     fetchNotifications();
   }, []);
 
+  useEffect(() => {
+    if (!isFetchingMore && notifications.length % 20 != 0) return;
+
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [notifications]);
+
   const fetchNotifications = async (offset = 0) => {
+    if (notifications.length % 20 != 0) return;
     try {
       const response = await fetch(
         `http://localhost:8404/notifications?offset=${offset}`,
@@ -33,14 +48,21 @@ export default function NotificationPage() {
       const data = await response.json();
 
       if (Array.isArray(data)) {
+        if (data.length < 20) {
+          setIsFetchingMore(false);
+        }
         if (offset === 0) {
           setNotifications(data);
         } else {
           setNotifications((prev) => [...prev, ...data]);
+          console.log("Fetched more notifications:", data);
+
         }
       }
     } catch (error) {
       console.error("Error fetching notifications:", error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -55,29 +77,11 @@ export default function NotificationPage() {
       );
 
       if (!response.ok) throw new Error("Failed to mark all as read");
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      fetchNotifications();
     } catch (error) {
       console.error("Error marking notifications as read:", error.message);
     }
   };
-
-  useInfiniteScroll({
-    fetchMoreCallback: async () => {
-      if (!hasMoreNotifications) return;
-      setIsFetchingMore(true);
-
-      const currentLength = notifications.length;
-      const newNotifications = await fetchNotifications(currentLength);
-
-      if (newNotifications.length === 0) {
-        setHasMoreNotifications(false);
-      }
-
-      setIsFetchingMore(false);
-    },
-    offset: notifications.length,
-    isFetching: isFetchingMore,
-  });
 
   const markAsRead = async (notification) => {
     try {
@@ -91,13 +95,7 @@ export default function NotificationPage() {
 
       if (!response.ok) throw new Error("Failed to mark notification as read");
 
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.notification_id === notification.notification_id
-            ? { ...n, read: true }
-            : n
-        )
-      );
+      fetchNotifications();
       if (notification.type_notification === "invitation") {
         router.push('/profile?id=' + notification.user_id);
       } else if (notification.type_notification === "like" ||
@@ -115,29 +113,11 @@ export default function NotificationPage() {
     }
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (container.current) {
-        const { scrollTop, scrollHeight, clientHeight } = container.current;
-        if (scrollHeight - scrollTop <= clientHeight + 1 && !noMoreNotifs) {
-          fetchNotifications(notifications.length);
-        }
-      }
-    };
-
-    const currentContainer = container.current;
-    currentContainer.addEventListener("scroll", handleScroll);
-
-    return () => {
-      currentContainer.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
   if (isLoading) {
     return (
       <div className="loadingContainer">
         <div className="loadingSpinner"></div>
-        <p className="loadingText">Loading your profile...</p>
+        <p className="loadingText">Loading...</p>
       </div>
     );
   }
@@ -152,7 +132,7 @@ export default function NotificationPage() {
           </button>
         </div>
 
-        <div className="notification-list" ref={container}>
+        <div className="notification-list">
           {notifications.length
             ? notifications.map((notification) => (
               <NotificationCard

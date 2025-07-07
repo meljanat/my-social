@@ -122,77 +122,18 @@ const CardOfEvent = ({ event, handleInterestedClick }) => {
           {/* <p>Created At: {event.created_at}</p> */}
 
           <div className={styles.eventActions}>
-            {event.type === "" ? (
-              <>
-                <button
-                  onClick={() =>
-                    handleInterestedClick(
-                      event.event_id,
-                      event.group_id,
-                      "going"
-                    )
-                  }
-                  className={`${styles.eventActionButton} ${styles.attending}`}
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M20 6L9 17l-5-5"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  Going
-                </button>
-                <button
-                  className={`${styles.eventActionButton} ${styles.attending}`}
-                  onClick={() =>
-                    handleInterestedClick(
-                      event.event_id,
-                      event.group_id,
-                      "not_going"
-                    )
-                  }
-                >
-                  {/* <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M20 6L9 17l-5-5"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg> */}
-                  Not Going
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className={styles.eventDetailsBtn}
-                  onClick={() =>
-                    router.push(
-                      `/event?id=${event.group_id}&event=${event.event_id}`
-                    )
-                  }
-                >
-                  View details
-                </button>
-              </>
-            )}
+            <>
+              <button
+                className={styles.eventDetailsBtn}
+                onClick={() =>
+                  router.push(
+                    `/event?id=${event.group_id}&event=${event.event_id}`
+                  )
+                }
+              >
+                View details
+              </button>
+            </>
           </div>
         </div>
       </div>

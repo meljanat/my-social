@@ -383,6 +383,8 @@ func AcceptInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("Invitation received:", invitation)
+
 	var userToFollowing structs.User
 	if invitation.User != 0 {
 		userToFollowing, err = database.GetUserById(invitation.User)

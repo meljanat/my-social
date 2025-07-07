@@ -40,13 +40,14 @@ export default function GroupCard({
         </div>
 
         <div className={styles.groupDetails}>
-          <p className={styles.groupMeta}>{`${group.total_members || 0} members - ${group.total_posts
-            } posts - ${group.privacy}`}</p>
+          <p className={styles.groupMeta}>{`${group.total_members || 0
+            } members - ${group.total_posts} posts - ${group.privacy}`}</p>
         </div>
 
         <div className={styles.groupActions}>
           <button
-            className={`${styles.groupJoinBtn} ${localIsJoined ? "joined" : ""}`}
+            className={`${styles.groupJoinBtn} ${localIsJoined ? "joined" : ""
+              }`}
             onClick={(e) => {
               e.stopPropagation();
               setLocalIsJoined(!localIsJoined);
@@ -54,15 +55,13 @@ export default function GroupCard({
             }}
             disabled={isProcessing}
           >
-            {isProcessing ? (
-              "Processing..."
-            ) : group.role === "admin" ? (
-              "Delete Group"
-            ) : localIsJoined ? (
-              "Leave"
-            ) : (
-              "Join Group"
-            )}
+            {isProcessing
+              ? "Processing..."
+              : group.role === "admin"
+                ? "Delete Group"
+                : localIsJoined
+                  ? "Leave"
+                  : "Join Group"}
           </button>
         </div>
       </div>

@@ -1,7 +1,10 @@
 import React from "react";
 import styles from "../styles/EventCard.module.css";
+import { joinGroup } from "../functions/group";
 
-export default function EventCard({ event, compact = false }) {
+export default function EventCard({ event }) {
+  console.log("EventCard event:", event);
+
   const startDate = new Date(event.start_date);
   const endDate = new Date(event.end_date);
 
@@ -15,7 +18,6 @@ export default function EventCard({ event, compact = false }) {
   const { month, day, year } = formatDate(startDate);
   const { month: endMonth, day: endDay, year: endYear } = formatDate(endDate);
 
-
   const StartRange = `${startDate.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -26,7 +28,7 @@ export default function EventCard({ event, compact = false }) {
     minute: "2-digit",
   })} ${endDay}/${endMonth}/${endYear}`;
 
-  const JoinToEvent = async (eventId, groupId) => {
+  const JoinToEvent = async (eventId, groupId, eventType) => {
     try {
       const response = await fetch(`http://localhost:8404/join_to_event`, {
         method: "POST",
@@ -37,8 +39,11 @@ export default function EventCard({ event, compact = false }) {
         body: JSON.stringify({
           event_id: eventId,
           group_id: groupId,
+          type: eventType,
         }),
       });
+      const data = await response.json();
+      console.log("Join to event response:", data);
 
       if (!response.ok) {
         throw new Error("Failed to join the event.");
@@ -48,16 +53,8 @@ export default function EventCard({ event, compact = false }) {
     }
   };
 
-  const handleNotGoing = () => {
-    console.log("User is not going to the event.");
-  };
-
   return (
-    <div
-      className={`${styles.eventCard} ${
-        compact ? styles.eventCardCompact : ""
-      }`}
-    >
+    <div className={styles.eventCard}>
       <div className={styles.eventImageContainer}>
         <img
           src={event.image || "/inconnu/event-placeholder.png"}
@@ -75,70 +72,65 @@ export default function EventCard({ event, compact = false }) {
 
         <div className={styles.eventMeta}>
           <div className={styles.eventMetaItem}>
-            <svg viewBox="0 0 24 24" className={styles.eventIcon} fill="currentColor">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
             <span>{event.location}</span>
           </div>
 
           <div className={styles.eventMetaItem}>
-            <svg viewBox="0 0 24 24" className={styles.eventIcon} fill="currentColor">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
             <span>{StartRange}</span>
           </div>
 
           <div className={styles.eventMetaItem}>
-            <svg viewBox="0 0 24 24" className={styles.eventIcon} fill="currentColor">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
             <span>{EndRange}</span>
           </div>
 
-          {!compact && event.group_name && (
+          {event.group_name && (
             <div className={styles.eventMetaItem}>
-              <svg viewBox="0 0 24 24" className={styles.eventIcon} fill="currentColor">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 00-3-3.87" />
-                <path d="M16 3.13a4 4 0 010 7.75" />
-              </svg>
               <span>{event.group_name}</span>
             </div>
           )}
 
-          {!compact && event.creator && (
+          {event.creator && (
             <div className={styles.eventMetaItem}>
-              <svg viewBox="0 0 24 24" className={styles.eventIcon} fill="currentColor">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
               <span>Created by {event.creator}</span>
             </div>
           )}
         </div>
 
-        {!compact && event.description && (
-          <p className={styles.eventDescription}>{event.description}</p>
+        {event.description && (
+          <>
+            <p className={styles.eventDescription}>{event.description}</p>
+            <p
+              style={
+                event.type === "GOING"
+                  ? { color: "rgb(103, 211, 103)" }
+                  : { color: "#ef4444" }
+              }
+              className={styles.isAttending}
+            >
+              {event.type}
+            </p>
+          </>
         )}
       </div>
 
       <div className={styles.eventCardFooter}>
         <button
           className={styles.eventActionButton}
-          onClick={() => JoinToEvent(event.event_id, event.group_id)}
+          disabled={event.type === "GOING"}
+          onClick={() => JoinToEvent(event.event_id, event.group_id, "going")}
         >
           <span>Going</span>
         </button>
 
-        {!compact && (
-          <button className={styles.eventDetailsButton} onClick={handleNotGoing}>
-            <span>Not Going</span>
-          </button>
-        )}
+        <button
+          className={styles.eventDetailsButton}
+          disabled={event.type === "NOT GOING"}
+          onClick={() =>
+            JoinToEvent(event.event_id, event.group_id, "not_going")
+          }
+        >
+          <span>Not Going</span>
+        </button>
       </div>
     </div>
   );

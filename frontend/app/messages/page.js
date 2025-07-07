@@ -28,27 +28,6 @@ const Message = ({ message, isSent }) => {
 };
 
 const UserCard = ({ user, isActive, onClick }) => {
-  // const handleMessage = (msg) => {
-  //   console.log(isActive, msg);
-
-  //   if (
-  //     !isActive &&
-  //     msg.type === "message" &&
-  //     ((user.username && msg.username === user.username) || (user.name && msg.name === user.name))
-  //   ) {
-  //     user.total_messages++;
-  //   }
-  // };
-  // useEffect(() => {
-  //   addToListeners("message", handleMessage);
-
-  //   return () => {
-  //     removeFromListeners("message", handleMessage);
-  //   };
-  // }, []);
-  // console.log("user", user, isActive);
-  console.log(user.total_messages);
-
   return (
     <li
       className={`${styles.userItem} ${isActive ? styles.activeUser : ""}`}
@@ -153,6 +132,8 @@ export default function MessagesPage() {
       setUsers(data);
     } catch (error) {
       console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -170,6 +151,8 @@ export default function MessagesPage() {
       console.log("Fetched groups:", data);
     } catch (error) {
       console.error("Error fetching groups:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -198,7 +181,7 @@ export default function MessagesPage() {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, [newMessage]);
 
   const handleUserSelect = (user_id, group_id, offset = 0) => {
     const user = user_id ? users?.find((u) => u.user_id == user_id) : null;
@@ -257,10 +240,8 @@ export default function MessagesPage() {
         ]);
       }
 
-      if (!selectedUser) {
-        fetchUsers();
-        fetchGroups();
-      }
+      fetchUsers();
+      fetchGroups();
     } else if (msg.type === "new_connection" || msg.type === "disconnection") {
       fetchUsers();
     }
@@ -429,7 +410,6 @@ export default function MessagesPage() {
           <div
             className={styles.usersListContainer}
             ref={sidebarRef}
-            onScroll={handleSidebarScroll}
           >
             <ul className={styles.usersList} ref={usersListRef}>
               {activeTab === "friends"
@@ -509,22 +489,7 @@ export default function MessagesPage() {
                     className={styles.actionButton}
                     onClick={handleSeeProfile}
                   >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 5V19M5 12H19"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    See Profile
+                    See Profile &rarr;
                   </button>
                 </div>
               </div>
@@ -532,7 +497,6 @@ export default function MessagesPage() {
               <div
                 className={styles.conversationMessages}
                 ref={conversationRef}
-                onScroll={handleScroll}
               >
                 {messages && messages.length > 0 ? (
                   messages.map((message, index) => (

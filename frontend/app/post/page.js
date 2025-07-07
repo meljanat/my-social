@@ -11,7 +11,7 @@ export default function PostPage() {
   const [newComment, setNewComment] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [commentImageFile, setCommentImageFile] = useState(null); // Renamed from groupImage for clarity
+  const [commentImageFile, setCommentImageFile] = useState(null); 
   // const [homeData, setHomeData] = useState(null); // Unused
   // const [posts, setPosts] = useState([]); // Unused
   // const [postSaved, setPostSaved] = useState(); // Unused
@@ -40,35 +40,36 @@ export default function PostPage() {
       setError("Network error while saving post.");
     }
   }
+  
+  const fetchPost = async (id) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        `http://localhost:8404/post?post_id=${id}&offset=0`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch post.");
+      }
+
+      const data = await response.json();
+      setPost(data);
+      setComments(data.comments || []);
+    } catch (err) {
+      console.error("Error fetching post:", err);
+      setError(err.message || "Failed to load post. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPost = async (id) => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(
-          `http://localhost:8404/post?post_id=${id}&offset=0`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to fetch post.");
-        }
-
-        const data = await response.json();
-        setPost(data);
-        setComments(data.comments || []);
-      } catch (err) {
-        console.error("Error fetching post:", err);
-        setError(err.message || "Failed to load post. Please try again later.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
     if (post_id) {
       fetchPost(post_id);
@@ -158,14 +159,14 @@ export default function PostPage() {
       <div className={styles.postPageContainer}>
         <div className={styles.postPageContent}>
           <img
-            src="/icons/no-post-state.svg" // Ensure this SVG exists
+            src="/icons/no-post-state.svg"
             alt="Error"
             className={styles.errorIcon}
           />
           <div className={styles.errorMessage}>{error}</div>
           <button
             onClick={() => window.location.reload()}
-            className={styles.retryButton} // Reusing retry button style
+            className={styles.retryButton} 
           >
             Try Again
           </button>
@@ -194,7 +195,7 @@ export default function PostPage() {
           <div className={styles.postPageHeader}>
             <div className={styles.postAuthorInfo}>
               <img
-                src={post.avatar || "/inconnu/avatar.png"} // Added fallback
+                src={post.avatar || "/inconnu/avatar.png"} 
                 alt={post.author}
                 className={styles.authorAvatar}
               />
@@ -206,7 +207,7 @@ export default function PostPage() {
                   <h4 className={styles.authorName}>{post.author}</h4>
                 </a>
                 <div className={styles.timestamp}>
-                  {/* Assuming created_at.svg exists or use emoji/text */}
+                  
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -281,7 +282,7 @@ export default function PostPage() {
                 viewBox="0 0 20 18"
               >
                 <path
-                  fill={post.is_liked ? "#667eea" : "#B8C3E1"} // Changed fill color to match gradient
+                  fill={post.is_liked ? "#667eea" : "#B8C3E1"} 
                   d="M14.44.1C12.63.1 11.01.98 10 2.33A5.55 5.55 0 0 0 5.56.1C2.49.1 0 2.6 0 5.69 0 6.88.19 7.98.52 9c1.58 5 6.45 7.99 8.86 8.81.34.12.9.12 1.24 0C13.03 16.99 17.9 14 19.48 9c.33-1.02.52-2.12.52-3.31C20 2.6 17.51.1 14.44.1"
                 ></path>
               </svg>
@@ -318,7 +319,7 @@ export default function PostPage() {
               >
                 <path
                   d="M13.5 0H3.86C1.73 0 0 1.74 0 3.86v14.09c0 1.8 1.29 2.56 2.87 1.69l4.88-2.71c.52-.29 1.36-.29 1.87 0l4.88 2.71c1.58.88 2.87.12 2.87-1.69V3.86C17.36 1.74 15.63 0 13.5 0m-1.81 7.75c-.97.35-1.99.53-3.01.53s-2.04-.18-3.01-.53a.75.75 0 0 1-.45-.96c.15-.39.58-.59.97-.45 1.61.58 3.38.58 4.99 0a.75.75 0 1 1 .51 1.41"
-                  fill={post.saved ? "#667eea" : "#B8C3E1"} // Changed fill color to match gradient
+                  fill={post.saved ? "#667eea" : "#B8C3E1"} 
                 ></path>
               </svg>
               <span>{post.total_saves} Saves</span>
@@ -343,11 +344,11 @@ export default function PostPage() {
                   viewBox="0 0 22 22"
                 >
                   <path
-                    fill="#667eea" // Changed fill color
+                    fill="#667eea" 
                     d="M1.67 18.7a.746.746 0 0 1-.41-1.37l4.93-3.31c1.08-.73 2.57-.64 3.55.19l.33.29c.5.43 1.35.43 1.84 0l4.16-3.57c1.06-.91 2.73-.91 3.8 0l1.63 1.4c.31.27.35.74.08 1.06-.27.31-.74.35-1.06.08l-1.63-1.4c-.5-.43-1.35-.43-1.85 0l-4.16 3.57c-1.06.91-2.73.91-3.8 0l-.33-.29c-.46-.39-1.22-.43-1.73-.08l-4.93 3.31c-.13.08-.28.12-.42.12M8 9.75C6.48 9.75 5.25 8.52 5.25 7S6.48 4.25 8 4.25 10.75 5.48 10.75 7 9.52 9.75 8 9.75m0-4a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5"
                   ></path>
                   <path
-                    fill="#667eea" // Changed fill color
+                    fill="#667eea" 
                     d="M14 21.75H8C2.57 21.75.25 19.43.25 14V8C.25 2.57 2.57.25 8 .25h6c5.43 0 7.75 2.32 7.75 7.75v6c0 5.43-2.32 7.75-7.75 7.75m-6-20C3.39 1.75 1.75 3.39 1.75 8v6c0 4.61 1.64 6.25 6.25 6.25h6c4.61 0 6.25-1.64 6.25-6.25V8c0-4.61-1.64-6.25-6.25-6.25z"
                   ></path>
                 </svg>
@@ -356,7 +357,7 @@ export default function PostPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setCommentImageFile(e.target.files[0])}
-                  className={styles.hiddenFileInput} // Changed class name
+                  className={styles.hiddenFileInput} 
                 />
               </label>
             </div>

@@ -20,7 +20,7 @@ export default function Home() {
   const postsRef = useRef(null);
   const msgsRef = useRef(null);
   const lastPostsRef = useRef(null);
-  const postsScroll = postsRef.current;
+  let postsScroll = postsRef.current;
   const msgsScroll = msgsRef.current;
 
   useEffect(() => {
@@ -28,8 +28,6 @@ export default function Home() {
   }, []);
 
   const fetchHomeData = async (offset = 0, msgOffset = 0) => {
-    console.log("fethomedata called with offset:", offset, isFetchingMorePosts);
-
     try {
       const response = await fetch(
         `http://localhost:8404/home?offset=${offset}&offset_messages=${msgOffset}`,
@@ -68,18 +66,13 @@ export default function Home() {
   };
 
   const handleScroll = () => {
-    console.log(postsScroll.scrollTop, postsScroll.scrollHeight);
-    console.log(postsScroll.scrollHeight / 3);
-
-
-    if (postsScroll.scrollTop == postsScroll.scrollHeight - (postsScroll.scrollHeight / 3)) {
-      console.log(posts.length);
-
+    if (postsScroll.scrollTop + postsScroll.clientHeight >= postsScroll.scrollHeight - 100) {
       fetchHomeData(posts.length, msgOffset)
     }
   };
 
   useEffect(() => {
+    postsScroll = postsRef.current;
     if (!postsScroll || !isFetchingMorePosts) return;
 
     postsScroll.addEventListener("scroll", handleScroll);
@@ -87,7 +80,7 @@ export default function Home() {
     return () => {
       postsScroll.removeEventListener("scroll", handleScroll);
     };
-  }, [posts]);
+  }, [posts, msgOffset]);
 
   if (isLoading) {
     return (

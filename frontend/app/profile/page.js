@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import PostsComponent from "@/app/components/PostsComponent";
 import EditProfileModal from "@/app/components/EditProfileModal";
 import styles from "../styles/ProfilePage.module.css";
+import { websocket } from "../websocket/ws.js";
 
 export default function ProfilePage() {
   const [isFollowing, setIsFollowing] = useState();
@@ -30,6 +31,8 @@ export default function ProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [newMessage, setNewMessage] = useState("");
 
   function togglePicPreview(type = null) {
     setPicturePreview(type);
@@ -39,6 +42,19 @@ export default function ProfilePage() {
       ...userData,
       ...updatedData,
     });
+  };
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !userData) return;
+
+    const mssg = {
+      type: "message",
+      user_id: userData.user_id,
+      content: newMessage,
+    };
+
+    websocket.send(JSON.stringify(mssg));
+    setNewMessage("");
   };
 
   async function handleFollow(user_id) {
@@ -68,7 +84,19 @@ export default function ProfilePage() {
           };
         });
       }
-      fetchUserPosts();
+      if (activeTab === "posts") {
+        console.log("Active tab: ", activeTab);
+
+        fetchUserPosts();
+      } else if (activeTab === "followers") {
+        console.log("Active tab: ", activeTab);
+
+        fetchFollowers();
+      } else if (activeTab === "following") {
+        console.log("Active tab: ", activeTab);
+
+        fetchFollowing();
+      }
     } catch (error) {
       console.error("Error following user:", error);
     }
@@ -168,8 +196,6 @@ export default function ProfilePage() {
   };
 
   const fetchFollowers = async () => {
-    if (followers.length > 0) return;
-
     setIsLoadingFollowers(true);
     try {
       const response = await fetch(
@@ -197,8 +223,6 @@ export default function ProfilePage() {
   };
 
   const fetchFollowing = async () => {
-    if (following.length > 0) return;
-
     setIsLoadingFollowing(true);
     try {
       const response = await fetch(
@@ -292,6 +316,43 @@ export default function ProfilePage() {
 
   return (
     <div className={styles.appContainer}>
+      {showMessageModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            {/* <h2 className={styles.modalTitle}>Send Message</h2> */}
+            <div className={styles.messageForm}>
+              <div className={styles.modalHeader}>
+                <h2 className={styles.modalTitle}>
+                  Send Message to {userData.username}
+                </h2>
+                <button
+                  className={styles.closeModalButton}
+                  onClick={() => setShowMessageModal(false)}
+                >
+                  &times;
+                </button>
+              </div>
+
+              <textarea
+                onChange={(e) => setNewMessage(e.target.value)}
+                className={styles.messageInput}
+                placeholder="Type your message here..."
+              ></textarea>
+              <button
+                className={styles.sendMessageButton}
+                onClick={async () => {
+                  await handleSendMessage();
+                  setShowMessageModal(false);
+                  router.push(`/messages?user=${userData.user_id}`);
+                }}
+              >
+                Send Message
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={styles.profileContainer}>
         <div className={styles.profileHeader}>
           {picturePreview && (
@@ -344,7 +405,7 @@ export default function ProfilePage() {
           <div className={styles.profileInfo}>
             <div className={styles.profileDetails}>
               <div>
-                {userData.role !== "owner" &&
+                {userData.role !== "owner" && (
                   <div className={styles.profileStatusBadge}>
                     {userData.online ? (
                       <span className={styles.statusOnline}>Online</span>
@@ -352,7 +413,7 @@ export default function ProfilePage() {
                       <span className={styles.statusOffline}>Offline</span>
                     )}
                   </div>
-                }
+                )}
                 <h1 className={styles.profileName}>{`${userData.first_name || ""
                   } ${userData.last_name || ""}`}</h1>
                 <p className={styles.profileUsername}>
@@ -422,18 +483,29 @@ export default function ProfilePage() {
                     Edit Profile
                   </button>
                 ) : (
-                  <button
-                    className={
-                      userData.type === "Pending" ?
-                        styles.requestCancelBtn
-                        : userData.type === "Unfollow" ?
-                          styles.unfollowBtn
-                          : styles.followBtn
-                    }
-                    onClick={() => handleFollow(id)}
-                  >
-                    {userData.type}
-                  </button>
+                  <div className={styles.followActions}>
+                    {(userData.privacy === "public" || userData.is_following === true) && (
+                      <button
+                        className={styles.messageBtn}
+                        onClick={() => setShowMessageModal(true)}
+                      >
+                        Send Message
+                      </button>
+                    )}
+
+                    <button
+                      className={
+                        userData.type === "Pending"
+                          ? styles.requestCancelBtn
+                          : userData.type === "Unfollow"
+                            ? styles.unfollowBtn
+                            : styles.followBtn
+                      }
+                      onClick={() => handleFollow(id)}
+                    >
+                      {userData.type}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -810,15 +882,13 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-      {
-        showEditModal && userData && (
-          <EditProfileModal
-            user={userData}
-            onClose={() => setShowEditModal(false)}
-            onSave={handleProfileUpdate}
-          />
-        )
-      }
-    </div >
+      {showEditModal && userData && (
+        <EditProfileModal
+          user={userData}
+          onClose={() => setShowEditModal(false)}
+          onSave={handleProfileUpdate}
+        />
+      )}
+    </div>
   );
 }

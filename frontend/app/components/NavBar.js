@@ -243,6 +243,21 @@ export default function Navbar() {
             <span>Events</span>
             {/* </Link> */}
           </button>
+          <button
+            className={`${styles.navLink} ${
+              activeLink === "messages" ? styles.active : ""
+            }`}
+            onClick={() => {
+              router.push("/messages");
+              setActiveLink("messages");
+            }}
+          >
+            <img src="./icons/message.svg" alt="Messages" />
+            {user.total_messages > 0 && (
+              <span className={styles.badge}>{user.total_messages || 0}</span>
+            )}
+            <span>Messages</span>
+          </button>
         </div>
       </div>
 
@@ -361,14 +376,14 @@ export default function Navbar() {
           )}
         </div>
 
-        <button className={`${styles.actionIcon} ${styles.messageBadge}`}>
+        {/* <button className={`${styles.actionIcon} ${styles.messageBadge}`}>
           <Link href="/messages">
             <img src="./icons/message.svg" alt="Messages" />
             {user.total_messages > 0 && (
               <span className={styles.badge}>{user.total_messages || 0}</span>
             )}
           </Link>
-        </button>
+        </button> */}
 
         <div className={styles.profileDropdown} ref={profileMenuRef}>
           <button className={styles.profileButton} onClick={toggleProfileMenu}>

@@ -11,13 +11,13 @@ export default function GroupCard({
   const [localIsJoined, setLocalIsJoined] = useState(isJoined);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleAction = (id) => {
+  const handleAction = () => {
     setIsProcessing(true);
     try {
-      if (group.role === "admin") {
-        onAction(id);
+      if (group.role === "admin" || group.role === "member") {
+        onAction();
       } else {
-        onJoin(id);
+        onJoin();
       }
     } finally {
       setIsProcessing(false);
@@ -51,7 +51,7 @@ export default function GroupCard({
             onClick={(e) => {
               e.stopPropagation();
               setLocalIsJoined(!localIsJoined);
-              handleAction(group.group_id);
+              handleAction();
             }}
             disabled={isProcessing}
           >

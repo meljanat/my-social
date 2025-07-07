@@ -95,8 +95,6 @@ export default function GroupsPage() {
   };
 
   const handleGroupSelect = (group) => {
-    console.log("Selected group:", group);
-
     router.push(`/group?id=${group.group_id}`);
   };
 
@@ -106,8 +104,8 @@ export default function GroupsPage() {
     setShowRemoveGroupModal(false);
   };
 
-  const handleJoinGroup = async (group) => {
-    await handleFollow(0, group.group_id);
+  const handleJoinGroup = async (group_id) => {
+    await handleFollow(0, group_id);
     fetchGroupData("suggested");
   };
 
@@ -122,9 +120,9 @@ export default function GroupsPage() {
   };
 
   const handleGroupCreated = () => {
+    setShowGroupForm(false);
     setActiveTab("my-groups");
     fetchGroupData("joined");
-    setShowGroupForm(false);
   };
 
   if (isLoading) {
@@ -143,7 +141,10 @@ export default function GroupsPage() {
           <div className={styles.modalOverlay}>
             <RemoveGroupModal
               group={selectedGroup}
-              onClose={() => setShowRemoveGroupModal(false)}
+              onClose={() => {
+                setShowRemoveGroupModal(false);
+                setSelectedGroup(null);
+              }}
               onRemove={() => {
                 handleDeleteGroup(selectedGroup.group_id);
                 setSelectedGroup(null);
@@ -289,7 +290,9 @@ export default function GroupsPage() {
                     key={group.group_id}
                     group={group}
                     isJoined={false}
-                    onJoin={handleJoinGroup}
+                    onJoin={() => {
+                      handleJoinGroup(group.group_id);
+                    }}
                     onClick={() => {
                       handleGroupSelect(group);
                     }}

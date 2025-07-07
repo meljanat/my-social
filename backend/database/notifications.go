@@ -68,10 +68,12 @@ func SetNotificationMessage(type_notification string) string {
 		return "sent you a follow request"
 	case "group":
 		return "invited you to join a group"
-	case "group_request":
+	case "join_request":
 		return "requested to join your group"
+	case "join":
+		return "joined your group"
 	case "event":
-		return "invited you to an event"
+		return "created an event"
 	default:
 		return "sent you a notification"
 	}

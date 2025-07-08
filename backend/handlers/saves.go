@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+
 	structs "social-network/data"
 	"social-network/database"
-	"strconv"
 )
 
 func SaveHandler(w http.ResponseWriter, r *http.Request) {
@@ -108,13 +109,14 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(response)
 			return
 		}
-
-		if err := database.CreateNotification(user.ID, post.UserID, post.ID, post.GroupID, 0, "save"); err != nil {
-			fmt.Println("Failed to create notification", err)
-			response := map[string]string{"error": "Failed to create notification"}
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(response)
-			return
+		if user.ID != post.UserID {
+			if err := database.CreateNotification(user.ID, post.UserID, post.ID, post.GroupID, 0, "save"); err != nil {
+				fmt.Println("Failed to create notification", err)
+				response := map[string]string{"error": "Failed to create notification"}
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(response)
+				return
+			}
 		}
 	} else {
 		if err := database.UnsavePost(user.ID, post.ID, post.GroupID); err != nil {
@@ -188,6 +190,8 @@ func GetSavedPostsHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+
+	fmt.Println("posts saved : =====> ", posts)
 
 	if err != nil {
 		fmt.Println("Failed to retrieve saved posts", err)

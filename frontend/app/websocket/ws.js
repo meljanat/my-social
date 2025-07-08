@@ -15,6 +15,8 @@ const connectWebSocket = function () {
     const data = JSON.parse(event.data);
     if (listeners["message"]) {
       listeners["message"].forEach((callback) => callback(data));
+    } else if (listeners["read_messages"]) {
+      listeners["read_messages"].forEach((callback) => callback(data));
     } else if (listeners["notifications"]) {
       listeners["notifications"].forEach((callback) => callback(data));
     } else if (listeners["new_connection"]) {

@@ -124,6 +124,8 @@ export default function ProfilePage() {
           setSavedPosts(data || []);
         } else if (type === "group") {
           setSavedGroupPosts(data || []);
+          console.log(data, "=====>");
+
         }
       } else {
         console.error("Failed to fetch saved posts");
@@ -731,9 +733,11 @@ export default function ProfilePage() {
                     onClick={() => {
                       fetchSavedPosts("group");
                       setActiveSubTab("group-posts");
+                      console.log("salma cv ======>>>> ");
+
                     }}
                   >
-                    Saved Group Posts
+                    Saved Posts
                   </button>
                 </div>
 
@@ -772,6 +776,43 @@ export default function ProfilePage() {
                         onClick={goToHome}
                       >
                         Browse Posts
+                      </button>
+                    </div>
+                  ))}
+                
+                {activeSubTab === "group-posts" &&
+                  (isLoadingSavedGroupPosts ? (
+                    <div className={styles.loadingTab}>
+                      <div className={styles.loadingSpinner}></div>
+                      <p>Loading saved group posts...</p>
+                    </div>
+                  ) : savedGroupPosts.length > 0 ? (
+                    <div className={styles.postsContainer}>
+                      {savedGroupPosts.map((post) => (
+                        <PostsComponent
+                          key={post.post_id}
+                          post={post}
+                          setPosts={setSavedGroupPosts}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={styles.emptyState}>
+                      <div className={`${styles.emptyStateIcon} ${styles.bookmark}`}>
+                        🔖
+                      </div>
+                      <h3 className={styles.emptyStateTitle}>
+                        No saved group posts yet
+                      </h3>
+                      <p className={styles.emptyStateText}>
+                        When you save group posts you like, they will appear here for
+                        quick access later.
+                      </p>
+                      <button
+                        className={styles.createPostButton}
+                        onClick={goToHome}
+                      >
+                        Browse Groups
                       </button>
                     </div>
                   ))}

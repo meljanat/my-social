@@ -86,6 +86,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	mutex.Lock()
 	if err := database.UpdateSession(login.Email, sessionToken); err != nil {
 		log.Printf("Error updating session token: %v", err)
 		response := map[string]string{"error": "Failed to update session token"}
@@ -93,6 +94,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	mutex.Unlock()
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
@@ -224,6 +226,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		mutex.Lock()
 		if err := database.RegisterUser(register.Username, register.FirstName, register.LastName, register.Email, register.Bio, imagePath, coverPath, register.Privacy, hashedPassword, register.DateOfBirth, sessionToken); err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed: users.email") {
 				fmt.Println("Email already exists")
@@ -243,6 +246,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+		mutex.Unlock()
 	} else if register.Type == "update" {
 		register.ID, err = strconv.ParseInt(r.FormValue("id"), 10, 64)
 		if err != nil {
@@ -252,6 +256,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(response)
 			return
 		}
+		mutex.Lock()
 		if err := database.UpdateProfile(register.ID, register.Username, register.FirstName, register.LastName, register.Bio, register.Privacy); err != nil {
 			if strings.Contains(err.Error(), "UNIQUE constraint failed: users.email") {
 				fmt.Println("Email already exists")
@@ -274,7 +279,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+		mutex.Unlock()
 
+		mutex.Lock()
 		if err := database.AcceptAllInvitations(register.ID); err != nil {
 			log.Printf("Error accepting invitations: %v", err)
 			response := map[string]string{"error": "Failed to accept invitations"}
@@ -283,6 +290,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(response)
 			return
 		}
+		mutex.Unlock()
 
 		response := map[string]interface{}{
 			"user":    register,

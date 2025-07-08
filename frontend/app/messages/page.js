@@ -76,18 +76,52 @@ export default function MessagesPage() {
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [openEmojiSection, setOpenEmojiSection] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const [limit, setLimit] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
+  const [showNewMessageModal, setShowNewMessageModal] = useState(false);
+  const [isFetchingMore, setIsFetchingMore] = useState(true);
   const conversationRef = useRef(null);
   const usersListRef = useRef(null);
   const sidebarRef = useRef(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [showNewMessageModal, setShowNewMessageModal] = useState(false);
-  const selectedUserId = searchParams.get("user");
-  const selectedGroupId = searchParams.get("group");
+  const reqTab = searchParams.get("tab") || "friends";
+  const reqId = searchParams.get("id") || 0;
+
+  useEffect(() => {
+    setActiveTab(reqTab === "groups" ? "groups" : "friends");
+  }, [reqTab]);
+
+  useEffect(() => {
+    fetchUsers();
+    fetchGroups();
+  }, []);
+
+  useEffect(() => {
+    handleUserSelect(reqId);
+  }, [reqId, users, groups]);
+
+  // useEffect(() => {
+  //   if (messagesEndRef.current) {
+  //     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // }, [newMessage]);
+
+  useEffect(() => {
+    addToListeners("message", handleMessage);
+    addToListeners("new_connection", handleMessage);
+    addToListeners("disconnection", handleMessage);
+
+    return () => {
+      removeFromListeners("message", handleMessage);
+      removeFromListeners("new_connection", handleMessage);
+      removeFromListeners("disconnection", handleMessage);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedUser) return;
+    readMessages();
+  }, [messages]);
 
   const getUserChat = async (user_id = 0) => {
     const response = await fetch(
@@ -122,7 +156,7 @@ export default function MessagesPage() {
   const fetchUsers = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8404/connections?offset=${offset}`,
+        `http://localhost:8404/connections?offset=0`,
         {
           method: "GET",
           credentials: "include",
@@ -140,7 +174,7 @@ export default function MessagesPage() {
   const fetchGroups = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8404/groups?type=joined&offset=${offset}`,
+        `http://localhost:8404/groups?type=joined&offset=0`,
         {
           method: "GET",
           credentials: "include",
@@ -156,108 +190,74 @@ export default function MessagesPage() {
     }
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const handleUserSelect = async (id) => {
+    let user;
+    if (activeTab === "friends") user = users?.find((u) => u.user_id == id);
+    else if (activeTab === "groups") user = groups?.find((g) => g.group_id == id);
 
-  useEffect(() => {
-    fetchGroups();
-  }, []);
-
-  useEffect(() => {
-    if (!selectedUserId && !selectedGroupId) return;
-
-    handleUserSelect(selectedUserId, selectedGroupId, 0);
-
-    if (selectedGroupId) {
-      setActiveTab("groups");
+    if (user) {
+      setSelectedUser(user);
     } else {
-      setActiveTab("friends");
+      await getUserChat(id);
     }
 
-  }, [selectedUserId, selectedGroupId]);
-
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [newMessage]);
-
-  const handleUserSelect = (user_id, group_id, offset = 0) => {
-    const user = user_id ? users?.find((u) => u.user_id == user_id) : null;
-    const group = group_id ? groups?.find((g) => g.group_id == group_id) : null;
-
-    if (user || group) {
-      setSelectedUser(user || group);
-    } else {
-      getUserChat(user_id);
-    }
-
-    let fetchMessages = group_id
-      ? `chats_group?group_id=${group_id}&offset=${offset}`
-      : `chats?id=${user_id}&offset=${offset}`;
-    fetch(`http://localhost:8404/${fetchMessages}`, {
-      method: "GET",
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setMessages(data);
-        console.log("Fetched messages:", data);
-      })
-      .catch((error) => {
-        console.error("Error fetching messages:", error);
-        setMessages([]);
-      });
+    fetchMessages(selectedUser.user_id || selectedUser.group_id, 0);
   };
 
-  const fetchMoreMessages = (user, offset) => {
-    let fetchMessages = `id=${user.user_id}&offset=${offset}`;
-    fetch(`http://localhost:8404/chats?${fetchMessages}`, {
-      method: "GET",
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setMessages(messages ? [...data, ...messages] : data);
+  const fetchMessages = async (id, offset = 0) => {
+    let fetchMessages = activeTab === "groups"
+      ? `chats_group?group_id=${id}&offset=${offset}`
+      : `chats?id=${id}&offset=${offset}`;
+
+    try {
+      const response = await fetch(`http://localhost:8404/${fetchMessages}`, {
+        method: "GET",
+        credentials: "include",
       })
-      .catch((error) => {
-        console.error("Error fetching messages:", error);
-      });
-  };
+      const data = await response.json();
+      if (data.length <= 20) {
+        setIsFetchingMore(false);
+      }
+      if (offset === 0) setMessages(data);
+      else {
+        setMessages((prevMessages) => [...prevMessages, ...data]);
+      }
+      console.log("Fetched messages:", data);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      setMessages([]);
+    }
+  }
 
   const handleMessage = (msg) => {
     if (msg.type === "message") {
-      if (
-        selectedUser &&
-        ((selectedUser.username && msg.username === selectedUser.username) ||
-          (selectedUser.name && msg.name === selectedUser.name) ||
-          msg.user_id === msg.current_user)
-      ) {
-        setMessages((prevMessages) => [
-          ...(prevMessages ? prevMessages : []),
-          msg,
-        ]);
-      }
+      if (activeTab === "friends") fetchMessages(reqId, 0);
+    }
 
-      fetchUsers();
+    if (activeTab === "groups") {
       fetchGroups();
-    } else if (msg.type === "new_connection" || msg.type === "disconnection") {
+    } else {
       fetchUsers();
     }
+    // if (msg.type === "message") {
+    //   if (
+    //     selectedUser &&
+    //     ((selectedUser.username && msg.username === selectedUser.username) ||
+    //       (selectedUser.name && msg.name === selectedUser.name) ||
+    //       msg.user_id === msg.current_user)
+    //   ) {
+    //     setMessages((prevMessages) => [
+    //       ...(prevMessages ? prevMessages : []),
+    //       msg,
+    //     ]);
+    //   }
+
+    //   fetchUsers();
+    //   fetchGroups();
+    // } else if (msg.type === "new_connection" || msg.type === "disconnection") {
+    //   fetchUsers();
+    // }
   };
-
-  useEffect(() => {
-    addToListeners("message", handleMessage);
-    addToListeners("new_connection", handleMessage);
-    addToListeners("disconnection", handleMessage);
-
-    return () => {
-      removeFromListeners("message", handleMessage);
-      removeFromListeners("new_connection", handleMessage);
-      removeFromListeners("disconnection", handleMessage);
-    };
-  }, []);
 
   const readMessages = async () => {
     await fetch("http://localhost:8404/read_messages", {
@@ -273,11 +273,6 @@ export default function MessagesPage() {
     });
   };
 
-  useEffect(() => {
-    if (!selectedUser) return;
-    readMessages();
-  }, [messages]);
-
   const handleSendMessage = async (e) => {
     e.preventDefault();
 
@@ -292,6 +287,9 @@ export default function MessagesPage() {
 
     websocket.send(JSON.stringify(mssg));
     setNewMessage("");
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const toggleEmojiSection = () => {
@@ -386,14 +384,14 @@ export default function MessagesPage() {
             <button
               className={`${styles.tabButton} ${activeTab === "friends" ? styles.activeTab : ""
                 }`}
-              onClick={() => setActiveTab("friends")}
+              onClick={() => router.push(`/messages?tab=friends`)}
             >
               Friends
             </button>
             <button
               className={`${styles.tabButton} ${activeTab === "groups" ? styles.activeTab : ""
                 }`}
-              onClick={() => setActiveTab("groups")}
+              onClick={() => router.push(`/messages?tab=groups`)}
             >
               Groups
             </button>
@@ -422,7 +420,7 @@ export default function MessagesPage() {
                       selectedUser && selectedUser.user_id === user.user_id
                     }
                     onClick={() => {
-                      router.push(`/messages?user=${user.user_id}`);
+                      router.push(`/messages?tab=friends&id=${user.user_id}`);
                     }}
                   />
                 ))
@@ -435,7 +433,7 @@ export default function MessagesPage() {
                       selectedUser && selectedUser.group_id === group.group_id
                     }
                     onClick={() => {
-                      router.push(`/messages?group=${group.group_id}`);
+                      router.push(`/messages?tab=groups&id=${group.group_id}`);
                     }}
                   />
                 ))}

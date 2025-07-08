@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import styles from "../styles/Navbar.module.css";
 
 import NotificationsComponent from "./NotificationsComponent";
@@ -21,6 +20,38 @@ export default function Navbar() {
   const profileMenuRef = useRef(null);
   const searchSugRef = useRef(null);
   const notificationRef = useRef(null);
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    console.log(router.pathname);
+
+  }, [router.pathname]);
+
+  useEffect(() => {
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    addToListeners("notifications", handleNewMessage);
+    addToListeners("message", handleNewMessage);
+
+    return () => {
+      removeFromListeners("notifications", handleNewMessage);
+      removeFromListeners("message", handleNewMessage);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    setSuggestions([]);
+    fetchSuggestions();
+  }, [searchQuery, activeSugTab]);
 
   const fetchUser = async () => {
     try {
@@ -46,9 +77,6 @@ export default function Navbar() {
     }
   };
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
 
   const handleNewMessage = (msg) => {
     if (
@@ -59,16 +87,6 @@ export default function Navbar() {
       fetchUser();
     }
   };
-
-  useEffect(() => {
-    addToListeners("notifications", handleNewMessage);
-    addToListeners("message", handleNewMessage);
-
-    return () => {
-      removeFromListeners("notifications", handleNewMessage);
-      removeFromListeners("message", handleNewMessage);
-    };
-  }, []);
 
   const fetchSuggestions = async () => {
     const offset = 0;
@@ -123,11 +141,6 @@ export default function Navbar() {
     }
   };
 
-  useEffect(() => {
-    if (!user) return;
-    setSuggestions([]);
-    fetchSuggestions();
-  }, [searchQuery, activeSugTab]);
 
   const handleLogout = async () => {
     try {
@@ -178,12 +191,6 @@ export default function Navbar() {
       setShowNotifications(false);
     }
   };
-  useEffect(() => {
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
 
   if (!user) {
     return null;
@@ -198,9 +205,8 @@ export default function Navbar() {
 
         <div className={styles.navLinks}>
           <button
-            className={`${styles.navLink} ${
-              activeLink === "home" ? styles.active : ""
-            }`}
+            className={`${styles.navLink} ${activeLink === "home" ? styles.active : ""
+              }`}
             onClick={() => {
               router.push("/");
 
@@ -214,9 +220,8 @@ export default function Navbar() {
           </button>
 
           <button
-            className={`${styles.navLink} ${
-              activeLink === "groups" ? styles.active : ""
-            }`}
+            className={`${styles.navLink} ${activeLink === "groups" ? styles.active : ""
+              }`}
             onClick={() => {
               router.push("/groups");
 
@@ -230,9 +235,8 @@ export default function Navbar() {
           </button>
 
           <button
-            className={`${styles.navLink} ${
-              activeLink === "events" ? styles.active : ""
-            }`}
+            className={`${styles.navLink} ${activeLink === "events" ? styles.active : ""
+              }`}
             onClick={() => {
               router.push("/Events");
               setActiveLink("events");
@@ -244,9 +248,8 @@ export default function Navbar() {
             {/* </Link> */}
           </button>
           <button
-            className={`${styles.navLink} ${
-              activeLink === "messages" ? styles.active : ""
-            }`}
+            className={`${styles.navLink} ${activeLink === "messages" ? styles.active : ""
+              }`}
             onClick={() => {
               router.push("/messages");
               setActiveLink("messages");
@@ -292,48 +295,43 @@ export default function Navbar() {
             <div className={styles.searchSuggestions}>
               <div className={styles.navLinks}>
                 <button
-                  className={`${styles.navLink} ${
-                    activeSugTab === "all" ? styles.active : ""
-                  }`}
+                  className={`${styles.navLink} ${activeSugTab === "all" ? styles.active : ""
+                    }`}
                   onClick={() => setActiveSugTab("all")}
                 >
                   All
                 </button>
                 <button
-                  className={`${styles.navLink} ${
-                    activeSugTab === "users" ? styles.active : ""
-                  }`}
+                  className={`${styles.navLink} ${activeSugTab === "users" ? styles.active : ""
+                    }`}
                   onClick={() => setActiveSugTab("users")}
                 >
                   Users
                 </button>
                 <button
-                  className={`${styles.navLink} ${
-                    activeSugTab === "groups" ? styles.active : ""
-                  }`}
+                  className={`${styles.navLink} ${activeSugTab === "groups" ? styles.active : ""
+                    }`}
                   onClick={() => setActiveSugTab("groups")}
                 >
                   Groups
                 </button>
                 <button
-                  className={`${styles.navLink} ${
-                    activeSugTab === "events" ? styles.active : ""
-                  }`}
+                  className={`${styles.navLink} ${activeSugTab === "events" ? styles.active : ""
+                    }`}
                   onClick={() => setActiveSugTab("events")}
                 >
                   Events
                 </button>
                 <button
-                  className={`${styles.navLink} ${
-                    activeSugTab === "posts" ? styles.active : ""
-                  }`}
+                  className={`${styles.navLink} ${activeSugTab === "posts" ? styles.active : ""
+                    }`}
                   onClick={() => setActiveSugTab("posts")}
                 >
                   Posts
                 </button>
               </div>
               {suggestions &&
-              Object.values(suggestions).flat()?.length === 0 ? (
+                Object.values(suggestions).flat()?.length === 0 ? (
                 <div className={styles.noSuggestions}>No suggestions found</div>
               ) : (
                 suggestions &&
@@ -403,9 +401,8 @@ export default function Navbar() {
             <img
               src="./icons/drop-down.svg"
               alt="Menu"
-              className={`${styles.dropdownIcon} ${
-                showProfileMenu ? styles.rotate : ""
-              }`}
+              className={`${styles.dropdownIcon} ${showProfileMenu ? styles.rotate : ""
+                }`}
             />
           </button>
 

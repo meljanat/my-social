@@ -93,6 +93,9 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+
+	fmt.Println("infos : ===> ", info)
+
 	json.NewEncoder(w).Encode(info)
 }
 

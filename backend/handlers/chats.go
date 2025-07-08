@@ -95,6 +95,7 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	chats, err := database.GetConversation(user.ID, receiver_id, offset)
+	// fmt.Println("chats ====> :  ", chats)
 	if err != nil {
 		fmt.Println("Failed to retrieve chats", err)
 		response := map[string]string{"error": "Failed to retrieve chats"}

@@ -48,7 +48,7 @@ func SendMessage(sender_id, receiver_id, group_id int64, content, image string) 
 }
 
 func GetConversation(user_id, receiver_id, offset int64) ([]structs.Message, error) {
-	rows, err := DB.Query("SELECT m.id, u.username, u.avatar, m.content, m.created_at FROM messages m JOIN users u ON u.id = m.sender_id WHERE ((m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)) AND m.group_id = 0 ORDER BY m.created_at DESC LIMIT ? OFFSET ?", user_id, receiver_id, receiver_id, user_id, 10, offset)
+	rows, err := DB.Query("SELECT m.id, u.username, u.avatar, m.content, m.created_at FROM messages m JOIN users u ON u.id = m.sender_id WHERE ((m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)) AND m.group_id = 0 ORDER BY m.created_at ASC LIMIT ? OFFSET ?", user_id, receiver_id, receiver_id, user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}

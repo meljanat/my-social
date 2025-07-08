@@ -121,6 +121,7 @@ func NewPostPost(w http.ResponseWriter, r *http.Request, user *structs.User) {
 		imagePath = newpath[1]
 	}
 
+	Mutex.Lock()
 	id, err := database.CreatePost(user.ID, post.GroupID, post.CategoryID, post.Title, post.Content, imagePath, post.Privacy)
 	if err != nil {
 		fmt.Println("Failed to create post", err)
@@ -129,6 +130,7 @@ func NewPostPost(w http.ResponseWriter, r *http.Request, user *structs.User) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	Mutex.Unlock()
 
 	if post.Privacy == "almost_private" {
 		users := strings.Split(r.FormValue("users"), ",")

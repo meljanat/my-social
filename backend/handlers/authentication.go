@@ -322,6 +322,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Mutex.Lock()
 	if err := database.DeleteSession(user.ID); err != nil {
 		log.Printf("Error deleting session: %v", err)
 		response := map[string]string{"error": "Failed to delete session"}
@@ -329,6 +330,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	Mutex.Unlock()
 
 	http.SetCookie(w, &http.Cookie{
 		Name:   "session_token",

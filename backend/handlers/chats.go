@@ -219,6 +219,7 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	mutex.Lock()
 	err = database.ReadMessages(request.UserID, user.ID, request.GroupID)
 	if err != nil {
 		fmt.Println("Failed to mark messages as read", err)
@@ -227,8 +228,8 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-
 	SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
+	mutex.Unlock()
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("success")

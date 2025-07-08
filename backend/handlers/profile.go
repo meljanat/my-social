@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"sync"
 
 	structs "social-network/data"
 	"social-network/database"
 )
+
+var mutex = &sync.Mutex{}
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -78,9 +81,11 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response)
 		return
-	} 
+	}
 
+	mutex.Lock()
 	info.Online = structs.Clients[user_id] != nil
+	mutex.Unlock()
 
 	if info.IsPending {
 		info.Type = "Pending"
@@ -93,9 +98,6 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
-	fmt.Println("infos : ===> ", info)
-
 	json.NewEncoder(w).Encode(info)
 }
 

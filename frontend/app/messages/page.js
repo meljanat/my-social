@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState, useRef, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "../styles/MessagesPage.module.css";
@@ -97,14 +98,13 @@ export default function MessagesPage() {
   }, []);
 
   useEffect(() => {
+    if (!reqId) return;
     handleUserSelect(reqId);
-  }, [reqId, users, groups]);
+  }, [reqId]);
 
-  // useEffect(() => {
-  //   if (messagesEndRef.current) {
-  //     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-  //   }
-  // }, [newMessage]);
+  useEffect(() => {
+    scrollIntoView();
+  }, [newMessage]);
 
   useEffect(() => {
     addToListeners("message", handleMessage);
@@ -116,12 +116,13 @@ export default function MessagesPage() {
       removeFromListeners("new_connection", handleMessage);
       removeFromListeners("disconnection", handleMessage);
     };
-  }, []);
+  }, [selectedUser]);
 
-  useEffect(() => {
-    if (!selectedUser) return;
-    readMessages();
-  }, [messages]);
+  const scrollIntoView = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }
 
   const getUserChat = async (user_id = 0) => {
     const response = await fetch(
@@ -136,7 +137,6 @@ export default function MessagesPage() {
     );
     if (response.ok) {
       const data = await response.json();
-      // setUsers([data, ...users]);
       setSelectedUser(data);
     } else {
       console.log("Error fetching user chat:", response.statusText);
@@ -182,7 +182,6 @@ export default function MessagesPage() {
       );
       const data = await response.json();
       setGroups(data);
-      console.log("Fetched groups:", data);
     } catch (error) {
       console.error("Error fetching groups:", error);
     } finally {
@@ -191,26 +190,19 @@ export default function MessagesPage() {
   };
 
   const handleUserSelect = async (id) => {
-    let user;
-    if (activeTab === "friends") user = users?.find((u) => u.user_id == id);
-    else if (activeTab === "groups") user = groups?.find((g) => g.group_id == id);
-
-    if (user) {
-      setSelectedUser(user);
-    } else {
-      await getUserChat(id);
-    }
-
-    fetchMessages(selectedUser.user_id || selectedUser.group_id, 0);
+    await getUserChat(id);
+    await fetchMessages(id, 0);
   };
 
   const fetchMessages = async (id, offset = 0) => {
-    let fetchMessages = activeTab === "groups"
+    if (!id) return;
+
+    let fetchMsgs = activeTab === "groups"
       ? `chats_group?group_id=${id}&offset=${offset}`
       : `chats?id=${id}&offset=${offset}`;
 
     try {
-      const response = await fetch(`http://localhost:8404/${fetchMessages}`, {
+      const response = await fetch(`http://localhost:8404/${fetchMsgs}`, {
         method: "GET",
         credentials: "include",
       })
@@ -222,55 +214,53 @@ export default function MessagesPage() {
       else {
         setMessages((prevMessages) => [...prevMessages, ...data]);
       }
-      console.log("Fetched messages:", data);
     } catch (error) {
       console.error("Error fetching messages:", error);
       setMessages([]);
+    } finally {
+      setIsLoading(false);
+      scrollIntoView();
     }
   }
 
-  const handleMessage = (msg) => {
+  const handleMessage = async (msg) => {
+    if (reqId && !selectedUser) return;
     if (msg.type === "message") {
-      if (activeTab === "friends") fetchMessages(reqId, 0);
+      if (!selectedUser || (selectedUser.username != msg.username && selectedUser.name != msg.name)) {
+        if (activeTab === "friends") {
+          fetchUsers();
+        } else if (activeTab === "groups") {
+          fetchGroups();
+        }
+      } else if (
+        (selectedUser.username && msg.username === selectedUser.username) ||
+        (selectedUser.name && msg.name === selectedUser.name) ||
+        msg.user_id === msg.current_user
+      ) {
+        setMessages((prevMessages) => [...prevMessages || [], msg]);
+      }
+      scrollIntoView();
+    } else if (msg.type === "new_connection" || msg.type === "disconnection") {
+      if (activeTab === "friends") {
+        setUsers((prevUsers) =>
+          prevUsers?.map((user) => {
+            if (user.user_id === msg.user_id) {
+              return { ...user, online: msg.online };
+            }
+            return user;
+          })
+        );
+      } else if (activeTab === "groups") {
+        setGroups((prevGroups) =>
+          prevGroups?.map((group) => {
+            if (group.group_id === msg.group_id) {
+              return { ...group, online: msg.online };
+            }
+            return group;
+          })
+        );
+      }
     }
-
-    if (activeTab === "groups") {
-      fetchGroups();
-    } else {
-      fetchUsers();
-    }
-    // if (msg.type === "message") {
-    //   if (
-    //     selectedUser &&
-    //     ((selectedUser.username && msg.username === selectedUser.username) ||
-    //       (selectedUser.name && msg.name === selectedUser.name) ||
-    //       msg.user_id === msg.current_user)
-    //   ) {
-    //     setMessages((prevMessages) => [
-    //       ...(prevMessages ? prevMessages : []),
-    //       msg,
-    //     ]);
-    //   }
-
-    //   fetchUsers();
-    //   fetchGroups();
-    // } else if (msg.type === "new_connection" || msg.type === "disconnection") {
-    //   fetchUsers();
-    // }
-  };
-
-  const readMessages = async () => {
-    await fetch("http://localhost:8404/read_messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: selectedUser.user_id || 0,
-        group_id: selectedUser.group_id || 0,
-      }),
-      credentials: "include",
-    });
   };
 
   const handleSendMessage = async (e) => {

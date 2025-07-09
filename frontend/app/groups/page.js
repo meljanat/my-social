@@ -43,6 +43,7 @@ export default function GroupsPage() {
         throw new Error("Failed to fetch group data");
       }
       const data = await response.json();
+console.log("Fetched group data:", data);
 
       if (endpoint === "joined") {
         setMyGroups(data);

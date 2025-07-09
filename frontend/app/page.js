@@ -15,13 +15,12 @@ export default function Home() {
   const [homeData, setHomeData] = useState(null);
   const [posts, setPosts] = useState([]);
   const [stories, setStories] = useState([]);
-  const [msgOffset, setMsgOffset] = useState(0);
   const [isFetchingMorePosts, setIsFetchingMorePosts] = useState(true);
   const postsRef = useRef(null);
   const msgsRef = useRef(null);
   const lastPostsRef = useRef(null);
   let postsScroll = postsRef.current;
-  const msgsScroll = msgsRef.current;
+  // const msgsScroll = msgsRef.current;
 
   useEffect(() => {
     fetchHomeData();
@@ -62,12 +61,12 @@ export default function Home() {
   };
 
   const addNewPost = () => {
-    fetchHomeData(0, msgOffset)
+    fetchHomeData(0, 0)
   };
 
   const handleScroll = () => {
     if (postsScroll.scrollTop + postsScroll.clientHeight >= postsScroll.scrollHeight - 100) {
-      fetchHomeData(posts.length, msgOffset)
+      fetchHomeData(posts.length, 0)
     }
   };
 
@@ -80,7 +79,7 @@ export default function Home() {
     return () => {
       postsScroll.removeEventListener("scroll", handleScroll);
     };
-  }, [posts, msgOffset]);
+  }, [posts]);
 
   if (isLoading) {
     return (

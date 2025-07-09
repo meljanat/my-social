@@ -48,7 +48,7 @@ func SendMessage(sender_id, receiver_id, group_id int64, content, image string) 
 }
 
 func GetConversation(user_id, receiver_id, offset int64) ([]structs.Message, error) {
-	rows, err := DB.Query("SELECT m.id, u.username, u.avatar, m.content, m.created_at FROM messages m JOIN users u ON u.id = m.sender_id WHERE ((m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)) AND m.group_id = 0 ORDER BY m.created_at ASC LIMIT ? OFFSET ?", user_id, receiver_id, receiver_id, user_id, 20, offset)
+	rows, err := DB.Query("SELECT m.id, u.username, u.avatar, m.content, m.created_at FROM messages m JOIN users u ON u.id = m.sender_id WHERE ((m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)) AND m.group_id = 0 ORDER BY m.created_at DESC LIMIT ? OFFSET ?", user_id, receiver_id, receiver_id, user_id, 20, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -130,11 +130,17 @@ func GetCountConversationMessages(sender_id, user_id, group_id int64) (int64, er
 }
 
 func ReadMessages(sender_id, reciever_id, group_id int64) error {
-	var err error
-	if group_id == 0 {
-		_, err = DB.Exec("UPDATE messages SET messages_not_read = 0 WHERE receiver_id = ? AND sender_id = ? AND group_id = ?", reciever_id, sender_id, group_id)
-	} else {
-		_, err = DB.Exec("UPDATE messages SET messages_not_read = 0 WHERE receiver_id = ? AND group_id = ?", reciever_id, group_id)
+	
+	unreadCount, err := GetCountConversationMessages(sender_id, reciever_id, group_id)
+	if err != nil {
+		return err
+	}
+	if unreadCount > 0 {
+		if group_id == 0 {
+			_, err = DB.Exec("UPDATE messages SET messages_not_read = 0 WHERE receiver_id = ? AND sender_id = ? AND group_id = ?", reciever_id, sender_id, group_id)
+		} else {
+			_, err = DB.Exec("UPDATE messages SET messages_not_read = 0 WHERE receiver_id = ? AND group_id = ?", reciever_id, group_id)
+		}
 	}
 	return err
 }

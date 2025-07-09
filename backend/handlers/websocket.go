@@ -65,6 +65,7 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 			fmt.Println("Error reading JSON:", err)
 			break
 		}
+		fmt.Println("Received message:", message)
 
 		msgType := ""
 		if message.Type == "message" {
@@ -79,7 +80,8 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 
 		var users_ids []int64
 		if message.GroupID != 0 {
-			if _, err := database.GetGroupById(message.GroupID); err != nil {
+			group, err := database.GetGroupById(message.GroupID)
+			if err != nil {
 				fmt.Println(err)
 				continue
 			}
@@ -87,7 +89,7 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 				fmt.Println(err)
 				continue
 			}
-			users_ids, err = database.GetAllMembers(message.GroupID, user_id)
+			users_ids, err = database.GetAllMembers(message.GroupID)
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -98,7 +100,6 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 					fmt.Println("Error getting user by ID:", err)
 					return
 				}
-				group, err := database.GetGroupById(message.GroupID)
 				is_member, err := database.IsMemberGroup(id, message.GroupID)
 				if err != nil {
 					fmt.Println("Error checking group membership:", err)
@@ -108,13 +109,14 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 					fmt.Println("User is not a member of the group")
 					continue
 				}
+
+				Mutex.Lock()
 				if err = database.SendMessage(user_id, id, message.GroupID, message.Content, ""); err != nil && user_id != id {
 					fmt.Println("Error sending message:", err)
 					continue
 				}
 
-				Mutex.Lock()
-				SendWsMessage(id, map[string]interface{}{"type": msgType, "name": group.Name, "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": id, "created_at": "Just now"})
+				SendWsMessage(id, map[string]interface{}{"type": msgType, "name": group.Name, "user_id": user.ID, "group_id": group.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": id, "created_at": "Just now"})
 				Mutex.Unlock()
 			}
 		} else {
@@ -127,12 +129,13 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 				fmt.Println("User is not followed or error checking follow status:", err)
 				continue
 			}
+
+			Mutex.Lock()
 			if err = database.SendMessage(user_id, message.UserID, message.GroupID, message.Content, ""); err != nil {
 				fmt.Println("Error sending message:", err)
 				continue
 			}
 
-			Mutex.Lock()
 			SendWsMessage(user_id, map[string]interface{}{"type": msgType, "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": user_id, "created_at": "Just now"})
 			SendWsMessage(message.UserID, map[string]interface{}{"type": msgType, "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": message.UserID, "created_at": "Just now"})
 			Mutex.Unlock()
@@ -154,9 +157,9 @@ func NotifyUsers(user_id int64, statu string) {
 		Mutex.Lock()
 		if _, ok := Clients[connections[i].ID]; ok {
 			if statu == "online" {
-				SendWsMessage(connections[i].ID, map[string]interface{}{"type": "new_connection", "user_id": user_id})
+				SendWsMessage(connections[i].ID, map[string]interface{}{"type": "new_connection", "user_id": user_id, "online": true})
 			} else if statu == "offline" {
-				SendWsMessage(connections[i].ID, map[string]interface{}{"type": "disconnection", "user_id": user_id})
+				SendWsMessage(connections[i].ID, map[string]interface{}{"type": "disconnection", "user_id": user_id, "online": false})
 			}
 		}
 		Mutex.Unlock()

@@ -83,9 +83,11 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mutex.Lock()
-	info.Online = structs.Clients[user_id] != nil
-	mutex.Unlock()
+	if info.Privacy == "public" || info.IsFollowing || user_id == user.ID {
+		mutex.Lock()
+		info.Online = structs.Clients[user_id] != nil
+		mutex.Unlock()
+	}
 
 	if info.IsPending {
 		info.Type = "Pending"

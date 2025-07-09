@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 
 	"social-network/database"
@@ -94,8 +95,19 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	mutex.Lock()
+	err = database.ReadMessages(receiver_id, user.ID, 0)
+	if err != nil {
+		fmt.Println("Failed to mark messages as read", err)
+		response := map[string]string{"error": "Failed to mark messages as read"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
+	mutex.Unlock()
+
 	chats, err := database.GetConversation(user.ID, receiver_id, offset)
-	// fmt.Println("chats ====> :  ", chats)
 	if err != nil {
 		fmt.Println("Failed to retrieve chats", err)
 		response := map[string]string{"error": "Failed to retrieve chats"}
@@ -103,6 +115,7 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	slices.Reverse(chats)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chats)
@@ -167,6 +180,18 @@ func ChatGroupHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	
+	mutex.Lock()
+	err = database.ReadMessages(0, user.ID, group_id)
+	if err != nil {
+		fmt.Println("Failed to mark messages as read", err)
+		response := map[string]string{"error": "Failed to mark messages as read"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
+	mutex.Unlock()
 
 	chats, err := database.GetGroupConversation(group_id, user.ID, offset)
 	if err != nil {
@@ -176,6 +201,7 @@ func ChatGroupHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	slices.Reverse(chats)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chats)
@@ -196,6 +222,10 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		response := map[string]string{"error": "Failed to retrieve user"}
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if !LastTime(w, r, "messages") {
 		return
 	}
 
@@ -228,7 +258,7 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
+	// SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
 	mutex.Unlock()
 
 	w.Header().Set("Content-Type", "application/json")

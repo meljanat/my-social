@@ -98,7 +98,7 @@ func GetSuggestedGroups(user_id, offset int64) ([]structs.Group, error) {
 
 func GetPendingGroups(user_id, offset int64) ([]structs.Group, error) {
 	var groups []structs.Group
-	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.admin, g.privacy, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN invitations i ON g.id = i.group_id WHERE i.invited_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
+	rows, err := DB.Query("SELECT g.id, i.recipient_id, g.name, g.description, g.image, g.cover, g.admin, g.privacy, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN invitations i ON g.id = i.group_id WHERE i.invited_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -106,9 +106,17 @@ func GetPendingGroups(user_id, offset int64) ([]structs.Group, error) {
 	for rows.Next() {
 		var group structs.Group
 		var date time.Time
-		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Image, &group.Cover, &group.AdminID, &group.Privacy, &date, &group.Admin, &group.TotalMembers)
+		var recipient_id int64
+		err = rows.Scan(&group.ID, &recipient_id, &group.Name, &group.Description, &group.Image, &group.Cover, &group.AdminID, &group.Privacy, &date, &group.Admin, &group.TotalMembers)
 		if err != nil {
 			return nil, err
+		}
+		isAdmin, err := IsAdminGroup(user_id, group.ID)
+		if err != nil {
+			return nil, err
+		}
+		if !isAdmin {
+			continue
 		}
 		group.CreatedAt = date.Format("2006-01-02 15:04:05")
 		group.TotalPosts, err = GetCountGroupPosts(group.ID)
@@ -118,6 +126,15 @@ func GetPendingGroups(user_id, offset int64) ([]structs.Group, error) {
 		groups = append(groups, group)
 	}
 	return groups, nil
+}
+
+func IsAdminGroup(user_id, group_id int64) (bool, error) {
+	var isAdmin bool
+	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM groups WHERE id = ? AND admin = ?)", group_id, user_id).Scan(&isAdmin)
+	if err != nil {
+		return false, err
+	}
+	return isAdmin, nil
 }
 
 func GetGroupById(group_id int64) (structs.Group, error) {
@@ -138,7 +155,7 @@ func GetCountUserGroups(id int64) (int64, error) {
 	return count, err
 }
 
-func GetAllMembers(group_id, user_id int64) ([]int64, error) {
+func GetAllMembers(group_id int64) ([]int64, error) {
 	var users []int64
 	rows, err := DB.Query("SELECT u.id FROM group_members m JOIN users u ON u.id = m.user_id WHERE m.group_id = ?", group_id)
 	if err != nil {

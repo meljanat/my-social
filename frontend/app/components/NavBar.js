@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import styles from "../styles/Navbar.module.css";
 
 import NotificationsComponent from "./NotificationsComponent";
@@ -17,7 +17,7 @@ export default function Navbar() {
   const [suggestions, setSuggestions] = useState(null);
   const [user, setUser] = useState();
   const router = useRouter();
-  const { pathname } = router;
+  const pathname = usePathname();
   const profileMenuRef = useRef(null);
   const searchSugRef = useRef(null);
   const notificationRef = useRef(null);
@@ -27,8 +27,15 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    console.log(pathname);
-
+    if (pathname === "/") {
+      setActiveLink("home");
+    } else if (pathname.startsWith("/group")) {
+      setActiveLink("groups");
+    } else if (pathname.startsWith("/event")) {
+      setActiveLink("events");
+    } else if (pathname.startsWith("/messages")) {
+      setActiveLink("messages");
+    }
   }, [pathname]);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, use } from "react";
+import React, { useEffect, useState, useRef, act } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "../styles/MessagesPage.module.css";
 import { addToListeners, removeFromListeners } from "../websocket/ws.js";
@@ -74,15 +74,13 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
+  const conversationRef = useRef(null);
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [openEmojiSection, setOpenEmojiSection] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
-  const [isFetchingMore, setIsFetchingMore] = useState(true);
-  const conversationRef = useRef(null);
-  const usersListRef = useRef(null);
-  const sidebarRef = useRef(null);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const reqTab = searchParams.get("tab") || "friends";
@@ -99,14 +97,37 @@ export default function MessagesPage() {
 
   useEffect(() => {
     if (!reqId) return;
-    handleUserSelect(reqId);
-  }, [reqId]);
+    if (activeTab === "friends") handleUserSelect(reqId);
+    else if (activeTab === "groups") findGroup(reqId);
+  }, [reqId, activeTab]);
 
   useEffect(() => {
     scrollIntoView();
   }, [newMessage]);
 
   useEffect(() => {
+    const handleMessage = async (msg) => {
+      console.log(reqId);
+
+      if (msg.type === "message") {
+        if (reqId &&
+          (reqId == msg.user_id ||
+            reqId == msg.group_id ||
+            msg.user_id === msg.current_user)
+        ) {
+          setMessages((prevMessages) => [...(prevMessages || []), msg]);
+        }
+        if (activeTab === "friends") {
+          fetchUsers();
+        } else if (activeTab === "groups") {
+          fetchGroups();
+        }
+        scrollIntoView();
+      } else if (msg.type === "new_connection" || msg.type === "disconnection") {
+        fetchUsers();
+      }
+    };
+
     addToListeners("message", handleMessage);
     addToListeners("new_connection", handleMessage);
     addToListeners("disconnection", handleMessage);
@@ -116,11 +137,36 @@ export default function MessagesPage() {
       removeFromListeners("new_connection", handleMessage);
       removeFromListeners("disconnection", handleMessage);
     };
-  }, [selectedUser]);
+  }, []);
+
+  useEffect(() => {
+    const convScroll = conversationRef.current;
+    if (!convScroll) return;
+
+    convScroll.addEventListener("scroll", handleScroll);
+
+    return () => {
+      convScroll.removeEventListener("scroll", handleScroll);
+    };
+  }, [messages]);
+
+  const handleScroll = () => {
+    if (conversationRef.current.scrollTop === 0 && isFetchingMore) {
+      fetchMessages(selectedUser.user_id || selectedUser.group_id, messages.length);
+    }
+  };
 
   const scrollIntoView = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }
+
+  const findGroup = async (group_id) => {
+    const group = groups ? groups.find((g) => g.group_id === parseInt(group_id)) : null;
+    if (group) {
+      setSelectedUser(group);
+      await fetchMessages(group.group_id, 0);
     }
   }
 
@@ -207,61 +253,24 @@ export default function MessagesPage() {
         credentials: "include",
       })
       const data = await response.json();
-      if (data.length <= 20) {
+      if (data.length == 20) {
+        setIsFetchingMore(true);
+      } else {
         setIsFetchingMore(false);
       }
-      if (offset === 0) setMessages(data);
-      else {
-        setMessages((prevMessages) => [...prevMessages, ...data]);
+      if (offset === 0) {
+        setMessages(data);
+        scrollIntoView();
+      } else {
+        setMessages((prevMessages) => [...data, ...prevMessages]);
       }
     } catch (error) {
       console.error("Error fetching messages:", error);
       setMessages([]);
     } finally {
       setIsLoading(false);
-      scrollIntoView();
     }
   }
-
-  const handleMessage = async (msg) => {
-    if (reqId && !selectedUser) return;
-    if (msg.type === "message") {
-      if (!selectedUser || (selectedUser.username != msg.username && selectedUser.name != msg.name)) {
-        if (activeTab === "friends") {
-          fetchUsers();
-        } else if (activeTab === "groups") {
-          fetchGroups();
-        }
-      } else if (
-        (selectedUser.username && msg.username === selectedUser.username) ||
-        (selectedUser.name && msg.name === selectedUser.name) ||
-        msg.user_id === msg.current_user
-      ) {
-        setMessages((prevMessages) => [...prevMessages || [], msg]);
-      }
-      scrollIntoView();
-    } else if (msg.type === "new_connection" || msg.type === "disconnection") {
-      if (activeTab === "friends") {
-        setUsers((prevUsers) =>
-          prevUsers?.map((user) => {
-            if (user.user_id === msg.user_id) {
-              return { ...user, online: msg.online };
-            }
-            return user;
-          })
-        );
-      } else if (activeTab === "groups") {
-        setGroups((prevGroups) =>
-          prevGroups?.map((group) => {
-            if (group.group_id === msg.group_id) {
-              return { ...group, online: msg.online };
-            }
-            return group;
-          })
-        );
-      }
-    }
-  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -277,9 +286,7 @@ export default function MessagesPage() {
 
     websocket.send(JSON.stringify(mssg));
     setNewMessage("");
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    scrollIntoView();
   };
 
   const toggleEmojiSection = () => {
@@ -397,9 +404,8 @@ export default function MessagesPage() {
 
           <div
             className={styles.usersListContainer}
-            ref={sidebarRef}
           >
-            <ul className={styles.usersList} ref={usersListRef}>
+            <ul className={styles.usersList}>
               {activeTab === "friends"
                 ? users?.length > 0 &&
                 users.map((user) => (
@@ -487,9 +493,9 @@ export default function MessagesPage() {
                 ref={conversationRef}
               >
                 {messages && messages.length > 0 ? (
-                  messages.map((message, index) => (
+                  messages.map((message) => (
                     <Message
-                      key={index}
+                      key={message.message_id}
                       message={message}
                       isSent={
                         message.current_user

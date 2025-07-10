@@ -50,7 +50,7 @@ export default function GroupPage() {
 
       const data = await response.json();
       console.log("Group data:", data);
-      
+
       setSelectedGroup(data);
       fetchGroupDetails("posts", data.group_id);
       setIsLoading(false);
@@ -104,7 +104,7 @@ export default function GroupPage() {
       }
       const data = await response.json();
       console.log("Group details data:", data);
-      
+
       setSelectedGroup((prev) => ({
         ...prev,
         [type]: data,
@@ -170,11 +170,8 @@ export default function GroupPage() {
     router.push("/groups");
   };
 
-  const addNewPost = (newPost) => {
-    setSelectedGroup((prev) => ({
-      ...prev,
-      posts: [newPost, ...(prev.posts || [])],
-    }));
+  const addNewPost = () => {
+    fetchGroupDetails("posts", selectedGroup.group_id);
   };
 
   if (isLoading) {

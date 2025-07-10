@@ -17,6 +17,7 @@ export default function Navbar() {
   const [suggestions, setSuggestions] = useState(null);
   const [user, setUser] = useState();
   const router = useRouter();
+  const { pathname } = router;
   const profileMenuRef = useRef(null);
   const searchSugRef = useRef(null);
   const notificationRef = useRef(null);
@@ -26,9 +27,9 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    console.log(router.pathname);
+    console.log(pathname);
 
-  }, [router.pathname]);
+  }, [pathname]);
 
   useEffect(() => {
     document.addEventListener("click", handleClickOutside);

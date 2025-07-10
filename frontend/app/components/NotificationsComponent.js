@@ -70,23 +70,26 @@ const NotificationsComponent = ({ onMarkAllAsRead }) => {
         )
       );
       if (
-        notification.type_notification === "follow_request" ||
-        notification.type_notification === "follow"
+        notification.type_notification === "follow" ||
+        notification.type_notification === "follow_request"
       ) {
-        router.push("/profile?id=" + notification.user_id);
+        router.push('/profile?id=' + notification.user_id);
       } else if (
         notification.type_notification === "like" ||
         notification.type_notification === "comment" ||
         notification.type_notification === "save"
       ) {
-        router.push("/post?id=" + notification.post_id);
-      } else if (notification.type_notification === "event") {
-        router.push("/event?id=" + notification.event_id);
+        router.push('/post?id=' + notification.post_id);
+      } else if (
+        notification.type_notification === "event"
+      ) {
+        router.push('/event?id=' + notification.event_id);
       } else if (
         notification.type_notification === "group" ||
-        notification.type_notification === "join_request"
+        notification.type_notification === "join_request" ||
+        notification.type_notification === "join"
       ) {
-        router.push("/group?id=" + notification.group_id);
+        router.push('/group?id=' + notification.group_id);
       }
     } catch (error) {
       console.error("Error marking notification as read:", error.message);

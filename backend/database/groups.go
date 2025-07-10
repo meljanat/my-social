@@ -111,7 +111,7 @@ func GetPendingGroups(user_id, offset int64) ([]structs.Group, error) {
 		if err != nil {
 			return nil, err
 		}
-		isAdmin, err := IsAdminGroup(user_id, group.ID)
+		isAdmin, err := IsAdminGroup(recipient_id, group.ID)
 		if err != nil {
 			return nil, err
 		}

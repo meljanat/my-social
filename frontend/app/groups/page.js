@@ -212,26 +212,7 @@ console.log("Fetched group data:", data);
             ) : activeTab === "invitations" ? (
               (groupData || []).length > 0 ? (
                 (groupData || []).map((invitation) =>
-                  invitation.user.username === invitation.group.admin ? (
-                    <InvitationCard
-                      key={invitation.invitation_id}
-                      invitation={invitation}
-                      onAccept={async () => {
-                        await handelAcceptOtherGroup(
-                          invitation.user.user_id,
-                          invitation.group.group_id
-                        );
-                        fetchUserInvitationsData();
-                      }}
-                      onDecline={async () => {
-                        await handleRejectOtherGroup(
-                          invitation.user.user_id,
-                          invitation.group.group_id
-                        );
-                        fetchUserInvitationsData();
-                      }}
-                    />
-                  ) : (
+                  invitation.user.username !== invitation.group.admin ? (
                     <InvitationCard
                       key={invitation.invitation_id}
                       invitation={invitation}
@@ -244,6 +225,25 @@ console.log("Fetched group data:", data);
                       }}
                       onDecline={async () => {
                         await handleReject(
+                          invitation.user.user_id,
+                          invitation.group.group_id
+                        );
+                        fetchUserInvitationsData();
+                      }}
+                    />
+                  ) : (
+                    <InvitationCard
+                      key={invitation.invitation_id}
+                      invitation={invitation}
+                      onAccept={async () => {
+                        await handelAcceptOtherGroup(
+                          invitation.user.user_id,
+                          invitation.group.group_id
+                        );
+                        fetchUserInvitationsData();
+                      }}
+                      onDecline={async () => {
+                        await handleRejectOtherGroup(
                           invitation.user.user_id,
                           invitation.group.group_id
                         );

@@ -383,8 +383,6 @@ func AcceptInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Invitation received:", invitation)
-
 	var userToFollowing structs.User
 	if invitation.User != 0 {
 		userToFollowing, err = database.GetUserById(invitation.User)
@@ -671,8 +669,6 @@ func AcceptOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Invitation received:", invitation)
-
 	userToFollowing, err := database.GetUserById(invitation.User)
 	if err != nil {
 		fmt.Println("Failed to retrieve follower", err)
@@ -697,15 +693,24 @@ func AcceptOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if group.AdminID != invitation.User {
-		fmt.Println("User is not the creator of the group")
-		response := map[string]string{"error": "User is not the creator of the group"}
+	isMember, err := database.IsMemberGroup(invitation.User, group.ID)
+	if err != nil {
+		fmt.Println("Failed to check if user is member of the group", err)
+		response := map[string]string{"error": "Failed to check if user is member of the group"}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if !isMember {
+		fmt.Println("User is not a member of the group")
+		response := map[string]string{"error": "User is not a member of the group"}
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
 		return
 	}
 
-	isMember, err := database.IsMemberGroup(user.ID, group.ID)
+	isMember, err = database.IsMemberGroup(user.ID, group.ID)
 	if err != nil {
 		fmt.Println("Failed to check if user is member of the group", err)
 		response := map[string]string{"error": "Failed to check if user is member of the group"}
@@ -747,12 +752,29 @@ func AcceptOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := database.AcceptInvitation(invitation_id, invitation.User, user.ID, invitation.Group); err != nil {
-		fmt.Println("Failed to accept invitation", err)
-		response := map[string]string{"error": "Failed to accept invitation"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
-		return
+	if group.AdminID == invitation.User {
+		if err := database.AcceptInvitation(invitation_id, invitation.User, user.ID, invitation.Group); err != nil {
+			fmt.Println("Failed to accept invitation", err)
+			response := map[string]string{"error": "Failed to accept invitation"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+	} else {
+		if err := database.CreateInvitation(user.ID, group.AdminID, invitation.Group); err != nil {
+			fmt.Println("Failed to accept invitation", err)
+			response := map[string]string{"error": "Failed to accept invitation"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		if err := database.DeleteInvitation(invitation_id); err != nil {
+			fmt.Println("Failed to delete invitation", err)
+			response := map[string]string{"error": "Failed to delete invitation"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
 	}
 }
 

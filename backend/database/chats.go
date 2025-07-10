@@ -9,7 +9,7 @@ import (
 )
 
 func GetConnections(user_id, offset int64) ([]structs.User, error) {
-	rows, err := DB.Query("SELECT DISTINCT u.id, u.username, u.firstname, u.lastname, u.avatar, u.privacy FROM users u JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id) WHERE (m.sender_id  = ? OR m.receiver_id = ?) LIMIT ? OFFSET ?", user_id, user_id, 10, offset)
+	rows, err := DB.Query("SELECT DISTINCT u.id, u.username, u.firstname, u.lastname, u.avatar, u.privacy FROM users u JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id) WHERE (m.sender_id  = ? OR m.receiver_id = ?) GROUP BY u.id ORDER BY MAX(m.created_at) DESC LIMIT ? OFFSET ?", user_id, user_id, 10, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func GetCountConversationMessages(sender_id, user_id, group_id int64) (int64, er
 }
 
 func ReadMessages(sender_id, reciever_id, group_id int64) error {
-	
+
 	unreadCount, err := GetCountConversationMessages(sender_id, reciever_id, group_id)
 	if err != nil {
 		return err

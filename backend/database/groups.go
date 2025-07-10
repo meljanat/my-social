@@ -38,9 +38,12 @@ func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
 	var err error
 	var rows *sql.Rows
 	if offset == -1 {
-		rows, err = DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ? ORDER BY g.created_at DESC", user.ID)
+		rows, err = DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, g.privacy, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ? ORDER BY g.created_at DESC", user.ID)
 	} else {
-		rows, err = DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user.ID, 10, offset)
+		rows, err = DB.Query(`SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, g.privacy, g.members FROM groups g 
+		JOIN group_members m ON g.id = m.group_id 
+		LEFT JOIN messages ms ON (u.id = ms.sender_id OR u.id = ms.receiver_id) 
+		WHERE m.user_id = ? GROUP BY u.id ORDER BY MAX(ms.created_at) DESC LIMIT ? OFFSET ?`, user.ID, 10, offset)
 	}
 	if err != nil {
 		return nil, err

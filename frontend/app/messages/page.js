@@ -7,7 +7,7 @@ import { addToListeners, removeFromListeners } from "../websocket/ws.js";
 import { websocket } from "../websocket/ws.js";
 import EmojiSection from "../components/EmojiSection";
 
-const Message = ({ message, isSent }) => {
+const Message = ({ message, isSent, messagesEndRef }) => {
   return (
     <div
       className={`${styles.message} ${isSent ? styles.sent : styles.received}`}
@@ -24,6 +24,7 @@ const Message = ({ message, isSent }) => {
       )}
       <p className={styles.messageContent}>{message.content}</p>
       <span className={styles.messageTime}>{message.created_at}</span>
+      {messagesEndRef && <div ref={messagesEndRef} />}
     </div>
   );
 };
@@ -69,7 +70,7 @@ const UserCard = ({ user, isActive, onClick }) => {
 };
 
 export default function MessagesPage() {
-  const [activeTab, setActiveTab] = useState("friends");
+  const [activeTab, setActiveTab] = useState();
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -83,7 +84,7 @@ export default function MessagesPage() {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const reqTab = searchParams.get("tab") || "friends";
+  const reqTab = searchParams.get("tab");
   const reqId = searchParams.get("id") || 0;
 
   useEffect(() => {
@@ -97,18 +98,20 @@ export default function MessagesPage() {
 
   useEffect(() => {
     if (!reqId) return;
-    if (activeTab === "friends") handleUserSelect(reqId);
-    else if (activeTab === "groups") findGroup(reqId);
-  }, [reqId, activeTab]);
+    if (activeTab === "friends") handleUserSelect(reqId, activeTab);
+    else if (activeTab === "groups") findGroup(reqId, activeTab);
+  }, [reqId, activeTab, users, groups]);
 
   useEffect(() => {
-    scrollIntoView();
-  }, [newMessage]);
+    // const lastMessage = messagesEndRef.current;
+    // if (lastMessage) {
+    //   lastMessage.scrollIntoView({ behavior: "smooth" });
+    // }
+    scrollIntoLastMsg();
+  }, [newMessage, reqId, selectedUser, messages]);
 
   useEffect(() => {
     const handleMessage = async (msg) => {
-      console.log(reqId);
-
       if (msg.type === "message") {
         if (reqId &&
           (reqId == msg.user_id ||
@@ -122,7 +125,7 @@ export default function MessagesPage() {
         } else if (activeTab === "groups") {
           fetchGroups();
         }
-        scrollIntoView();
+        scrollIntoLastMsg();
       } else if (msg.type === "new_connection" || msg.type === "disconnection") {
         fetchUsers();
       }
@@ -152,21 +155,24 @@ export default function MessagesPage() {
 
   const handleScroll = () => {
     if (conversationRef.current.scrollTop === 0 && isFetchingMore) {
-      fetchMessages(selectedUser.user_id || selectedUser.group_id, messages.length);
+      fetchMessages(selectedUser.user_id || selectedUser.group_id, activeTab, messages.length);
     }
   };
 
-  const scrollIntoView = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  const scrollIntoLastMsg = () => {
+    const lastMessage = messagesEndRef.current;
+    if (lastMessage) {
+      lastMessage.scrollIntoView({ behavior: "smooth" });
     }
   }
 
-  const findGroup = async (group_id) => {
+  const findGroup = async (group_id, tab) => {
+    if (tab !== "groups") return;
+
     const group = groups ? groups.find((g) => g.group_id === parseInt(group_id)) : null;
     if (group) {
       setSelectedUser(group);
-      await fetchMessages(group.group_id, 0);
+      await fetchMessages(group.group_id, tab, 0);
     }
   }
 
@@ -235,24 +241,29 @@ export default function MessagesPage() {
     }
   };
 
-  const handleUserSelect = async (id) => {
+  const handleUserSelect = async (id, tab) => {
+    if (tab === "groups") return;
     await getUserChat(id);
-    await fetchMessages(id, 0);
+    await fetchMessages(id, tab, 0);
   };
 
-  const fetchMessages = async (id, offset = 0) => {
+  const fetchMessages = async (id, tab, offset = 0) => {
     if (!id) return;
 
-    let fetchMsgs = activeTab === "groups"
+    let fetchMsgs = tab === "groups"
       ? `chats_group?group_id=${id}&offset=${offset}`
       : `chats?id=${id}&offset=${offset}`;
 
     try {
+      if (offset === 0) setMessages([]);
       const response = await fetch(`http://localhost:8404/${fetchMsgs}`, {
         method: "GET",
         credentials: "include",
       })
       const data = await response.json();
+      if (!data || !Array.isArray(data)) {
+        return;
+      }
       if (data.length == 20) {
         setIsFetchingMore(true);
       } else {
@@ -260,7 +271,7 @@ export default function MessagesPage() {
       }
       if (offset === 0) {
         setMessages(data);
-        scrollIntoView();
+        scrollIntoLastMsg();
       } else {
         setMessages((prevMessages) => [...data, ...prevMessages]);
       }
@@ -286,7 +297,7 @@ export default function MessagesPage() {
 
     websocket.send(JSON.stringify(mssg));
     setNewMessage("");
-    scrollIntoView();
+    scrollIntoLastMsg();
   };
 
   const toggleEmojiSection = () => {
@@ -493,7 +504,7 @@ export default function MessagesPage() {
                 ref={conversationRef}
               >
                 {messages && messages.length > 0 ? (
-                  messages.map((message) => (
+                  messages.map((message, index) => (
                     <Message
                       key={message.message_id}
                       message={message}
@@ -502,6 +513,7 @@ export default function MessagesPage() {
                           ? message.user_id === message.current_user
                           : message.username !== selectedUser.username
                       }
+                      messagesEndRef={messages.length - 1 === index ? messagesEndRef : null}
                     />
                   ))
                 ) : (
@@ -509,7 +521,7 @@ export default function MessagesPage() {
                     No messages in this conversation.
                   </div>
                 )}
-                <div ref={messagesEndRef} />
+                {/* <div ref={messagesEndRef} /> */}
               </div>
 
               {selectedUser.is_following ||

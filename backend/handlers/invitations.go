@@ -229,7 +229,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 
-				if err := database.CreateNotification(user.ID, group.AdminID, group.ID, 0, 0, "join"); err != nil {
+				if err := database.CreateNotification(user.ID, group.AdminID, 0, group.ID, 0, "join"); err != nil {
 					fmt.Println("Failed to create notification", err)
 					response := map[string]string{"error": "Failed to create notification"}
 					w.WriteHeader(http.StatusInternalServerError)
@@ -246,7 +246,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 					json.NewEncoder(w).Encode(response)
 					return
 				}
-				if err := database.CreateNotification(user.ID, group.AdminID, group.ID, 0, 0, "join_request"); err != nil {
+				if err := database.CreateNotification(user.ID, group.AdminID, 0, group.ID, 0, "join_request"); err != nil {
 					fmt.Println("Failed to create notification", err)
 					response := map[string]string{"error": "Failed to create notification"}
 					w.WriteHeader(http.StatusInternalServerError)
@@ -696,7 +696,7 @@ func AcceptOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(response)
 		}
-		if err := database.CreateNotification(invitation.User, group.AdminID, group.ID, 0, 0, "join"); err != nil {
+		if err := database.CreateNotification(invitation.User, group.AdminID, 0, group.ID, 0, "join"); err != nil {
 			fmt.Println("Failed to create notification", err)
 			response := map[string]string{"error": "Failed to create notification"}
 			w.WriteHeader(http.StatusInternalServerError)
@@ -735,7 +735,7 @@ func AcceptOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if err := database.CreateNotification(user.ID, group.AdminID, group.ID, 0, 0, "join"); err != nil {
+			if err := database.CreateNotification(user.ID, group.AdminID, 0, group.ID, 0, "join"); err != nil {
 				fmt.Println("Failed to create notification", err)
 				response := map[string]string{"error": "Failed to create notification"}
 				w.WriteHeader(http.StatusInternalServerError)
@@ -751,7 +751,7 @@ func AcceptOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if err := database.CreateNotification(user.ID, group.AdminID, group.ID, 0, 0, "join_request"); err != nil {
+			if err := database.CreateNotification(user.ID, group.AdminID, 0, group.ID, 0, "join_request"); err != nil {
 				fmt.Println("Failed to create notification", err)
 				response := map[string]string{"error": "Failed to create notification"}
 				w.WriteHeader(http.StatusInternalServerError)

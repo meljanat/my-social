@@ -30,9 +30,9 @@ func GetPosts(user_id, offset int64, followers []structs.User) ([]structs.Post, 
 	args := make([]interface{}, len(usersIds)+8)
 	args[0] = "public"
 	args[1] = user_id
-	args[2] = "almost_private"
+	args[2] = "private"
 	args[3] = user_id
-	args[4] = "private"
+	args[4] = "almost_private"
 
 	for i, user_id := range usersIds {
 		placeholders[i] = "?"
@@ -110,7 +110,7 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 			AND ((posts.privacy = ? OR posts.privacy = ?)
 			OR (posts.privacy = ? AND post_privacy.user_id = ?))
 			ORDER BY posts.created_at DESC LIMIT ? OFFSET ?
-		`, user_id, "public", "private", "almost_private", my_id, 10, offset)
+		`, user_id, "public", "almost_private", "private", my_id, 10, offset)
 	} else if !followed {
 		rows, err = DB.Query(`
 			SELECT DISTINCT posts.id, posts.title, posts.content, categories.name, categories.color, categories.background, users.username, users.avatar,
@@ -137,7 +137,7 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 		if err != nil && !strings.Contains(err.Error(), `name "image": converting NULL to string`) {
 			return nil, err
 		}
-		
+
 		post.CreatedAt = TimeAgo(date)
 		post.IsLiked, err = PostIsLiked(post.ID, my_id)
 		if err != nil {

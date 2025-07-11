@@ -73,7 +73,7 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-	} else if (post.Privacy == "private" || post.Privacy == "almost_private") && post.Author != user.Username {
+	} else if (post.Privacy == "almost_private" || post.Privacy == "private") && post.Author != user.Username {
 		if followed, err := database.IsFollowed(user.ID, post.UserID); err != nil || !followed {
 			fmt.Println("You are not authorized to view this post", err)
 			response := map[string]string{"error": "You are not authorized to view this post"}
@@ -81,7 +81,7 @@ func SaveHandler(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(response)
 			return
 		}
-		if post.Privacy == "almost_private" {
+		if post.Privacy == "private" {
 			if authorized, err := database.IsAuthorized(user.ID, post.ID); err != nil || !authorized {
 				fmt.Println("You are not authorized to view this post", err)
 				response := map[string]string{"error": "You are not authorized to view this post"}

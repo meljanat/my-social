@@ -343,6 +343,22 @@ export default function GroupPage() {
                       Guest
                     </span>
                   </div>
+                ) : selectedGroup.role === "requested" ? (
+                  <div className={styles.metaItem}>
+                    <span
+                      className={`${styles.userRoleBadge} ${styles.requestBadge}`}
+                    >
+                      Requested
+                    </span>
+                  </div>
+                ) : selectedGroup.role === "invited" ? (
+                  <div className={styles.metaItem}>
+                    <span
+                      className={`${styles.userRoleBadge} ${styles.invitedBadge}`}
+                    >
+                      Invited
+                    </span>
+                  </div>
                 ) : (
                   <div className={styles.metaItem}>
                     <span
@@ -521,18 +537,52 @@ export default function GroupPage() {
                     Invite Users
                   </button>
                 )}
-                <button
-                  className={` ${selectedGroup.role === "member" ||
-                    activeTab === "pending-groups"
-                    ? styles.leaveGroupBtn
-                    : styles.adminActionBtn
-                    }`}
-                  onClick={() => {
-                    handleFollow(selectedGroup.admin_id, selectedGroup.group_id);
-                  }}
-                >
-                  {selectedGroup.type}
-                </button>
+                <>
+                  {selectedGroup.role === "invited" && (
+                    <>
+                      <button
+                        className={` ${styles.acceptBtn}`}
+                        onClick={() => {
+                          handleFollow(
+                            selectedGroup.admin_id,
+                            selectedGroup.group_id
+                          );
+                        }}
+                      >
+                        Accept Invite
+                      </button>
+
+                      <button
+                        className={` ${styles.leaveGroupBtn}`}
+                        onClick={() => {
+                          handleFollow(
+                            selectedGroup.admin_id,
+                            selectedGroup.group_id
+                          );
+                        }}
+                      >
+                        Decline Invite
+                      </button>
+                    </>
+                  )}
+                  {selectedGroup.type === "member" && (
+                    <button
+                      className={` ${selectedGroup.role === "member" ||
+                        activeTab === "pending-groups"
+                        ? styles.leaveGroupBtn
+                        : styles.adminActionBtn
+                        }`}
+                      onClick={() => {
+                        handleFollow(
+                          selectedGroup.admin_id,
+                          selectedGroup.group_id
+                        );
+                      }}
+                    >
+                      {selectedGroup.type}
+                    </button>
+                  )}
+                </>
               </>
             )}
           </div>

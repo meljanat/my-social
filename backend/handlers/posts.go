@@ -132,7 +132,7 @@ func NewPostPost(w http.ResponseWriter, r *http.Request, user *structs.User) {
 	}
 	Mutex.Unlock()
 
-	if post.Privacy == "almost_private" {
+	if post.Privacy == "private" {
 		users := strings.Split(r.FormValue("users"), ",")
 		for _, usr := range users {
 			usr_id, err := strconv.ParseInt(usr, 10, 64)
@@ -434,7 +434,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-	} else if (post.Privacy == "private" || post.Privacy == "almost_private") && post.Author != user.Username {
+	} else if (post.Privacy == "almost_private" || post.Privacy == "private") && post.Author != user.Username {
 		if followed, err := database.IsFollowed(user.ID, post.UserID); err != nil || !followed {
 			fmt.Println("Failed to check if user is following author", err)
 			response := map[string]string{"error": "You are not authorized to view this post"}
@@ -442,7 +442,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(response)
 			return
 		}
-		if post.Privacy == "almost_private" {
+		if post.Privacy == "private" {
 			if authorized, err := database.IsAuthorized(user.ID, post_id); err != nil || !authorized {
 				fmt.Println("Failed to check if user is authorized", err)
 				response := map[string]string{"error": "You are not authorized to view this post"}
@@ -547,11 +547,11 @@ func GetPostsByCategory(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-		} else if (posts[i].Privacy == "private" || posts[i].Privacy == "almost_private") && posts[i].Author != user.Username {
+		} else if (posts[i].Privacy == "almost_private" || posts[i].Privacy == "private") && posts[i].Author != user.Username {
 			if followed, err := database.IsFollowed(user.ID, posts[i].UserID); err != nil || !followed {
 				continue
 			}
-			if posts[i].Privacy == "almost_private" {
+			if posts[i].Privacy == "private" {
 				if authorized, err := database.IsAuthorized(user.ID, posts[i].ID); err != nil || !authorized {
 					continue
 				}
@@ -591,8 +591,8 @@ func ValidatePost(title, content, privacy string) (map[string]string, bool) {
 
 	if privacy == "" {
 		errors["privacy"] = "Privacy is required"
-	} else if privacy != "public" && privacy != "private" && privacy != "almost_private" {
-		errors["privacy"] = "Privacy must be public, private, or almost_private"
+	} else if privacy != "public" && privacy != "almost_private" && privacy != "private" {
+		errors["privacy"] = "Privacy must be public, almost_private, or private"
 	}
 
 	if len(errors) > 0 {

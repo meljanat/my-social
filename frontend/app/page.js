@@ -40,7 +40,7 @@ export default function Home() {
       if (data.user.stories) {
         setStories(data.user.stories);
       }
-      if (posts?.length === 0) setPosts(data.posts);
+      if (offset === 0) setPosts(data.posts);
       else {
         setPosts(posts ? [...posts, ...data.posts] : data.posts)
       }

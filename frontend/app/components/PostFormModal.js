@@ -29,7 +29,7 @@ export default function PostFormModal({
   }, []);
 
   useEffect(() => {
-    if (postFormInput.privacy === "almost_private") {
+    if (postFormInput.privacy === "private") {
       setShowAudienceSelector(true);
     } else {
       setShowAudienceSelector(false);
@@ -319,9 +319,9 @@ export default function PostFormModal({
                   <label className={styles.privacyOption}>
                     <input
                       type="radio"
-                      value="private"
+                      value="almost_private"
                       name="privacy"
-                      checked={postFormInput.privacy === "private"}
+                      checked={postFormInput.privacy === "almost_private"}
                       onChange={(e) => {
                         setPostFormInput({
                           ...postFormInput,
@@ -329,7 +329,7 @@ export default function PostFormModal({
                         });
                       }}
                     />
-                    <span>Private</span>
+                    <span>Almost Private</span>
                   </label>
 
                   <label className={styles.privacyOption}>
@@ -351,9 +351,9 @@ export default function PostFormModal({
                   <label className={styles.privacyOption}>
                     <input
                       type="radio"
-                      value="almost_private"
+                      value="private"
                       name="privacy"
-                      checked={postFormInput.privacy === "almost_private"}
+                      checked={postFormInput.privacy === "private"}
                       onChange={(e) => {
                         setPostFormInput({
                           ...postFormInput,
@@ -361,7 +361,7 @@ export default function PostFormModal({
                         });
                       }}
                     />
-                    <span>Almost Private</span>
+                    <span>Private</span>
                   </label>
                 </div>
               </div>

@@ -115,11 +115,15 @@ func SearchPosts(user_id int64, query string, offset int64) ([]structs.Post, err
 }
 
 func InsertSearch(user_id int64, query string) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("INSERT INTO searches (user_id, content) VALUES (?, ?)", user_id, query)
 	return err
 }
 
 func UpdateFirstSearch(search_id int64, query string) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("UPDATE searches SET content = ? WHERE id = ?", query, search_id)
 	return err
 }

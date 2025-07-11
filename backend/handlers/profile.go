@@ -5,13 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"sync"
 
 	structs "social-network/data"
 	"social-network/database"
 )
-
-var mutex = &sync.Mutex{}
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -84,9 +81,9 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if info.Privacy == "public" || info.IsFollowing || user_id == user.ID {
-		mutex.Lock()
+		Mutex.Lock()
 		info.Online = structs.Clients[user_id] != nil
-		mutex.Unlock()
+		Mutex.Unlock()
 	}
 
 	if info.IsPending {

@@ -231,6 +231,14 @@ func AddMembers(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(response)
 			return
 		}
+
+		if err := database.CreateNotification(user.ID, ids.UserID, 0, ids.GroupID, 0, "group"); err != nil {
+			fmt.Println("Failed to create notification", err)
+			response := map[string]string{"error": "Failed to create notification"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
 	}
 }
 

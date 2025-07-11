@@ -1,13 +1,16 @@
 package database
 
 import (
-	structs "social-network/data"
 	"time"
+
+	structs "social-network/data"
 
 	"github.com/gofrs/uuid"
 )
 
 func RegisterUser(Username, FirstName, LastName, Email, AboutMe, Image, Cover, Privacy string, HashedPassword []byte, DateOfBirth time.Time, SessionToken uuid.UUID) error {
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("INSERT INTO users (username, firstname, lastname, email, avatar, cover, privacy, date_of_birth, password, session_token, about) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Username, FirstName, LastName, Email, Image, Cover, Privacy, DateOfBirth, HashedPassword, SessionToken, AboutMe)
 	return err
 }
@@ -25,6 +28,8 @@ func CheckUser(user_id int64) (structs.User, error) {
 }
 
 func UpdateSession(Email string, sessionToken uuid.UUID) error {
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("UPDATE users SET session_token = ? WHERE email = ?", sessionToken, Email)
 	return err
 }
@@ -36,6 +41,8 @@ func GetUserConnected(token string) (structs.User, error) {
 }
 
 func DeleteSession(user_id int64) error {
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("UPDATE users SET session_token = ? WHERE id = ?", "", user_id)
 	return err
 }

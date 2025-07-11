@@ -9,6 +9,8 @@ import (
 )
 
 func CreateGroup(admin int64, name, description, image, cover, privacy string) (int64, error) {
+			mu.Lock()
+	defer mu.Unlock() 
 	result, err := DB.Exec("INSERT INTO groups (name, description, image, cover, admin, privacy) VALUES (?, ?, ?, ?, ?, ?)", name, description, image, cover, admin, privacy)
 	if err != nil {
 		return 0, err
@@ -18,6 +20,8 @@ func CreateGroup(admin int64, name, description, image, cover, privacy string) (
 }
 
 func DeleteGroup(group_id int64) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("DELETE FROM groups WHERE id = ?", group_id)
 	if err != nil {
 		return err
@@ -38,7 +42,7 @@ func GetGroups(user structs.User) ([]structs.Group, error) {
 	var groups []structs.Group
 	var err error
 	var rows *sql.Rows
-	rows, err = DB.Query("SELECT g.id, g.name, g.description, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members, g.image FROM groups g  LEFT JOIN group_members m ON g.id = m.group_id  LEFT JOIN users u ON u.id = m.user_id LEFT JOIN messages ms ON (u.id = ms.sender_id OR u.id = ms.receiver_id) AND ms.group_id = g.id WHERE m.user_id = ? GROUP BY g.id ORDER BY MAX(ms.created_at) DESC", user.ID)
+	rows, err = DB.Query("SELECT g.id, g.name, g.description, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members, g.image FROM groups g  LEFT JOIN group_members m ON g.id = m.group_id  LEFT JOIN users u ON u.id = g.admin LEFT JOIN messages ms ON (u.id = ms.sender_id OR u.id = ms.receiver_id) AND ms.group_id = g.id WHERE m.user_id = ? GROUP BY g.id ORDER BY MAX(ms.created_at) DESC", user.ID)
 	if err != nil {
 		return nil, err
 	}

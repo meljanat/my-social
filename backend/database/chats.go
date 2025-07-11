@@ -2,10 +2,14 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+	"sync"
 	"time"
 
 	structs "social-network/data"
 )
+
+var mu sync.Mutex
 
 func GetConnections(user_id int64) ([]structs.User, error) {
 	rows, err := DB.Query("SELECT DISTINCT u.id, u.username, u.firstname, u.lastname, u.avatar, u.privacy FROM users u JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id) WHERE (m.sender_id  = ? OR m.receiver_id = ?) AND m.group_id = 0 GROUP BY u.id ORDER BY MAX(m.created_at) DESC", user_id, user_id)
@@ -37,6 +41,8 @@ func GetConnections(user_id int64) ([]structs.User, error) {
 }
 
 func SendMessage(sender_id, receiver_id, group_id int64, content, image string) error {
+	mu.Lock()
+	defer mu.Unlock()
 	totalMessages := 0
 	err := DB.QueryRow("SELECT messages_not_read FROM messages WHERE sender_id = ? AND receiver_id = ? AND group_id = ? ORDER BY created_at DESC LIMIT 1", sender_id, receiver_id, group_id).Scan(&totalMessages)
 	if err != nil && err.Error() != "sql: no rows in result set" {
@@ -112,8 +118,10 @@ func GetCountConversationMessages(sender_id, user_id, group_id int64) (int64, er
 	var err error
 	var rows *sql.Rows
 	if group_id == 0 {
+		fmt.Println("000")
 		rows, err = DB.Query("SELECT messages_not_read FROM messages WHERE sender_id = ? AND receiver_id = ? AND group_id = ? ORDER BY created_at DESC LIMIT 1", sender_id, user_id, group_id)
 	} else {
+		fmt.Println("001")
 		rows, err = DB.Query("SELECT messages_not_read FROM messages WHERE receiver_id = ? AND group_id = ? ORDER BY created_at DESC LIMIT 1", user_id, group_id)
 	}
 	if err != nil {
@@ -131,7 +139,8 @@ func GetCountConversationMessages(sender_id, user_id, group_id int64) (int64, er
 }
 
 func ReadMessages(sender_id, reciever_id, group_id int64) error {
-
+	mu.Lock()
+	defer mu.Unlock()
 	unreadCount, err := GetCountConversationMessages(sender_id, reciever_id, group_id)
 	if err != nil {
 		return err

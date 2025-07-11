@@ -85,11 +85,12 @@ const NotificationsComponent = ({ onMarkAllAsRead }) => {
       ) {
         router.push('/event?id=' + notification.group_id + '&event=' + notification.event_id);
       } else if (
-        notification.type_notification === "group" ||
         notification.type_notification === "join_request" ||
         notification.type_notification === "join"
       ) {
         router.push('/group?id=' + notification.group_id);
+      } else if (notification.type_notification === "group") {
+        router.push('/groups');
       }
     } catch (error) {
       console.error("Error marking notification as read:", error.message);

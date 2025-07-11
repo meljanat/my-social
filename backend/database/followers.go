@@ -5,11 +5,15 @@ import (
 )
 
 func AddFollower(follower_id, following_id int64) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("INSERT INTO follows (follower_id, following_id) VALUES (?, ?)", follower_id, following_id)
 	return err
 }
 
 func RemoveFollower(follower_id, following_id int64) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("DELETE FROM follows WHERE follower_id = ? AND following_id = ?", follower_id, following_id)
 	return err
 }

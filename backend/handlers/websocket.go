@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	structs "social-network/data"
 	"social-network/database"
@@ -111,12 +112,13 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 				}
 
 				Mutex.Lock()
-				if err = database.SendMessage(user_id, id, message.GroupID, message.Content, ""); err != nil && user_id != id {
+				err = database.SendMessage(user_id, id, message.GroupID, message.Content, "")
+				if err != nil && user_id != id {
 					fmt.Println("Error sending message:", err)
 					continue
 				}
 
-				SendWsMessage(id, map[string]interface{}{"type": msgType, "name": group.Name, "user_id": user.ID, "group_id": group.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": id, "created_at": "Just now"})
+				SendWsMessage(id, map[string]interface{}{"type": msgType, "message_id": time.Now(), "name": group.Name, "user_id": user.ID, "group_id": group.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": id, "created_at": "Just now"})
 				Mutex.Unlock()
 			}
 		} else {
@@ -131,13 +133,14 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 			}
 
 			Mutex.Lock()
-			if err = database.SendMessage(user_id, message.UserID, message.GroupID, message.Content, ""); err != nil {
+			err = database.SendMessage(user_id, message.UserID, message.GroupID, message.Content, "")
+			if err != nil {
 				fmt.Println("Error sending message:", err)
 				continue
 			}
 
-			SendWsMessage(user_id, map[string]interface{}{"type": msgType, "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": user_id, "created_at": "Just now"})
-			SendWsMessage(message.UserID, map[string]interface{}{"type": msgType, "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": message.UserID, "created_at": "Just now"})
+			SendWsMessage(user_id, map[string]interface{}{"type": msgType, "message_id": time.Now(), "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": user_id, "created_at": "Just now"})
+			SendWsMessage(message.UserID, map[string]interface{}{"type": msgType, "message_id": time.Now(), "user_id": user.ID, "username": user.Username, "avatar": user.Avatar, "content": message.Content, "current_user": message.UserID, "created_at": "Just now"})
 			Mutex.Unlock()
 		}
 	}

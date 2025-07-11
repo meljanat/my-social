@@ -26,6 +26,8 @@ func SendWsMessage(user_id int64, message map[string]interface{}) {
 }
 
 func CreateNotification(user_id, notified_id, post_id, group_id, event_id int64, type_notification string) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("INSERT INTO notifications (user_id, notified_id, post_id, group_id, event_id, type_notification) VALUES (?, ?, ?, ?, ?, ?)", user_id, notified_id, post_id, group_id, event_id, type_notification)
 	Mutex.Lock()
 	SendWsMessage(notified_id, map[string]interface{}{"type": "notifications"})
@@ -89,16 +91,22 @@ func GetCountNotifications(user_id int64) (int64, error) {
 }
 
 func DeleteNotification(user_id, notified_id, post_id, group_id, event_id int64, type_notification string) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("DELETE FROM notifications WHERE user_id = ? AND notified_id = ? AND post_id = ? AND group_id = ? AND event_id = ? AND type_notification = ?", user_id, notified_id, post_id, group_id, event_id, type_notification)
 	return err
 }
 
 func MarkNotificationAsRead(user_id, notfication_id int64) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("UPDATE notifications SET read = 1 WHERE notified_id = ? AND id = ?", user_id, notfication_id)
 	return err
 }
 
 func MarkAllNotificationsAsRead(user_id int64) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("UPDATE notifications SET read = 1 WHERE notified_id = ?", user_id)
 	return err
 }

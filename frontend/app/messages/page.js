@@ -80,7 +80,6 @@ export default function MessagesPage() {
   const [groups, setGroups] = useState([]);
   const [openEmojiSection, setOpenEmojiSection] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [showNewMessageModal, setShowNewMessageModal] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -114,11 +113,21 @@ export default function MessagesPage() {
 
   useEffect(() => {
     const handleMessage = async (msg) => {
+      console.log(reqId, reqTab);
+
       if (msg.type === "message") {
-        await fetchMessages(reqId, activeTab, 0);
-        if (activeTab === "friends") {
+        // if (reqId &&
+        //   (reqId == msg.user_id ||
+        //     reqId == msg.group_id ||
+        //     msg.user_id === msg.current_user)
+        // ) {
+        //   setMessages((prevMessages) => [...(prevMessages || []), msg]);
+        // }
+        if (reqTab === "friends") {
+          await fetchUserMessages(reqId, 0);
           fetchUsers();
-        } else if (activeTab === "groups") {
+        } else if (reqTab === "groups") {
+          await fetchGroupMessages(reqId, 0);
           fetchGroups();
         }
       } else if (msg.type === "new_connection" || msg.type === "disconnection") {
@@ -156,7 +165,11 @@ export default function MessagesPage() {
   const handleScroll = async () => {
     if (conversationRef.current.scrollTop === 0 && isFetchingMore && !isFirstFetch) {
       const scrollBeforeFetch = conversationRef.current.scrollHeight / ((messages.length / 20));
-      await fetchMessages(selectedUser.user_id || selectedUser.group_id, activeTab, messages.length, scrollBeforeFetch);
+      if (reqTab === "friends") {
+        await fetchUserMessages(reqId, messages.length, scrollBeforeFetch);
+      } else if (reqTab === "groups") {
+        await fetchGroupMessages(reqId, messages.length, scrollBeforeFetch);
+      }
     }
   };
 
@@ -174,7 +187,7 @@ export default function MessagesPage() {
     const group = groups ? groups.find((g) => g.group_id === parseInt(group_id)) : null;
     if (group) {
       setSelectedUser(group);
-      await fetchMessages(group.group_id, tab, 0);
+      await fetchGroupMessages(group.group_id, 0);
     }
   }
 
@@ -246,21 +259,54 @@ export default function MessagesPage() {
   const handleUserSelect = async (id, tab) => {
     if (tab != "friends") return;
     await getUserChat(id);
-    await fetchMessages(id, tab, 0);
+    await fetchUserMessages(id, 0);
   };
 
-  const fetchMessages = async (id, tab, offset = 0, scrollPos) => {
+  const fetchUserMessages = async (id, offset = 0, scrollPos) => {
     if (!id) return;
-
-    let fetchMsgs = tab === "groups"
-      ? `chats_group?group_id=${id}&offset=${offset}`
-      : `chats?id=${id}&offset=${offset}`;
 
     try {
       if (offset === 0) {
         setMessages([]);
       }
-      const response = await fetch(`http://localhost:8404/${fetchMsgs}`, {
+      const response = await fetch(`http://localhost:8404/chats?id=${id}&offset=${offset}`, {
+        method: "GET",
+        credentials: "include",
+      })
+      const data = await response.json();
+      if (!data || !Array.isArray(data)) {
+        return;
+      }
+      if (data.length == 20) {
+        setIsFetchingMore(true);
+      } else {
+        setIsFetchingMore(false);
+      }
+      if (offset === 0) {
+        setMessages(data);
+        setisFirstFetch(true);
+      } else {
+        setMessages((prevMessages) => [...data, ...prevMessages]);
+        if (scrollPos) {
+          setScrollRein(scrollPos);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      setMessages([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const fetchGroupMessages = async (id, offset = 0, scrollPos) => {
+    if (!id) return;
+
+    try {
+      if (offset === 0) {
+        setMessages([]);
+      }
+      const response = await fetch(`http://localhost:8404/chats_group?group_id=${id}&offset=${offset}`, {
         method: "GET",
         credentials: "include",
       })
@@ -332,7 +378,7 @@ export default function MessagesPage() {
 
     websocket.send(JSON.stringify(mssg));
     setNewMessage("");
-    readMessages(reqId, activeTab);
+    // readMessages(reqId, activeTab);
     setisFirstFetch(true);
   };
 
@@ -351,77 +397,13 @@ export default function MessagesPage() {
 
   return (
     <div className={styles.messagesPageContainer}>
-      {showNewMessageModal && (
-        <div className={styles.newMessageModalOverlay}>
-          <div className={styles.newMessageModal}>
-            <h2>Create New Message</h2>
-            <button
-              className={styles.closeButton}
-              onClick={() => setShowNewMessageModal(false)}
-            >
-              &times;
-            </button>
-            <form
-              className={styles.newMessageForm}
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (newMessage.trim()) {
-                  handleSendMessage(e);
-                  setShowNewMessageModal(false);
-                }
-              }}
-            >
-              <input
-                type="textArea"
-                placeholder="Type your message..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                className={styles.newMessageInput}
-              />
-              <select
-                className={styles.newMessageSelect}
-                onChange={(e) => {
-                  const userId = e.target.value;
-                  // if (userId) {
-                  //   handleUserSelect(userId, 0, 0);
-                  //   setSelectedUser(users.find((u) => u.user_id == userId));
-                  // } else {
-                  //   setSelectedUser(null);
-                  // }
-                }}
-              >
-                <option value="">Select User</option>
-                {/* {users.map((user) => (
-                  <option key={user.user_id} value={user.user_id}>
-                    {user.first_name ? `${user.first_name} ${user.last_name}` : user.name}
-                  </option>
-                ))} */}
-              </select>
-              <button type="submit" className={styles.sendButton}>
-                Send message
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+
 
       <div className={styles.messagesPageContent}>
         <div className={styles.messagesSidebar}>
           <div className={styles.messagesHeader}>
             <h2>Messages</h2>
-            <div
-              className={styles.newMessageButton}
-              onClick={() => setShowNewMessageModal(true)}
-            >
-              <span className={styles.newMessageIconContainer}>
-                {/* <img
-                  src="/icons/message.svg"
-                  alt="User Avatar"
-                  className={styles.newMessageIcon}
-                /> */}
-                +
-              </span>
-            </div>
+
           </div>
 
           <div className={styles.messagesTabs}>

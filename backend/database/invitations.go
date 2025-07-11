@@ -7,11 +7,15 @@ import (
 )
 
 func CreateInvitation(invited_id, recipient_id, group_id int64) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("INSERT INTO invitations (recipient_id, invited_id, group_id) VALUES (?, ?, ?)", recipient_id, invited_id, group_id)
 	return err
 }
 
 func AcceptInvitation(invitation_id, invited_id, recipient_id, group_id int64) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	var err error
 	if group_id != 0 {
 		_, err = DB.Exec("INSERT INTO group_members (user_id, group_id) VALUES (?, ?)", recipient_id, group_id)
@@ -25,6 +29,8 @@ func AcceptInvitation(invitation_id, invited_id, recipient_id, group_id int64) e
 }
 
 func DeleteInvitation(intitation_id int64) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("Delete FROM invitations WHERE id = ?", intitation_id)
 	return err
 }

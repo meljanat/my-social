@@ -10,6 +10,8 @@ import (
 )
 
 func CreatePost(user_id, group_id, category_id int64, title, content, image, privacy string) (int64, error) {
+			mu.Lock()
+	defer mu.Unlock() 
 	result, err := DB.Exec("INSERT INTO posts (title, content, category_id, user_id, group_id, image, privacy) VALUES (?, ?, ?, ?, ?, ?, ?)", title, content, category_id, user_id, group_id, image, privacy)
 	if err != nil {
 		return 0, err
@@ -252,6 +254,8 @@ func IsAuthorized(user_id, post_id int64) (bool, error) {
 }
 
 func Almost(user_id, post_id int64) error {
+			mu.Lock()
+	defer mu.Unlock() 
 	_, err := DB.Exec("INSERT INTO post_privacy (user_id, post_id) VALUES (?, ?)", user_id, post_id)
 	return err
 }

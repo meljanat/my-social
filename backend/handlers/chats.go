@@ -86,7 +86,6 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mutex.Lock()
 	err = database.ReadMessages(receiver_id, user.ID, 0)
 	if err != nil {
 		fmt.Println("Failed to mark messages as read", err)
@@ -96,7 +95,6 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
-	mutex.Unlock()
 
 	chats, err := database.GetConversation(user.ID, receiver_id, offset)
 	if err != nil {
@@ -123,7 +121,7 @@ func ChatGroupHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := GetUserFromSession(r)
 	if err != nil || user == nil {
-		fmt.Println("Failed to retrieve user", err)
+		fmt.Println("Failed to retrieve usejjtgjr", err)
 		response := map[string]string{"error": "Failed to retrieve user"}
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(response)
@@ -172,7 +170,6 @@ func ChatGroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mutex.Lock()
 	err = database.ReadMessages(0, user.ID, group_id)
 	if err != nil {
 		fmt.Println("Failed to mark messages as read", err)
@@ -181,8 +178,9 @@ func ChatGroupHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	Mutex.Lock()
 	SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
-	mutex.Unlock()
+	Mutex.Unlock()
 
 	chats, err := database.GetGroupConversation(group_id, user.ID, offset)
 	if err != nil {
@@ -241,7 +239,7 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mutex.Lock()
+	Mutex.Lock()
 	err = database.ReadMessages(request.UserID, user.ID, request.GroupID)
 	if err != nil {
 		fmt.Println("Failed to mark messages as read", err)
@@ -251,7 +249,7 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
-	mutex.Unlock()
+	Mutex.Unlock()
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("success")

@@ -88,7 +88,7 @@
 }
 
 .followBtn.Requested {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); /* Orange for pending */
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   color: white;
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
 }

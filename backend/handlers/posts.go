@@ -51,7 +51,7 @@ func NewPostGet(w http.ResponseWriter, r *http.Request, user *structs.User) {
 		return
 	}
 
-	users, err := database.GetFollowers(user.ID, 0)
+	users, err := database.GetFollowers(user.ID)
 	if err != nil {
 		log.Printf("Error retrieving users: %v", err)
 		response := map[string]string{"error": "Failed to retrieve users"}
@@ -462,16 +462,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid offset", err)
-		response := map[string]string{"error": "Invalid offset"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
-	post.Comments, err = database.GetPostComments(post_id, offset)
+	post.Comments, err = database.GetPostComments(post_id)
 	if err != nil {
 		fmt.Println("Failed to retrieve comments", err)
 		response := map[string]string{"error": "Failed to retrieve comments"}
@@ -511,16 +502,7 @@ func GetPostsByCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid offset", err)
-		response := map[string]string{"error": "Invalid offset"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
-	posts, err := database.GetPostsByCategory(category_id, user.ID, offset)
+	posts, err := database.GetPostsByCategory(category_id, user.ID)
 	if err != nil {
 		fmt.Println("Failed to retrieve posts", err)
 		response := map[string]string{"error": "Failed to retrieve posts"}

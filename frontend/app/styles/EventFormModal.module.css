@@ -91,7 +91,6 @@
   padding: 1rem 1rem;
   text-align: center;
   font-weight: 500;
-  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
   font-size: 0.9rem;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -165,7 +164,7 @@ textarea.formControl {
 .fileLabel img {
   width: 20px;
   height: 20px;
-  filter: brightness(0) saturate(100%) invert(49%) sepia(33%) saturate(3020%) hue-rotate(204deg) brightness(99%) contrast(92%); /* Adjust to match #667eea */
+  filter: brightness(0) saturate(100%) invert(49%) sepia(33%) saturate(3020%) hue-rotate(204deg) brightness(99%) contrast(92%); 
 }
 
 .fileName {

@@ -29,9 +29,9 @@ func DeleteInvitation(intitation_id int64) error {
 	return err
 }
 
-func GetInvitationsFriends(user_id, offset int64) ([]structs.Invitation, error) {
+func GetInvitationsFriends(user_id int64) ([]structs.Invitation, error) {
 	var invitations []structs.Invitation
-	rows, err := DB.Query("SELECT i.id, u.id, u.username, u.avatar FROM invitations i JOIN users u ON i.invited_id = u.id WHERE i.recipient_id = ? ORDER BY i.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
+	rows, err := DB.Query("SELECT i.id, u.id, u.username, u.avatar FROM invitations i JOIN users u ON i.invited_id = u.id WHERE i.recipient_id = ? ORDER BY i.created_at DESC", user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -47,9 +47,9 @@ func GetInvitationsFriends(user_id, offset int64) ([]structs.Invitation, error) 
 	return invitations, nil
 }
 
-func GetInvitationsGroups(user_id, offset int64) ([]structs.Invitation, error) {
+func GetInvitationsGroups(user_id int64) ([]structs.Invitation, error) {
 	var invitations []structs.Invitation
-	rows, err := DB.Query("SELECT i.id, i.created_at, u.id, u.username, u.avatar, g.id, g.admin, g.name, g.members FROM invitations i JOIN users u ON (u.id = i.invited_id) JOIN groups g ON i.group_id = g.id WHERE i.recipient_id = ? ORDER BY i.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
+	rows, err := DB.Query("SELECT i.id, i.created_at, u.id, u.username, u.avatar, g.id, g.admin, g.name, g.members FROM invitations i JOIN users u ON (u.id = i.invited_id) JOIN groups g ON i.group_id = g.id WHERE i.recipient_id = ? ORDER BY i.created_at DESC", user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -74,9 +74,9 @@ func GetInvitationsGroups(user_id, offset int64) ([]structs.Invitation, error) {
 	return invitations, nil
 }
 
-func GetInvitationsGroup(user_id, group_id, offset int64) ([]structs.Invitation, error) {
+func GetInvitationsGroup(user_id, group_id int64) ([]structs.Invitation, error) {
 	var invitations []structs.Invitation
-	rows, err := DB.Query("SELECT i.id, i.created_at, u.id, u.username, u.avatar FROM invitations i JOIN users u ON u.id = i.invited_id JOIN groups g ON i.group_id = g.id WHERE i.recipient_id = ? AND g.id = ? ORDER BY i.created_at DESC LIMIT ? OFFSET ?", user_id, group_id, 10, offset)
+	rows, err := DB.Query("SELECT i.id, i.created_at, u.id, u.username, u.avatar FROM invitations i JOIN users u ON u.id = i.invited_id JOIN groups g ON i.group_id = g.id WHERE i.recipient_id = ? AND g.id = ? ORDER BY i.created_at DESC", user_id, group_id)
 	if err != nil {
 		return nil, err
 	}

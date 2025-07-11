@@ -148,6 +148,7 @@ export default function AuthForm({ onLoginSuccess }) {
   };
 
   const handleRegister = async () => {
+
     try {
       const registerData = new FormData();
 
@@ -179,10 +180,25 @@ export default function AuthForm({ onLoginSuccess }) {
 
       if (response.ok) {
         setSuccessMessage("Registration successful! You can now log in.");
+
         setTimeout(() => {
           setIsLogin(true);
-          setSuccessMessage("");
+          (formData.email = ""),
+            (formData.password = ""),
+            (formData.privacy = ""),
+            (formData.username = ""),
+            (formData.firstName = ""),
+            (formData.lastName = ""),
+            (formData.confirmedPassword = ""),
+            (formData.dateOfBirth = ""),
+            (formData.aboutMe = ""),
+            (formData.avatar = null),
+            (formData.cover = null),
+
+            setSuccessMessage("");
         }, 2000);
+
+
       } else {
         const data = await response.json();
 
@@ -210,6 +226,8 @@ export default function AuthForm({ onLoginSuccess }) {
   };
 
   const handleSubmit = async (e) => {
+
+
     e.preventDefault();
 
     if (!validateForm()) return;
@@ -518,8 +536,8 @@ export default function AuthForm({ onLoginSuccess }) {
                 ? "Logging in..."
                 : "Registering..."
               : isLogin
-              ? "Log In"
-              : "Create Account"}
+                ? "Log In"
+                : "Create Account"}
           </button>
         </form>
 

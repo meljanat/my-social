@@ -34,15 +34,11 @@ func DeleteGroup(group_id int64) error {
 	return err
 }
 
-func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
+func GetGroups(user structs.User) ([]structs.Group, error) {
 	var groups []structs.Group
 	var err error
 	var rows *sql.Rows
-	if offset == -1 {
-		rows, err = DB.Query("SELECT g.id, g.name, g.description, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members, g.image FROM groups g  LEFT JOIN group_members m ON g.id = m.group_id  LEFT JOIN users u ON u.id = m.user_id LEFT JOIN messages ms ON (u.id = ms.sender_id OR u.id = ms.receiver_id) AND ms.group_id = g.id WHERE m.user_id = ? GROUP BY g.id ORDER BY MAX(ms.created_at) DESC", user.ID)
-	} else {
-		rows, err = DB.Query("SELECT g.id, g.name, g.description, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members, g.image FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user.ID, 10, offset)
-	}
+	rows, err = DB.Query("SELECT g.id, g.name, g.description, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members, g.image FROM groups g  LEFT JOIN group_members m ON g.id = m.group_id  LEFT JOIN users u ON u.id = m.user_id LEFT JOIN messages ms ON (u.id = ms.sender_id OR u.id = ms.receiver_id) AND ms.group_id = g.id WHERE m.user_id = ? GROUP BY g.id ORDER BY MAX(ms.created_at) DESC", user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -73,9 +69,9 @@ func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
 	return groups, nil
 }
 
-func GetSuggestedGroups(user_id, offset int64) ([]structs.Group, error) {
+func GetSuggestedGroups(user_id int64) ([]structs.Group, error) {
 	var groups []structs.Group
-	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.admin, g.privacy, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin WHERE g.id NOT IN (SELECT group_id FROM group_members WHERE user_id = ? UNION SELECT group_id FROM invitations WHERE invited_id = ?) ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, user_id, 10, offset)
+	rows, err := DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.admin, g.privacy, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin WHERE g.id NOT IN (SELECT group_id FROM group_members WHERE user_id = ? UNION SELECT group_id FROM invitations WHERE invited_id = ?) ORDER BY g.created_at DESC", user_id, user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -97,9 +93,9 @@ func GetSuggestedGroups(user_id, offset int64) ([]structs.Group, error) {
 	return groups, nil
 }
 
-func GetPendingGroups(user_id, offset int64) ([]structs.Group, error) {
+func GetPendingGroups(user_id int64) ([]structs.Group, error) {
 	var groups []structs.Group
-	rows, err := DB.Query("SELECT g.id, i.recipient_id, g.name, g.description, g.image, g.cover, g.admin, g.privacy, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN invitations i ON g.id = i.group_id WHERE i.invited_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
+	rows, err := DB.Query("SELECT g.id, i.recipient_id, g.name, g.description, g.image, g.cover, g.admin, g.privacy, g.created_at, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN invitations i ON g.id = i.group_id WHERE i.invited_id = ? ORDER BY g.created_at DESC", user_id)
 	if err != nil {
 		return nil, err
 	}

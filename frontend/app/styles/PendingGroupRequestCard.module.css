@@ -32,7 +32,7 @@
 }
 
 .pendingGroupInfo {
-  display: flex; /* Added to align avatar and name/status */
+  display: flex;
   align-items: center;
   gap: 1rem;
   flex-grow: 1;
@@ -75,7 +75,7 @@
 
 .pendingGroupStatus span {
   font-weight: 500;
-  color: #f97316; /* Orange for pending status */
+  color: #f97316; 
 }
 
 .pendingGroupCancelBtn {
@@ -89,7 +89,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
-  flex-shrink: 0; /* Prevent button from shrinking */
+  flex-shrink: 0; 
 }
 
 .pendingGroupCancelBtn:hover {
@@ -135,7 +135,7 @@
 .statIcon svg {
   width: 16px;
   height: 16px;
-  color: #667eea; /* Primary blue for icons */
+  color: #667eea; 
   flex-shrink: 0;
 }
 
@@ -157,7 +157,7 @@
   border-top: 1px dashed #f0f2f5;
 }
 
-/* Responsive Adjustments */
+
 @media (max-width: 768px) {
   .pendingGroupContent {
     padding: 1.2rem;
@@ -210,14 +210,14 @@
     padding: 1rem;
   }
   .pendingGroupHeader {
-    flex-direction: column; /* Stack avatar and info on very small screens */
+    flex-direction: column;
     align-items: flex-start;
     gap: 0.6rem;
     margin-bottom: 0.6rem;
   }
   .pendingGroupInfo {
     width: 100%;
-    justify-content: space-between; /* Keep status next to name */
+    justify-content: space-between;
     gap: 0.6rem;
   }
   .pendingGroupAvatar {
@@ -228,7 +228,7 @@
     font-size: 1rem;
   }
   .pendingGroupStatus {
-    flex-direction: row; /* Keep status and button inline if space allows */
+    flex-direction: row; 
     gap: 0.4rem;
     font-size: 0.75rem;
   }

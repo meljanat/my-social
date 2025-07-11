@@ -110,7 +110,7 @@ export default function NotificationPage() {
       } else if (
         notification.type_notification === "event"
       ) {
-        router.push('/event?id=' + notification.event_id);
+        router.push('/event?id=' + notification.group_id + '&event=' + notification.event_id);
       } else if (
         notification.type_notification === "group" ||
         notification.type_notification === "join_request" ||

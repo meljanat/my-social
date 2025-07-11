@@ -28,9 +28,9 @@ func IsMemberGroup(user_id, group_id int64) (bool, error) {
 	return count > 0, err
 }
 
-func GetGroupMembers(user_id, group_id, offset int64) ([]structs.User, error) {
+func GetGroupMembers(user_id, group_id int64) ([]structs.User, error) {
 	var members []structs.User
-	rows, err := DB.Query("SELECT u.id, u.username, u.avatar, u.lastname, u.firstname FROM users u JOIN group_members gm ON u.id = gm.user_id WHERE gm.group_id = ? LIMIT ? OFFSET ?", group_id, 10, offset)
+	rows, err := DB.Query("SELECT u.id, u.username, u.avatar, u.lastname, u.firstname FROM users u JOIN group_members gm ON u.id = gm.user_id WHERE gm.group_id = ?", group_id)
 	if err != nil {
 		return nil, err
 	}

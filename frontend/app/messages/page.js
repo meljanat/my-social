@@ -92,8 +92,6 @@ export default function MessagesPage({ searchParams }) {
   const [isFirstFetch, setisFirstFetch] = useState(false);
   const [scrollRein, setScrollRein] = useState();
 
-  // const {user: selectedUserId, group: selectedGroupId} = use(searchParams);
-
   useEffect(() => {
     setActiveTab(reqTab === "groups" ? "groups" : "friends");
   }, [reqTab]);
@@ -119,18 +117,8 @@ export default function MessagesPage({ searchParams }) {
 
   useEffect(() => {
     const handleMessage = async (msg) => {
-      console.log(msg);
-
       if (msg.type === "message") {
-        if (reqId &&
-          (reqId == msg.user_id ||
-            reqId == msg.group_id ||
-            msg.user_id === msg.current_user)
-        ) {
-          setMessages((prevMessages) => [...(prevMessages || []), msg]);
-        }
-
-        // await fetchMessages(reqId, activeTab, 0);
+        await fetchMessages(reqId, activeTab, 0);
         if (activeTab === "friends") {
           fetchUsers();
         } else if (activeTab === "groups") {
@@ -168,11 +156,6 @@ export default function MessagesPage({ searchParams }) {
     conversationRef.current.scrollTop = scrollRein;
   }, [scrollRein]);
 
-  useEffect(() => {
-    console.log("reinitialized: ", isFirstFetch);
-  }, [isFirstFetch]);
-
-
   const handleScroll = async () => {
     if (conversationRef.current.scrollTop === 0 && isFetchingMore && !isFirstFetch) {
       const scrollBeforeFetch = conversationRef.current.scrollHeight / ((messages.length / 20));
@@ -185,8 +168,6 @@ export default function MessagesPage({ searchParams }) {
     if (lastMessage) {
       lastMessage.scrollIntoView();
     }
-    console.log("Scrolling to last message");
-
     setisFirstFetch(false);
   }
 
@@ -589,23 +570,7 @@ export default function MessagesPage({ searchParams }) {
                   className={styles.messageInputForm}
                   onSubmit={handleSendMessage}
                 >
-                  <button type="button" className={styles.attachmentButton}>
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
+
                   <div className={styles.emojiToggle}>
                     <button type="button" onClick={toggleEmojiSection}>
                       😄

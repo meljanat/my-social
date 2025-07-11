@@ -749,7 +749,6 @@
 
 
 .closeModalButton {
-  /* position: absolute; */
   top: 20px;
   right: 20px;
   background: none;
@@ -789,6 +788,7 @@
   font-size: 1rem;
   color: #475569;
   margin-bottom: 1rem;  
+  background-color: #e7e8ed;
 }
 .messageInput:focus {
   outline: none;

@@ -15,7 +15,6 @@
   }
   
   .modal {
-    /* position: absolute; */
     background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
     border-radius: 20px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
@@ -93,6 +92,7 @@
     color: #334155;
     background-color: #f8faff;
     transition: all 0.3s ease;
+  
   }
   
   .formControl:focus {
@@ -110,6 +110,8 @@
     min-height: 100px;
     resize: vertical;
     line-height: 1.5;
+    color: #334155;
+
   }
   
   .imagePreview {

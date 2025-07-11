@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	structs "social-network/data"
 	"social-network/database"
@@ -322,16 +321,7 @@ func GetInvitationsGroups(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
-	if err != nil {
-		fmt.Println("Error parsing offset:", err)
-		response := map[string]string{"error": "Invalid offset"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
-	invitations, err := database.GetInvitationsGroups(user.ID, offset)
+	invitations, err := database.GetInvitationsGroups(user.ID)
 	if err != nil {
 		fmt.Println("Failed to retrieve invitations", err)
 		response := map[string]string{"error": "Failed to retrieve invitations"}

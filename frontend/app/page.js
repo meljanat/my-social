@@ -5,8 +5,7 @@ import LeftSidebar from "./components/LeftSideBar";
 import ProfileCard from "./components/ProfileCard";
 import TopGroups from "./components/TopGroups";
 import PostComponent from "./components/PostComponent";
-import StoriesComponent from "./components/StoriesComponent";
-import ChatWidget from "./components/ChatWidget";
+
 import "./styles/page.css";
 
 export default function Home() {
@@ -77,6 +76,9 @@ export default function Home() {
     };
   }, [posts]);
 
+  console.log(homeData);
+
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -115,9 +117,6 @@ export default function Home() {
             </div>
 
             <div className="center-column" ref={postsRef}>
-              <div className="stories-section">
-                <StoriesComponent storiesUsers={stories} />
-              </div>
               <PostComponent posts={posts} />
             </div>
 
@@ -131,12 +130,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        <ChatWidget
-          users={homeData.connections}
-          groups={homeData.my_groups}
-          myData={homeData.user}
-        />
       </div>
     );
   }

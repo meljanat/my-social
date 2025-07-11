@@ -12,7 +12,7 @@ export default function SuggestionCard({ suggestion, onclick }) {
     } else if (suggestion.post_id) {
       router.push(`/post?id=${suggestion.post_id}`);
     } else if (suggestion.event_id) {
-      router.push(`/event?id=${suggestion.event_id}`);
+      router.push('/event?id=' + suggestion.group_id + '&event=' + suggestion.event_id);
     }
     onclick();
   };

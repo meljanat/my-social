@@ -37,16 +37,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	count_follwing, err := database.GetCountFollowing(user.ID)
-	if err != nil {
-		fmt.Println("Failed to retrieve count following", err)
-		response := map[string]string{"error": "Failed to retrieve count following"}
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
-	following, err := database.GetFollowing(user.ID, 0, count_follwing)
+	following, err := database.GetFollowing(user.ID)
 	if err != nil {
 		fmt.Println("Failed to retrieve followings", err)
 		response := map[string]string{"error": "Failed to retrieve followings"}
@@ -64,7 +55,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	suggested_users, err := database.GetSuggestedUsers(user.ID, 0)
+	suggested_users, err := database.GetSuggestedUsers(user.ID)
 	if err != nil {
 		fmt.Println("Failed to retrieve not following", err)
 		response := map[string]string{"error": "Failed to retrieve not following"}
@@ -91,7 +82,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	my_groups, err := database.GetGroups(*user, -1)
+	my_groups, err := database.GetGroups(*user)
 	if err != nil {
 		fmt.Println("Failed to retrieve my groups", err)
 		response := map[string]string{"error": "Failed to retrieve my groups"}
@@ -100,7 +91,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	suggested_groups, err := database.GetSuggestedGroups(user.ID, 0)
+	suggested_groups, err := database.GetSuggestedGroups(user.ID)
 	if err != nil {
 		fmt.Println("Failed to retrieve suggested groups", err)
 		response := map[string]string{"error": "Failed to retrieve suggested groups"}

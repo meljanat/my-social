@@ -104,7 +104,6 @@
   box-shadow: none;
 }
 
-/* Responsive Adjustments */
 @media (max-width: 768px) {
   .modalContent {
     padding: 1.5rem;

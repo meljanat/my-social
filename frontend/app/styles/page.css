@@ -193,7 +193,6 @@ body {
   overflow-y: auto;
   padding: 0 1rem;
   box-sizing: border-box;
-  /* background-color: #fff; */
 }
 
 @media (max-width: 976px) {

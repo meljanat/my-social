@@ -16,8 +16,8 @@ func UnsavePost(user_id, post_id, group_id int64) error {
 	return err
 }
 
-func GetSavedPosts(user_id, group_id, offset int64) ([]structs.Post, error) {
-	rows, err := DB.Query("SELECT p.id, p.group_id, u.username, u.avatar, p.title, p.content, c.name, c.color, c.background, p.created_at, p.total_likes, p.total_comments, p.privacy, p.image FROM saves s JOIN posts p ON s.post_id = p.id JOIN categories c ON c.id = p.category_id JOIN users u ON u.id = p.user_id WHERE s.user_id = ? ORDER BY p.created_at DESC LIMIT ? OFFSET ?", user_id, 10, offset)
+func GetSavedPosts(user_id, group_id int64) ([]structs.Post, error) {
+	rows, err := DB.Query("SELECT p.id, p.group_id, u.username, u.avatar, p.title, p.content, c.name, c.color, c.background, p.created_at, p.total_likes, p.total_comments, p.privacy, p.image FROM saves s JOIN posts p ON s.post_id = p.id JOIN categories c ON c.id = p.category_id JOIN users u ON u.id = p.user_id WHERE s.user_id = ? ORDER BY p.created_at DESC", user_id)
 	if err != nil {
 		return nil, err
 	}

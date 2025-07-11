@@ -14,7 +14,6 @@
 
 .notificationItem:hover {
   background: linear-gradient(135deg, #f8faff 0%, #e8ecf7 100%);
-  /* transform: translateX(4px); */
 }
 
 .notificationContent {
@@ -53,7 +52,6 @@
 
 .notificationItem:hover .avatarImage {
   border-color: #2f52eb;
-  /* box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2); */
   transform: scale(1.05);
 }
 
@@ -61,6 +59,7 @@
   flex: 1;
   min-width: 0;
 }
+
 .followRequestButton {
   padding: 0.5rem 1rem;
   border-radius: 12px;
@@ -69,21 +68,24 @@
   cursor: pointer;
   border: none;
 }
+
 .acceptRequestButton {
   background: linear-gradient(135deg, #28a745 0%, #218838 100%);
   color: white;
   transition: all 0.3s ease;
 }
-.declineRequestButton{
+
+.declineRequestButton {
   background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   color: white;
   transition: all 0.3s ease;
 }
-.followRequestActions{
+
+.followRequestActions {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
-} 
+}
 
 .notificationMessage {
   font-size: 0.875rem;
@@ -94,7 +96,6 @@
 .userName {
   font-weight: 600;
   color: #302de9;
-  /* background: linear-gradient(135deg, #667eea 0%, #0300ce 100%); */
   background-clip: text;
 
   transition: all 0.3s ease;

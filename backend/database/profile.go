@@ -30,7 +30,7 @@ func GetProfileInfo(user_id int64, following []structs.User) (structs.User, erro
 	if err != nil {
 		return user, err
 	}
-	groups, err := GetGroups(user, -1)
+	groups, err := GetGroups(user)
 	if err != nil {
 		return user, err
 	}

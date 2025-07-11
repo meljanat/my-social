@@ -131,15 +131,6 @@ func ProfilePostsHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
-	if err != nil {
-		fmt.Println("Error parsing offset:", err)
-		response := map[string]string{"error": "Invalid offset"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
 	info, err := database.GetProfileInfo(user_id, nil)
 	if err != nil {
 		fmt.Println("Error retrieving profile:", err)
@@ -160,7 +151,7 @@ func ProfilePostsHandler(w http.ResponseWriter, r *http.Request) {
 
 	var posts []structs.Post
 	if followed || info.Privacy == "public" || user_id == user.ID {
-		posts, err = database.GetPostsByUser(user_id, user.ID, offset, followed)
+		posts, err = database.GetPostsByUser(user_id, user.ID, followed)
 		if err != nil {
 			fmt.Println("Error retrieving posts:", err)
 			response := map[string]string{"error": "Failed to retrieve posts"}

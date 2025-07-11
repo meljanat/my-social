@@ -1,15 +1,6 @@
-// import "../styles/ChatContact.css";
 import styles from "../styles/ChatContact.module.css";
 
 const ChatContact = ({ user, onClick, isOnline = false }) => {
-  const getInitials = (name) => {
-    return name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase();
-  };
-
   return (
     <div className={styles.chatContact} onClick={onClick}>
       <div className={styles.chatContactAvatarContainer}>

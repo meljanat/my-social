@@ -67,7 +67,6 @@
   }
   
   .formRow {
-    /* display: flex; */
     gap: 16px;
   }
   
@@ -291,6 +290,7 @@
     transition: border-color 0.2s, box-shadow 0.2s;
     appearance: none;
     background-size: 16px 16px;
+    color: #64748B;
   }
   
   .privacySelect:focus {

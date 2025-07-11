@@ -93,7 +93,7 @@ func GetPosts(user_id, offset int64, followers []structs.User) ([]structs.Post, 
 	return posts, nil
 }
 
-func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post, error) {
+func GetPostsByUser(user_id, my_id int64, followed bool) ([]structs.Post, error) {
 	var posts []structs.Post
 	var rows *sql.Rows
 	var err error
@@ -109,8 +109,8 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 			AND posts.group_id = 0
 			AND ((posts.privacy = ? OR posts.privacy = ?)
 			OR (posts.privacy = ? AND post_privacy.user_id = ?))
-			ORDER BY posts.created_at DESC LIMIT ? OFFSET ?
-		`, user_id, "public", "almost_private", "private", my_id, 10, offset)
+			ORDER BY posts.created_at DESC
+		`, user_id, "public", "almost_private", "private", my_id)
 	} else if !followed {
 		rows, err = DB.Query(`
 			SELECT DISTINCT posts.id, posts.title, posts.content, categories.name, categories.color, categories.background, users.username, users.avatar,
@@ -121,8 +121,8 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 			WHERE posts.user_id = ?
 			AND posts.group_id = 0
 			AND posts.privacy = ?
-			ORDER BY posts.created_at DESC LIMIT ? OFFSET ?
-		`, user_id, "public", 10, offset)
+			ORDER BY posts.created_at DESC
+		`, user_id, "public")
 	}
 
 	if err != nil {
@@ -156,9 +156,9 @@ func GetPostsByUser(user_id, my_id, offset int64, followed bool) ([]structs.Post
 	return posts, nil
 }
 
-func GetPostsGroup(group_id, user_id, offset int64, privacy string) ([]structs.Post, error) {
+func GetPostsGroup(group_id, user_id int64, privacy string) ([]structs.Post, error) {
 	var posts []structs.Post
-	rows, err := DB.Query("SELECT p.id, p.title, p.content, categories.name, categories.color, categories.background, users.username, users.avatar, p.created_at, p.total_likes, p.total_comments, p.image FROM posts p JOIN categories ON categories.id = p.category_id JOIN users ON p.user_id = users.id WHERE p.group_id = ? ORDER BY p.created_at DESC LIMIT ? OFFSET ? ", group_id, 10, offset)
+	rows, err := DB.Query("SELECT p.id, p.title, p.content, categories.name, categories.color, categories.background, users.username, users.avatar, p.created_at, p.total_likes, p.total_comments, p.image FROM posts p JOIN categories ON categories.id = p.category_id JOIN users ON p.user_id = users.id WHERE p.group_id = ? ORDER BY p.created_at DESC", group_id)
 	if err != nil {
 		return nil, err
 	}
@@ -185,9 +185,9 @@ func GetPostsGroup(group_id, user_id, offset int64, privacy string) ([]structs.P
 	return posts, nil
 }
 
-func GetPostsByCategory(category_id, user_id, offset int64) ([]structs.Post, error) {
+func GetPostsByCategory(category_id, user_id int64) ([]structs.Post, error) {
 	var posts []structs.Post
-	rows, err := DB.Query("SELECT p.id, p.title, p.content, categories.name, categories.color, categories.background, users.username, users.avatar, p.created_at, p.total_likes, p.total_comments, p.image FROM posts p JOIN categories ON categories.id = p.category_id JOIN users ON p.user_id = users.id WHERE p.category_id = ? ORDER BY p.created_at DESC LIMIT ? OFFSET ?", category_id, 10, offset)
+	rows, err := DB.Query("SELECT p.id, p.title, p.content, categories.name, categories.color, categories.background, users.username, users.avatar, p.created_at, p.total_likes, p.total_comments, p.image FROM posts p JOIN categories ON categories.id = p.category_id JOIN users ON p.user_id = users.id WHERE p.category_id = ? ORDER BY p.created_at DESC", category_id)
 	if err != nil {
 		return nil, err
 	}

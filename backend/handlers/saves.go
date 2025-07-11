@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	structs "social-network/data"
 	"social-network/database"
@@ -169,20 +168,12 @@ func GetSavedPostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Type := r.URL.Query().Get("type")
-	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid offset parameter", err)
-		response := map[string]string{"error": "Invalid offset parameter"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
 
 	var posts []structs.Post
 	if Type == "post" {
-		posts, err = database.GetSavedPosts(user.ID, 0, offset)
+		posts, err = database.GetSavedPosts(user.ID, 0)
 	} else if Type == "group" {
-		posts, err = database.GetSavedPosts(user.ID, 1, offset)
+		posts, err = database.GetSavedPosts(user.ID, 1)
 	} else {
 		fmt.Println("Invalid type parameter")
 		response := map[string]string{"error": "Invalid type parameter"}

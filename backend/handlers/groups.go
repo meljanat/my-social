@@ -253,23 +253,15 @@ func GetGroupsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Type := r.URL.Query().Get("type")
-	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
-	if err != nil {
-		fmt.Println("Error parsing offset:", err)
-		response := map[string]string{"error": "Invalid offset"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
 
 	var groups []structs.Group
 
 	if Type == "suggested" {
-		groups, err = database.GetSuggestedGroups(user.ID, offset)
+		groups, err = database.GetSuggestedGroups(user.ID)
 	} else if Type == "pending" {
-		groups, err = database.GetPendingGroups(user.ID, offset)
+		groups, err = database.GetPendingGroups(user.ID)
 	} else if Type == "joined" {
-		groups, err = database.GetGroups(*user, offset)
+		groups, err = database.GetGroups(*user)
 	} else {
 		fmt.Println("Invalid type groups")
 		response := map[string]string{"error": "Invalid type groups"}
@@ -418,18 +410,10 @@ func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Type := r.URL.Query().Get("type")
-	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid offset", err)
-		response := map[string]string{"error": "Invalid offset"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
 
 	if Type == "members" {
 		if member || group.Privacy == "public" {
-			members, err := database.GetGroupMembers(user.ID, group_id, offset)
+			members, err := database.GetGroupMembers(user.ID, group_id)
 			if err != nil {
 				fmt.Println("Failed to retrieve members", err)
 				response := map[string]string{"error": "Failed to retrieve members"}
@@ -447,7 +431,7 @@ func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if Type == "invitations" {
 		if group.Admin == user.Username {
-			invitations, err := database.GetInvitationsGroup(user.ID, group_id, offset)
+			invitations, err := database.GetInvitationsGroup(user.ID, group_id)
 			if err != nil {
 				fmt.Println("Failed to retrieve invitations", err)
 				response := map[string]string{"error": "Failed to retrieve invitations"}
@@ -465,7 +449,7 @@ func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if Type == "posts" {
 		if member || group.Privacy == "public" {
-			posts, err := database.GetPostsGroup(group_id, user.ID, offset, group.Privacy)
+			posts, err := database.GetPostsGroup(group_id, user.ID, group.Privacy)
 			if err != nil {
 				fmt.Println("Failed to retrieve posts", err)
 				response := map[string]string{"error": "Failed to retrieve posts"}
@@ -494,7 +478,7 @@ func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if Type == "events" {
 		if member {
-			events, err := database.GetEventGroup(user.ID, group_id, offset)
+			events, err := database.GetEventGroup(user.ID, group_id)
 			if err != nil {
 				fmt.Println("Failed to retrieve events", err)
 				response := map[string]string{"error": "Failed to retrieve events"}

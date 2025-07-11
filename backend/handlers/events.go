@@ -136,7 +136,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	members, err := database.GetGroupMembers(user.ID, event.GroupID, 0)
+	members, err := database.GetGroupMembers(user.ID, event.GroupID)
 	if err != nil {
 		fmt.Println("Error retrieving group members:", err)
 		response := map[string]string{"error": "Failed to retrieve group members"}
@@ -262,15 +262,6 @@ func GetEventsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Type := r.URL.Query().Get("type")
-	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
-	if err != nil {
-		fmt.Println("Error parsing offset:", err)
-		response := map[string]string{"error": "Invalid offset"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
 	var events []structs.Event
 
 	if Type != "my-events" && Type != "discover" {
@@ -280,7 +271,7 @@ func GetEventsHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 	}
 
-	events, err = database.GetEvents(user.ID, offset, Type)
+	events, err = database.GetEvents(user.ID, Type)
 	if err != nil {
 		fmt.Println("Error retrieving events:", err)
 		response := map[string]string{"error": "Failed to retrieve events"}

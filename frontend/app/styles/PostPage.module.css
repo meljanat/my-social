@@ -70,18 +70,13 @@
   font-weight: 500;
 }
 
-/* .errorIcon {
-  width: 800px;
-  height: 800px;
-  margin-bottom: 1rem;
-} */
+
 
 .errorMessage {
   font-size: 3rem;
   color: #ef4444;
   font-weight: 900;
   text-align: center;
-  /* margin-top: 1rem; */
 }
 
 .retryButton {

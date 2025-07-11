@@ -619,3 +619,10 @@
     padding: 0.6rem;
   }
 }
+
+@media (max-width: 630px) {
+  .chatBoxExpanded,
+  .overallChatContainer {
+    display: none;
+  }
+}

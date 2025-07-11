@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"strings"
 	"time"
 
 	structs "social-network/data"
@@ -38,9 +39,9 @@ func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
 	var err error
 	var rows *sql.Rows
 	if offset == -1 {
-		rows, err = DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members FROM groups g  LEFT JOIN group_members m ON g.id = m.group_id  LEFT JOIN users u ON u.id = m.user_id LEFT JOIN messages ms ON (u.id = ms.sender_id OR u.id = ms.receiver_id) AND ms.group_id = g.id WHERE m.user_id = ? GROUP BY g.id ORDER BY MAX(ms.created_at) DESC", user.ID)
+		rows, err = DB.Query("SELECT g.id, g.name, g.description, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members, g.image FROM groups g  LEFT JOIN group_members m ON g.id = m.group_id  LEFT JOIN users u ON u.id = m.user_id LEFT JOIN messages ms ON (u.id = ms.sender_id OR u.id = ms.receiver_id) AND ms.group_id = g.id WHERE m.user_id = ? GROUP BY g.id ORDER BY MAX(ms.created_at) DESC", user.ID)
 	} else {
-		rows, err = DB.Query("SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user.ID, 10, offset)
+		rows, err = DB.Query("SELECT g.id, g.name, g.description, g.cover, g.created_at, g.admin, g.privacy, u.username, g.members, g.image FROM groups g JOIN users u ON u.id = g.admin JOIN group_members m ON g.id = m.group_id WHERE m.user_id = ? ORDER BY g.created_at DESC LIMIT ? OFFSET ?", user.ID, 10, offset)
 	}
 	if err != nil {
 		return nil, err
@@ -49,8 +50,8 @@ func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
 	for rows.Next() {
 		var group structs.Group
 		var date time.Time
-		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Image, &group.Cover, &date, &group.Privacy, &group.Admin, &group.TotalMembers)
-		if err != nil {
+		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Cover, &date, &group.AdminID, &group.Privacy, &group.Admin, &group.TotalMembers, &group.Image)
+		if err != nil && !strings.Contains(err.Error(), `name "image": converting NULL to string`) {
 			return nil, err
 		}
 		group.TotalMessages, err = GetCountConversationMessages(0, user.ID, group.ID)

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, use } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import UserCard from "../components/UserCard";
 import GroupCard from "../components/GroupCard";
@@ -7,9 +7,10 @@ import EventCard from "../components/EventCard";
 import PostsComponent from "../components/PostsComponent";
 import styles from "../styles/SearchResults.module.css";
 
-export default function SearchResults() {
-  const searchParams = useSearchParams();
-  const searchQuery = searchParams.get("query") || "";
+export default function SearchResults( { searchParams }) {
+  // const searchParams = useSearchParams();
+  // const searchQuery = searchParams.get("query") || "";
+  const { [query ? query : ""]: searchQuery } = use(searchParams);
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);

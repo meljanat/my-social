@@ -1,17 +1,21 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import EventCard from "../components/EventCard";
 import styles from "../styles/EventPage.module.css";
 
-export default function EventPage() {
+export default function EventPage( {searchParams }) {
   const [isLoading, setIsLoading] = useState(true);
   const [event, setEvent] = useState(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const eventId = searchParams.get("event");
-  const groupId = searchParams.get("id");
+  // const searchParams = useSearchParams();
+
+  // const eventId = searchParams.get("event");
+  // const groupId = searchParams.get("id");
+  const params = use(searchParams);
+  const eventId = params.event;
+  const groupId = params.id;
 
   useEffect(() => {
     async function fetchEvent(group_id, event_id) {

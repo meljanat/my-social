@@ -1,12 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PostsComponent from "@/app/components/PostsComponent";
 import EditProfileModal from "@/app/components/EditProfileModal";
 import styles from "../styles/ProfilePage.module.css";
 import { websocket } from "../websocket/ws.js";
 
-export default function ProfilePage() {
+export default function ProfilePage( {searchParams}) {
   const [isFollowing, setIsFollowing] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -29,10 +29,12 @@ export default function ProfilePage() {
   const [isLoadingSavedGroupPosts, setIsLoadingSavedGroupPosts] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const id = searchParams.get("id");
+  // const searchParams = useSearchParams();
+  // const id = searchParams.get("id");
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [newMessage, setNewMessage] = useState("");
+
+  const { id: id } = use(searchParams);
 
   function togglePicPreview(type = null) {
     setPicturePreview(type);

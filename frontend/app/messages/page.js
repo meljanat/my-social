@@ -69,7 +69,7 @@ const UserCard = ({ user, isActive, onClick }) => {
   );
 };
 
-export default function MessagesPage() {
+export default function MessagesPage({ searchParams }) {
   const [activeTab, setActiveTab] = useState();
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -83,11 +83,16 @@ export default function MessagesPage() {
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const reqTab = searchParams.get("tab");
-  const reqId = searchParams.get("id") || 0;
+  // const searchParams = useSearchParams();
+  // const reqTab = searchParams.get("tab");
+  // const reqId = searchParams.get("id") || 0;
+  const params = use(searchParams);
+  const reqTab = params.tab;
+  const reqId = params.id || 0;
   const [isFirstFetch, setisFirstFetch] = useState(false);
   const [scrollRein, setScrollRein] = useState();
+
+  // const {user: selectedUserId, group: selectedGroupId} = use(searchParams);
 
   useEffect(() => {
     setActiveTab(reqTab === "groups" ? "groups" : "friends");

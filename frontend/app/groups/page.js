@@ -241,7 +241,8 @@ console.log("Fetched group data:", data);
                       onAccept={async () => {
                         await handelAcceptOtherGroup(
                           invitation.user.user_id,
-                          invitation.group.group_id
+                          invitation.group.group_id,
+                          invitation.owner
                         );
                         fetchUserInvitationsData();
                       }}

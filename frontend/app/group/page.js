@@ -1,6 +1,6 @@
 "use client";
 import styles from "../styles/GroupPage.module.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import InviteUsersModal from "../components/UsersToInviteModal";
 import RemoveGroupModal from "../components/RemoveGroupModal";
@@ -11,8 +11,9 @@ import PostFormModal from "../components/PostFormModal";
 import PostsComponent from "../components/PostsComponent";
 import EventFormModal from "../components/EventFormModal";
 import { handelAccept, handleReject } from "../functions/user";
+import { SearchParamsContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
 
-export default function GroupPage() {
+export default function GroupPage({ searchParams }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupPosts, setGroupPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,8 +26,9 @@ export default function GroupPage() {
   const [usersToInvite, setUsersToInvite] = useState([]);
   const [activeTab, setActiveTab] = useState("my-groups");
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const group_id = searchParams.get("id");
+  // const searchParams = useSearchParams();
+  // const group_id = searchParams.get("id"); gr
+  const { id: group_id} = use(searchParams);
 
   useEffect(() => {
     if (group_id) {

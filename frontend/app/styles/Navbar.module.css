@@ -10,7 +10,7 @@
   z-index: 100;
   width: 100%;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(10px);
+  /* backdrop-filter: blur(10px); */
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -62,6 +62,7 @@
   transition: all 0.3s ease;
   position: relative;
 }
+
 .navLink:hover::before {
   left: 100%;
 }
@@ -150,7 +151,7 @@
   overflow: hidden;
   z-index: 10;
   border: 1px solid #e8ecf7;
-  backdrop-filter: blur(10px);
+  /* backdrop-filter: blur(10px); */
 }
 
 .noSuggestions {
@@ -321,7 +322,7 @@
   overflow: hidden;
   z-index: 10;
   border: 1px solid #e8ecf7;
-  backdrop-filter: blur(10px);
+  /* backdrop-filter: blur(10px); */
 }
 
 .menuItem {
@@ -374,9 +375,9 @@
 }
 
 @media (max-width: 1024px) {
-  .navbar {
+  /* .navbar {
     padding: 1rem;
-  }
+  } */
 
   .searchBar {
     max-width: 300px;
@@ -432,5 +433,45 @@
   .notificationButton {
     width: 40px;
     height: 40px;
+  }
+
+  .navLinks {
+    gap: 0.1rem;
+    padding: 0.1rem;
+  }
+
+  .navLink {
+    padding: 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  .navLink svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .navLink span {
+    display: none;
+  }
+}
+
+@media (max-width: 800px) {
+
+  .dropdownIcon,
+  .logo {
+    display: none;
+  }
+
+  .profileButton {
+    padding: 0%;
+  }
+
+  .navbar {
+    gap: 0px;
+    width: 100%;
+  }
+
+  .navLinks {
+    gap: 0px;
   }
 }

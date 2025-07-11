@@ -2,9 +2,7 @@ import React from "react";
 import styles from "../styles/EventCard.module.css";
 import { joinGroup } from "../functions/group";
 
-export default function EventCard({ event }) {
-  console.log("EventCard event:", event);
-
+export default function EventCard({ event, onAction }) {
   const startDate = new Date(event.start_date);
   const endDate = new Date(event.end_date);
 
@@ -117,7 +115,11 @@ export default function EventCard({ event }) {
         <button
           className={styles.eventActionButton}
           disabled={event.type === "GOING"}
-          onClick={() => JoinToEvent(event.event_id, event.group_id, "going")}
+          onClick={async () => {
+            await JoinToEvent(event.event_id, event.group_id, "going")
+            onAction();
+          }
+        }
         >
           <span>Going</span>
         </button>
@@ -125,8 +127,12 @@ export default function EventCard({ event }) {
         <button
           className={styles.eventDetailsButton}
           disabled={event.type === "NOT GOING"}
-          onClick={() =>
-            JoinToEvent(event.event_id, event.group_id, "not_going")
+          onClick={async ()  =>{
+
+            
+            await JoinToEvent(event.event_id, event.group_id, "not_going")
+            onAction();
+          }
           }
         >
           <span>Not Going</span>

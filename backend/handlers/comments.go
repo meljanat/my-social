@@ -30,7 +30,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var comment structs.Comment
-	comment.Content = r.FormValue("content")
+	comment.Content = strings.TrimSpace(r.FormValue("content"))
 	comment.PostID, err = strconv.ParseInt(r.FormValue("post_id"), 10, 64)
 	if err != nil {
 		fmt.Println("Error parsing post ID:", err)

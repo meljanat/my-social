@@ -92,7 +92,8 @@ export default function EventsPage() {
   };
 
   const handleEventCreated = (newEvent) => {
-    setEvents((prevEvents) => [newEvent, ...prevEvents]);
+    setActiveTab("discover");
+    fetchEvents(activeTab, 0);
   };
 
   const handleInterestedClick = async (eventId, groupId, type) => {

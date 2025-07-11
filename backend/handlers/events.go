@@ -35,13 +35,21 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var event structs.Event
-	event.Name = r.FormValue("name")
-	event.Description = r.FormValue("description")
-	event.Location = r.FormValue("location")
+	event.Name = strings.TrimSpace(r.FormValue("name"))
+	event.Description = strings.TrimSpace(r.FormValue("description"))
+	event.Location = strings.TrimSpace(r.FormValue("location"))
 	event.GroupID, err = strconv.ParseInt(r.FormValue("group_id"), 10, 64)
 	if err != nil {
 		fmt.Println("Error parsing group ID:", err)
 		response := map[string]string{"error": "Invalid group ID"}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if event.Name == "" || event.Description == "" || event.Location == "" {
+		fmt.Println("All fields are required!")
+		response := map[string]string{"error": "All fields are required!"}
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
 		return
@@ -327,6 +335,12 @@ func JoinToEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if event.Type == "not_going" {
+		event.Type = "NOT GOING"
+	} else {
+		event.Type = "GOING"
+	}
+
 	_, err = database.GetGroupById(event.GroupID)
 	if err != nil {
 		fmt.Println("Error retrieving group:", err)
@@ -363,10 +377,10 @@ func JoinToEventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if member || event.Type == "not_going" {
-		if err = database.NotGoingToEvent(user.ID, event.EventID); err != nil {
-			fmt.Println("Error leaving event:", err)
-			response := map[string]string{"error": "Failed to leave event"}
+	if !member {
+		if err = database.JoinToEvent(user.ID, event.EventID, event.Type); err != nil {
+			fmt.Println("Error joining to event:", err)
+			response := map[string]string{"error": "Failed to join to event"}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(response)
 			return
@@ -375,9 +389,9 @@ func JoinToEventHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	} else {
-		if err = database.GoingToEvent(user.ID, event.EventID); err != nil {
-			fmt.Println("Error joining to event:", err)
-			response := map[string]string{"error": "Failed to join to event"}
+		if err = database.UpdateEvent(event.EventID, event.Type); err != nil {
+			fmt.Println("Error change type event:", err)
+			response := map[string]string{"error": "Failed to change type event"}
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(response)
 			return

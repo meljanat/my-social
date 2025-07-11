@@ -4,8 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import EventCard from "../components/EventCard";
 import styles from "../styles/EventPage.module.css";
 
-export default function EventPage( {searchParams }) {
-  const [isLoading, setIsLoading] = useState(true);
+export default function EventPage({ searchParams }) {
+  const [isLoading, setIsLoading] = useState();
   const [event, setEvent] = useState(null);
   const router = useRouter();
 
@@ -17,37 +17,37 @@ export default function EventPage( {searchParams }) {
   const eventId = params.event;
   const groupId = params.id;
 
-  useEffect(() => {
-    async function fetchEvent(group_id, event_id) {
-      setIsLoading(true);
-      setEvent(null);
-      try {
-        const response = await fetch(
-          `http://localhost:8404/event?event_id=${event_id}&group_id=${group_id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to retrieve event data");
+  async function fetchEvent(group_id, event_id) {
+    setIsLoading(true);
+    setEvent(null);
+    try {
+      const response = await fetch(
+        `http://localhost:8404/event?event_id=${event_id}&group_id=${group_id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
         }
+      );
 
-        const data = await response.json();
-        setEvent(data);
-      } catch (error) {
-        console.error("Failed to fetch event:", error);
-        setEvent(null);
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to retrieve event data");
       }
-    }
 
+      const data = await response.json();
+      setEvent(data);
+    } catch (error) {
+      console.error("Failed to fetch event:", error);
+      setEvent(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
     if (groupId && eventId) {
       fetchEvent(groupId, eventId);
     } else {
@@ -86,7 +86,11 @@ export default function EventPage( {searchParams }) {
         <button onClick={handleGoBack} className={styles.goBackButton}>
           Go Back
         </button>
-        <EventCard key={event.event_id} event={event} />
+        <EventCard
+          key={event.event_id}
+          event={event}
+          onAction={() => fetchEvent(groupId, eventId)}
+        />
       </div>
     </div>
   );

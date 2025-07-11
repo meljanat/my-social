@@ -130,17 +130,17 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	var register structs.User
 	var err error
-	register.Type = r.FormValue("type")
-	register.Username = r.FormValue("username")
-	register.FirstName = r.FormValue("firstName")
-	register.LastName = r.FormValue("lastName")
-	register.Bio = r.FormValue("aboutMe")
-	register.Privacy = r.FormValue("privacy")
+	register.Type = strings.TrimSpace(r.FormValue("type"))
+	register.Username = strings.TrimSpace(r.FormValue("username"))
+	register.FirstName = strings.TrimSpace(r.FormValue("firstName"))
+	register.LastName = strings.TrimSpace(r.FormValue("lastName"))
+	register.Bio = strings.TrimSpace(r.FormValue("aboutMe"))
+	register.Privacy = strings.TrimSpace(r.FormValue("privacy"))
 
 	if register.Type == "register" {
-		register.Email = r.FormValue("email")
-		register.Password = r.FormValue("password")
-		register.ConfirmPass = r.FormValue("confirmedPassword")
+		register.Email = strings.TrimSpace(r.FormValue("email"))
+		register.Password = strings.TrimSpace(r.FormValue("password"))
+		register.ConfirmPass = strings.TrimSpace(r.FormValue("confirmedPassword"))
 		temp := r.FormValue("dateOfBirth")
 		register.DateOfBirth, err = time.Parse("2006-01-02", temp)
 		if err != nil {

@@ -215,7 +215,7 @@ console.log("Fetched group data:", data);
             ) : activeTab === "invitations" ? (
               (groupData || []).length > 0 ? (
                 (groupData || []).map((invitation) =>
-                  invitation.user.username !== invitation.group.admin ? (
+                  invitation.user.username === invitation.group.admin ? (
                     <InvitationCard
                       key={invitation.invitation_id}
                       invitation={invitation}

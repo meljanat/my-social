@@ -138,13 +138,13 @@ func GetCountUserEvents(id int64) (int64, error) {
 	return count, err
 }
 
-func GoingToEvent(user_id, event_id int64) error {
-	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id, type) VALUES (?, ?, ?)", user_id, event_id, "GOING")
+func JoinToEvent(user_id, event_id int64, going string) error {
+	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id, type) VALUES (?, ?, ?)", user_id, event_id, going)
 	return err
 }
 
-func NotGoingToEvent(user_id, event_id int64) error {
-	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id, type) VALUES (?, ?, ?)", user_id, event_id, "NOT GOING")
+func UpdateEvent(event_id int64, going string) error {
+	_, err := DB.Exec("UPDATE event_members SET type = ? WHERE event.id = ?", going, event_id)
 	return err
 }
 

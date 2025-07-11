@@ -75,9 +75,9 @@ func NewPostGet(w http.ResponseWriter, r *http.Request, user *structs.User) {
 func NewPostPost(w http.ResponseWriter, r *http.Request, user *structs.User) {
 	var post structs.Post
 	var err error
-	post.Title = r.FormValue("title")
-	post.Content = r.FormValue("content")
-	post.Privacy = r.FormValue("privacy")
+	post.Title = strings.TrimSpace(r.FormValue("title"))
+	post.Content = strings.TrimSpace(r.FormValue("content"))
+	post.Privacy = strings.TrimSpace(r.FormValue("privacy"))
 	post.CategoryID, err = strconv.ParseInt(r.FormValue("category"), 10, 64)
 	if err != nil {
 		fmt.Println("Invalid category", err)
@@ -284,8 +284,8 @@ func NewPostGroupGet(w http.ResponseWriter, r *http.Request) {
 func NewPostGroupPost(w http.ResponseWriter, r *http.Request, user *structs.User, group_id int64) {
 	var post structs.Post
 	var err error
-	post.Title = r.FormValue("title")
-	post.Content = r.FormValue("content")
+	post.Title = strings.TrimSpace(r.FormValue("title"))
+	post.Content = strings.TrimSpace(r.FormValue("content"))
 	post.GroupID = group_id
 	post.CategoryID, err = strconv.ParseInt(r.FormValue("category"), 10, 64)
 	if err != nil {

@@ -37,9 +37,9 @@ func CreateGrpoupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var group structs.Group
-	group.Name = r.FormValue("name")
-	group.Description = r.FormValue("description")
-	group.Privacy = r.FormValue("privacy")
+	group.Name = strings.TrimSpace(r.FormValue("name"))
+	group.Description = strings.TrimSpace(r.FormValue("description"))
+	group.Privacy = strings.TrimSpace(r.FormValue("privacy"))
 
 	errors, valid := ValidateGroup(group.Name, group.Description, group.Privacy)
 	if !valid {

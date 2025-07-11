@@ -54,7 +54,6 @@ console.log("Fetched group data:", data);
       console.error("Error fetching group data:", error);
       setGroupData([]);
       setIsLoading(false);
-
     }
   }
 
@@ -177,29 +176,33 @@ console.log("Fetched group data:", data);
 
           <div className={styles.groupsTabs}>
             <button
-              className={`${styles.tabButton} ${activeTab === "my-groups" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "my-groups" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("my-groups")}
             >
               My Groups
             </button>
             <button
-              className={`${styles.tabButton} ${activeTab === "discover" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "discover" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("discover")}
             >
               Discover
             </button>
             <button
-              className={`${styles.tabButton} ${activeTab === "pending-groups" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "pending-groups" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("pending-groups")}
             >
               Pending Groups
             </button>
             <button
-              className={`${styles.tabButton} ${activeTab === "invitations" ? styles.activeTab : ""
-                }`}
+              className={`${styles.tabButton} ${
+                activeTab === "invitations" ? styles.activeTab : ""
+              }`}
               onClick={() => handleTabChange("invitations")}
             >
               Invitations

@@ -227,7 +227,7 @@ export default function MessagesPage() {
   const fetchUsers = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8404/connections?offset=0`,
+        `http://localhost:8404/connections`,
         {
           method: "GET",
           credentials: "include",
@@ -245,7 +245,7 @@ export default function MessagesPage() {
   const fetchGroups = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8404/groups?type=joined&offset=0`,
+        `http://localhost:8404/groups?type=joined&offset=-1`,
         {
           method: "GET",
           credentials: "include",

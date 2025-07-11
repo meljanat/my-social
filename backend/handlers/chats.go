@@ -28,16 +28,7 @@ func GetConnectionsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
-	if err != nil {
-		fmt.Println("Invalid offset")
-		response := map[string]string{"error": "Invalid offset"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
-	connections, err := database.GetConnections(user.ID, offset)
+	connections, err := database.GetConnections(user.ID)
 	if err != nil {
 		fmt.Println("Failed to retrieve connections")
 		response := map[string]string{"error": "Failed to retrieve connections"}

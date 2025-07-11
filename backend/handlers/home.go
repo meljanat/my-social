@@ -37,15 +37,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	offset_messages, err := strconv.ParseInt(r.URL.Query().Get("offset_messages"), 10, 64)
-	if err != nil {
-		fmt.Println("Error parsing offset_messages:", err)
-		response := map[string]string{"error": "Invalid offset_messages"}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
 	count_follwing, err := database.GetCountFollowing(user.ID)
 	if err != nil {
 		fmt.Println("Failed to retrieve count following", err)
@@ -118,7 +109,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	connections, err := database.GetConnections(user.ID, offset_messages)
+	connections, err := database.GetConnections(user.ID)
 	if err != nil {
 		fmt.Println("Failed to retrieve connections", err)
 		response := map[string]string{"error": "Failed to retrieve connections"}

@@ -65,7 +65,6 @@ func main() {
 	http.HandleFunc("/accept_invitation", handlers.AcceptInvitationHandler)
 	http.HandleFunc("/reject_invitation", handlers.DeclineInvitationHandler)
 	http.HandleFunc("/accept_invitation_other", handlers.AcceptOtherInvitationHandler)
-	http.HandleFunc("/reject_invitation_other", handlers.DeclineOtherInvitationHandler)
 	http.HandleFunc("/invitations_groups", handlers.GetInvitationsGroups)
 	http.HandleFunc("/notifications", handlers.NotificationsHandler)
 	http.HandleFunc("/mark_notifications_as_read", handlers.MarkNotificationsAsReadHandler)

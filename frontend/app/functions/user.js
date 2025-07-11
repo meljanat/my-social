@@ -15,7 +15,6 @@ export async function handleFollow(user_id, group_id) {
       throw new Error("Failed to follow user");
     }
     const data = await response.json();
-    // console.log("Follow response data:", data);
 
     if (data.error) {
       throw new Error(data.error);
@@ -43,8 +42,6 @@ export async function handelAccept(user_id, group_id) {
       }),
       credentials: "include",
     });
-    const data = await response.json();
-    console.log("Accept response data:", data);
   } catch (error) {
     console.error("Error accepting user:", error);
   }
@@ -68,7 +65,7 @@ export async function handleReject(user_id, group_id) {
   }
 }
 
-export async function handelAcceptOtherGroup(user_id, group_id) {
+export async function handelAcceptOtherGroup(user_id, group_id, owner) {
   try {
     await fetch(`http://localhost:8404/accept_invitation_other`, {
       method: "POST",
@@ -78,6 +75,7 @@ export async function handelAcceptOtherGroup(user_id, group_id) {
       body: JSON.stringify({
         user_id: parseInt(user_id),
         group_id: parseInt(group_id),
+        owner: owner,
       }),
       credentials: "include",
     });
@@ -88,7 +86,7 @@ export async function handelAcceptOtherGroup(user_id, group_id) {
 
 export async function handleRejectOtherGroup(user_id, group_id) {
   try {
-    await fetch(`http://localhost:8404/reject_invitation_other`, {
+    await fetch(`http://localhost:8404/reject_invitation`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

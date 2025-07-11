@@ -144,7 +144,7 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 }
 
 func NotifyUsers(user_id int64, statu string) {
-	connections, err := database.GetConnections(user_id, 0)
+	connections, err := database.GetConnections(user_id)
 	if err != nil {
 		fmt.Println(err)
 		return

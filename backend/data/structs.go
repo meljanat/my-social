@@ -161,6 +161,7 @@ type Notification struct {
 type Invitation struct {
 	ID        int64  `json:"invitation_id" sqlite:"invitation_id"`
 	CreatedAt string `json:"created_at" sqlite:"created_at"`
+	Owner     bool   `json:"owner" sqlite:"owner"`
 	User      User   `json:"user" sqlite:"user"`
 	Group     Group  `json:"group" sqlite:"group"`
 }

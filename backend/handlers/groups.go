@@ -447,7 +447,7 @@ func GroupDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if Type == "invitations" {
 		if group.Admin == user.Username {
-			invitations, err := database.GetInvitationsGroup(group_id, offset)
+			invitations, err := database.GetInvitationsGroup(user.ID, group_id, offset)
 			if err != nil {
 				fmt.Println("Failed to retrieve invitations", err)
 				response := map[string]string{"error": "Failed to retrieve invitations"}

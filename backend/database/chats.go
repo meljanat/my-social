@@ -2,14 +2,13 @@ package database
 
 import (
 	"database/sql"
-	"slices"
 	"time"
 
 	structs "social-network/data"
 )
 
-func GetConnections(user_id, offset int64) ([]structs.User, error) {
-	rows, err := DB.Query("SELECT DISTINCT u.id, u.username, u.firstname, u.lastname, u.avatar, u.privacy FROM users u JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id) WHERE (m.sender_id  = ? OR m.receiver_id = ?) AND m.group_id = 0 GROUP BY u.id ORDER BY MAX(m.created_at) DESC LIMIT ? OFFSET ?", user_id, user_id, 10, offset)
+func GetConnections(user_id int64) ([]structs.User, error) {
+	rows, err := DB.Query("SELECT DISTINCT u.id, u.username, u.firstname, u.lastname, u.avatar, u.privacy FROM users u JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id) WHERE (m.sender_id  = ? OR m.receiver_id = ?) AND m.group_id = 0 GROUP BY u.id ORDER BY MAX(m.created_at) DESC", user_id, user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -42,6 +41,9 @@ func SendMessage(sender_id, receiver_id, group_id int64, content, image string) 
 	err := DB.QueryRow("SELECT messages_not_read FROM messages WHERE sender_id = ? AND receiver_id = ? AND group_id = ? ORDER BY created_at DESC LIMIT 1", sender_id, receiver_id, group_id).Scan(&totalMessages)
 	if err != nil && err.Error() != "sql: no rows in result set" {
 		return err
+	}
+	if sender_id == receiver_id {
+		totalMessages = -1
 	}
 	_, err = DB.Exec("INSERT INTO messages (sender_id, receiver_id, group_id, content, messages_not_read) VALUES (?, ?, ?, ?, ?)", sender_id, receiver_id, group_id, content, totalMessages+1)
 	return err
@@ -83,7 +85,6 @@ func GetGroupConversation(group_id, user_id, offset int64) ([]structs.Message, e
 		chat.CreatedAt = TimeAgo(date)
 		chats = append(chats, chat)
 	}
-	slices.Reverse(chats)
 	return chats, nil
 }
 

@@ -22,10 +22,10 @@ export default function Home() {
     fetchHomeData();
   }, []);
 
-  const fetchHomeData = async (offset = 0, msgOffset = 0) => {
+  const fetchHomeData = async (offset = 0) => {
     try {
       const response = await fetch(
-        `http://localhost:8404/home?offset=${offset}&offset_messages=${msgOffset}`,
+        `http://localhost:8404/home?offset=${offset}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -57,7 +57,7 @@ export default function Home() {
   };
 
   const addNewPost = () => {
-    fetchHomeData(0, 0)
+    fetchHomeData(0)
   };
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function Home() {
 
     const handleScroll = () => {
       if (postsScroll.scrollTop + postsScroll.clientHeight >= postsScroll.scrollHeight - 100) {
-        fetchHomeData(posts.length, 0)
+        fetchHomeData(posts.length)
       }
     };
 

@@ -4,7 +4,7 @@ import "../styles/Notifications.css";
 import NotificationCard from "../components/NotificationCard";
 import { useRouter } from "next/navigation";
 
-const NotificationsComponent = ({ onMarkAllAsRead }) => {
+const NotificationsComponent = ({ onMarkAllAsRead, onClick }) => {
   const [notifications, setNotifications] = useState([]);
   const [notificationType, setNotificationType] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -51,6 +51,7 @@ const NotificationsComponent = ({ onMarkAllAsRead }) => {
   };
 
   const markAsRead = async (notification) => {
+    onClick()
     try {
       const response = await fetch(
         `http://localhost:8404/read_notification?id=${notification.notification_id}`,

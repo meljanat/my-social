@@ -89,7 +89,15 @@ export default function Navbar() {
 
 
   const handleNewMessage = (msg) => {
-    fetchUser();
+    if (msg.type === "notifications") setUser((prev) => ({
+      ...prev,
+      total_notifications: prev.total_notifications++,
+    }));
+
+    if (msg.type === "message") setUser((prev) => ({
+      ...prev,
+      total_messages: prev.total_messages++,
+    }));
   };
 
   const fetchSuggestions = async () => {
@@ -261,7 +269,7 @@ export default function Navbar() {
           >
             <img src="./icons/message.svg" alt="Messages" />
             {user.total_messages > 0 && (
-              <span className={styles.badge}>{user.total_messages || 0}</span>
+              <span className={styles.badge}>!</span>
             )}
             <span>Messages</span>
           </button>
@@ -374,6 +382,12 @@ export default function Navbar() {
                 setUser((prevUser) => ({
                   ...prevUser,
                   total_notifications: 0,
+                }));
+              }}
+              onClick={() => {
+                setUser((prevUser) => ({
+                  ...prevUser,
+                  total_notifications: prevUser.total_notifications--,
                 }));
               }}
             />

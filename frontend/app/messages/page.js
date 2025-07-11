@@ -98,13 +98,13 @@ export default function MessagesPage() {
   }, []);
 
   useEffect(() => {
-    if (!reqId || (activeTab != "friends" && activeTab != "groups")) return;
     setMessages([]);
     setSelectedUser(null);
     setScrollRein(null);
-    if (activeTab === "friends") handleUserSelect(reqId, activeTab);
-    else if (activeTab === "groups") findGroup(reqId, activeTab);
-  }, [reqId, activeTab, users, groups]);
+    if (!reqId || !reqTab) return;
+    if (reqTab === "friends") handleUserSelect(reqId);
+    else if (reqTab === "groups") findGroup(reqId);
+  }, [reqId, reqTab]);
 
   useEffect(() => {
     if (!isFirstFetch) return;
@@ -113,25 +113,48 @@ export default function MessagesPage() {
 
   useEffect(() => {
     const handleMessage = async (msg) => {
-      console.log(reqId, reqTab);
-
       if (msg.type === "message") {
-        // if (reqId &&
-        //   (reqId == msg.user_id ||
-        //     reqId == msg.group_id ||
-        //     msg.user_id === msg.current_user)
-        // ) {
-        //   setMessages((prevMessages) => [...(prevMessages || []), msg]);
-        // }
-        if (reqTab === "friends") {
-          await fetchUserMessages(reqId, 0);
-          fetchUsers();
-        } else if (reqTab === "groups") {
-          await fetchGroupMessages(reqId, 0);
-          fetchGroups();
+        if (reqId &&
+          (reqId == msg.user_id ||
+            reqId == msg.group_id ||
+            msg.user_id === msg.current_user)
+        ) {
+          msg.message_id = Date.now();
+          setMessages((prevMessages) => [...(prevMessages || []), msg]);
+          setisFirstFetch(true);
+        } else {
+          if (reqTab === "friends") setUsers((prev) =>
+            prev.map(user =>
+              user.user_id === msg.user_id ?
+                { ...user, total_chats_messages: total_chats_messages++ }
+                : user
+            )
+          );
+
+          if (reqTab === "groups") setGroups((prev) =>
+            prev.map(group =>
+              group.group_id === msg.group_id ?
+                { ...group, total_groups_messages: total_groups_messages++ }
+                : group
+            )
+          );
         }
-      } else if (msg.type === "new_connection" || msg.type === "disconnection") {
-        fetchUsers();
+      } else if (msg.type === "new_connection") {
+        setUsers((prev) =>
+          prev.map(user =>
+            user.user_id === msg.user_id ?
+              { ...user, online: true }
+              : user
+          )
+        );
+      } else if (msg.type === "disconnection") {
+        setUsers((prev) =>
+          prev.map(user =>
+            user.user_id === msg.user_id ?
+              { ...user, online: false }
+              : user
+          )
+        );
       }
     };
 
@@ -181,12 +204,17 @@ export default function MessagesPage() {
     setisFirstFetch(false);
   }
 
-  const findGroup = async (group_id, tab) => {
-    if (tab !== "groups") return;
-
+  const findGroup = async (group_id) => {
     const group = groups ? groups.find((g) => g.group_id === parseInt(group_id)) : null;
     if (group) {
       setSelectedUser(group);
+      setGroups((prev) =>
+        prev.map(group =>
+          group.group_id === reqId ?
+            { ...group, total_chats_messages: 0 }
+            : group
+        )
+      );
       await fetchGroupMessages(group.group_id, 0);
     }
   }
@@ -205,6 +233,13 @@ export default function MessagesPage() {
     if (response.ok) {
       const data = await response.json();
       setSelectedUser(data);
+      setUsers((prev) =>
+        prev.map(user =>
+          user.user_id === reqId ?
+            { ...user, total_chats_messages: 0 }
+            : user
+        )
+      );
     } else {
       console.log("Error fetching user chat:", response.statusText);
     }
@@ -256,8 +291,7 @@ export default function MessagesPage() {
     }
   };
 
-  const handleUserSelect = async (id, tab) => {
-    if (tab != "friends") return;
+  const handleUserSelect = async (id) => {
     await getUserChat(id);
     await fetchUserMessages(id, 0);
   };
@@ -378,8 +412,7 @@ export default function MessagesPage() {
 
     websocket.send(JSON.stringify(mssg));
     setNewMessage("");
-    // readMessages(reqId, activeTab);
-    setisFirstFetch(true);
+    readMessages(reqId, reqTab);
   };
 
   const toggleEmojiSection = () => {

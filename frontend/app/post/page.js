@@ -1,22 +1,17 @@
 "use client";
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import styles from "../styles/PostPage.module.css";
 
-export default function PostPage( {searchParams}) {
-  // const searchParams = useSearchParams();
-  // const post_id = searchParams.get("id");
-  // const params = use(searchParams);
-  const { id: post_id } = use(searchParams);
+export default function PostPage() {
+  const searchParams = useSearchParams();
+  const post_id = searchParams.get("id");
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [commentImageFile, setCommentImageFile] = useState(null); 
-  // const [homeData, setHomeData] = useState(null); // Unused
-  // const [posts, setPosts] = useState([]); // Unused
-  // const [postSaved, setPostSaved] = useState(); // Unused
 
   async function handleSave(postIdToSave) {
     try {

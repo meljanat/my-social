@@ -134,6 +134,14 @@ func NewPostPost(w http.ResponseWriter, r *http.Request, user *structs.User) {
 
 	if post.Privacy == "private" {
 		users := strings.Split(r.FormValue("users"), ",")
+		if len(users) == 1 && users[0] == "" {
+			fmt.Println("No users provided for private post")
+			response := map[string]string{"error": "No users provided for private post"}
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
 		for _, usr := range users {
 			usr_id, err := strconv.ParseInt(usr, 10, 64)
 			if err != nil {

@@ -237,7 +237,6 @@ func GetEventHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	event.ID = event_id
 	event.GroupID = group_id
-	fmt.Println("Event retrieved successfully:", event)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(event)

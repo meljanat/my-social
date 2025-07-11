@@ -160,7 +160,7 @@ func JoinToEvent(user_id, event_id int64, going string) error {
 }
 
 func UpdateEvent(event_id int64, going string) error {
-	_, err := DB.Exec("UPDATE event_members SET type = ? WHERE event.id = ?", going, event_id)
+	_, err := DB.Exec("UPDATE event_members SET type = ? WHERE event_id = ?", going, event_id)
 	return err
 }
 

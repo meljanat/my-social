@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, act, use } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "../styles/MessagesPage.module.css";
 import { addToListeners, removeFromListeners } from "../websocket/ws.js";
@@ -69,7 +69,7 @@ const UserCard = ({ user, isActive, onClick }) => {
   );
 };
 
-export default function MessagesPage({ searchParams }) {
+export default function MessagesPage() {
   const [activeTab, setActiveTab] = useState();
   const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -83,12 +83,9 @@ export default function MessagesPage({ searchParams }) {
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const router = useRouter();
-  // const searchParams = useSearchParams();
-  // const reqTab = searchParams.get("tab");
-  // const reqId = searchParams.get("id") || 0;
-  const params = use(searchParams);
-  const reqTab = params.tab;
-  const reqId = params.id || 0;
+  const searchParams = useSearchParams();
+  const reqTab = searchParams.get("tab");
+  const reqId = searchParams.get("id") || 0;
   const [isFirstFetch, setisFirstFetch] = useState(false);
   const [scrollRein, setScrollRein] = useState();
 

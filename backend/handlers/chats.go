@@ -180,7 +180,7 @@ func ChatGroupHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	
+
 	mutex.Lock()
 	err = database.ReadMessages(0, user.ID, group_id)
 	if err != nil {
@@ -233,6 +233,7 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		UserID  int64 `json:"user_id"`
 		GroupID int64 `json:"group_id"`
 	}
+
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		fmt.Println("Invalid request body", err)
 		response := map[string]string{"error": "Invalid request body"}
@@ -258,7 +259,7 @@ func ReadMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-	// SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
+	SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
 	mutex.Unlock()
 
 	w.Header().Set("Content-Type", "application/json")

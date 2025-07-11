@@ -75,14 +75,7 @@ export default function ProfilePage() {
         console.log("Follow response data:", data);
 
 
-        setUserData((prev) => {
-          return {
-            ...prev,
-            type: data.action,
-            total_followers: data.total_followers,
-
-          };
-        });
+        fetchUserData(user_id)
       }
       if (activeTab === "posts") {
         console.log("Active tab: ", activeTab);
@@ -137,36 +130,36 @@ export default function ProfilePage() {
       else if (type === "group") setIsLoadingSavedGroupPosts(false);
     }
   }
-
-  useEffect(() => {
-    const fetchUserData = async (id) => {
-      try {
-        const response = await fetch(
-          `http://localhost:8404/profile?user_id=${id}&offset=0`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          }
-        );
-        if (!response.ok) {
-          const data = await response.json();
-          setError(data.error || "Failed to fetch user data");
-        } else {
-          const data = await response.json();
-          console.log("user data:", data);
-          setUserData(data);
-          setIsOwnProfile(data.role === "owner");
-          fetchUserPosts();
+  const fetchUserData = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8404/profile?user_id=${id}&offset=0`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
         }
-      } catch (error) {
-        setError("Network error while fetching user data");
-      } finally {
-        setIsLoading(false);
+      );
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || "Failed to fetch user data");
+      } else {
+        const data = await response.json();
+        console.log("user data:", data);
+        setUserData(data);
+        setIsOwnProfile(data.role === "owner");
+        fetchUserPosts();
       }
-    };
+    } catch (error) {
+      setError("Network error while fetching user data");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+  useEffect(() => {
+
     fetchUserData(id);
   }, [id]);
 
@@ -345,7 +338,7 @@ export default function ProfilePage() {
                 onClick={async () => {
                   await handleSendMessage();
                   setShowMessageModal(false);
-                  router.push(`/messages?user=${userData.user_id}`);
+                  router.push(`/messages?tab=friends&id=${userData.user_id}`);
                 }}
               >
                 Send Message
@@ -779,7 +772,7 @@ export default function ProfilePage() {
                       </button>
                     </div>
                   ))}
-                
+
                 {activeSubTab === "group-posts" &&
                   (isLoadingSavedGroupPosts ? (
                     <div className={styles.loadingTab}>

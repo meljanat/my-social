@@ -6,7 +6,7 @@ import styles from "../styles/AllCategories.module.css";
 export default function AllCategories() {
   const [categories, setCategories] = useState([]);
   const [posts, setPosts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
@@ -49,6 +49,7 @@ export default function AllCategories() {
   async function hundleClick(id) {
     setActiveCategory(id);
     setIsLoadingPosts(true);
+    setIsLoading(true)
     setError(null);
     try {
       const response = await fetch(
@@ -74,6 +75,7 @@ export default function AllCategories() {
       setError("Network error while fetching posts.");
       setPosts([]);
     } finally {
+      setIsLoading(false)
       setIsLoadingPosts(false);
     }
   }
@@ -83,37 +85,37 @@ export default function AllCategories() {
   }, []);
 
   let content;
-  // if (isLoadingPosts) {
-  //   content = (
-  //     <div className={styles.loadingMessage}>
-  //       <div className={styles.loadingSpinner}></div>
-  //       <p>Loading posts...</p>
-  //     </div>
-  //   );
-  // } else if (error) {
-  //   content = (
-  //     <div className={styles.errorMessageContainer}>
-  //       <p>{error}</p>
-  //       <button
-  //         onClick={() => window.location.reload()}
-  //         className={styles.retryButton}
-  //       >
-  //         Try Again
-  //       </button>
-  //     </div>
-  //   );
-  // } else if (posts && posts.length > 0) {
-  //   content = <PostComponent posts={posts} />;
-  // } else {
-  //   content = (
-  //     <div className={styles.noPostsMessage}>
-  //       <p>No posts to show for this category.</p>
-  //     </div>
-  //   );
-  // }
+  if (isLoadingPosts) {
+    content = (
+      <div className={styles.loadingMessage}>
+        <div className={styles.loadingSpinner}></div>
+        <p>Loading posts...</p>
+      </div>
+    );
+  } else if (error) {
+    content = (
+      <div className={styles.errorMessageContainer}>
+        <p>{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className={styles.retryButton}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  } else if (posts && posts.length > 0) {
+    content = <PostComponent posts={posts} />;
+  } else {
+    content = (
+      <div className={styles.noPostsMessage}>
+        <p>No posts to show for this category.</p>
+      </div>
+    );
+  }
   if (isLoading) {
     return (
-      <div className={styles.loadingContaine}>
+      <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner}></div>
         <p className={styles.loadingText}>Loading...</p>
       </div>
@@ -146,11 +148,10 @@ export default function AllCategories() {
             {categories.map((category) => (
               <li
                 key={category.category_id}
-                className={`${styles.categoryItem} ${
-                  activeCategory === category.category_id
-                    ? styles.activeCategory
-                    : ""
-                }`}
+                className={`${styles.categoryItem} ${activeCategory === category.category_id
+                  ? styles.activeCategory
+                  : ""
+                  }`}
                 onClick={() => hundleClick(category.category_id)}
               >
                 <div className={styles.categoryContent}>

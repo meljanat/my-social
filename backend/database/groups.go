@@ -42,6 +42,7 @@ func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
 	} else {
 		rows, err = DB.Query(`SELECT g.id, g.name, g.description, g.image, g.cover, g.created_at, g.admin, g.privacy, g.members FROM groups g 
 		JOIN group_members m ON g.id = m.group_id 
+		JOIN users u 
 		LEFT JOIN messages ms ON (u.id = ms.sender_id OR u.id = ms.receiver_id) 
 		WHERE m.user_id = ? GROUP BY u.id ORDER BY MAX(ms.created_at) DESC LIMIT ? OFFSET ?`, user.ID, 10, offset)
 	}
@@ -52,7 +53,7 @@ func GetGroups(user structs.User, offset int64) ([]structs.Group, error) {
 	for rows.Next() {
 		var group structs.Group
 		var date time.Time
-		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Image, &group.Cover, &date, &group.AdminID, &group.Privacy, &group.Admin, &group.TotalMembers)
+		err = rows.Scan(&group.ID, &group.Name, &group.Description, &group.Image, &group.Cover, &date, &group.Privacy, &group.Admin, &group.TotalMembers)
 		if err != nil {
 			return nil, err
 		}

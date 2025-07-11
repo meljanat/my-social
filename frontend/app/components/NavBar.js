@@ -48,10 +48,12 @@ export default function Navbar() {
   useEffect(() => {
     addToListeners("notifications", handleNewMessage);
     addToListeners("message", handleNewMessage);
+    addToListeners("read_messages", handleNewMessage);
 
     return () => {
       removeFromListeners("notifications", handleNewMessage);
       removeFromListeners("message", handleNewMessage);
+      removeFromListeners("read_messages", handleNewMessage);
     };
   }, []);
 
@@ -87,13 +89,7 @@ export default function Navbar() {
 
 
   const handleNewMessage = (msg) => {
-    if (
-      (msg.type === "message" && msg.user_id !== msg.current_user) ||
-      msg.type === "notifications" ||
-      msg.type === "read_messages"
-    ) {
-      fetchUser();
-    }
+    fetchUser();
   };
 
   const fetchSuggestions = async () => {
@@ -346,7 +342,9 @@ export default function Navbar() {
                 Object.values(suggestions)
                   .flat()
                   ?.map((suggestion, index) => (
-                    <SuggestionCard key={index} suggestion={suggestion} />
+                    <SuggestionCard key={index} suggestion={suggestion} onclick={() => {
+                      setShowSearchSuggestions(false)
+                    }} />
                   ))
               )}
             </div>

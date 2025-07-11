@@ -30,7 +30,7 @@ func LastTime(w http.ResponseWriter, r *http.Request, name_table string) bool {
 		return false
 	}
 	time := time.Now()
-	if time.UnixMilli()-time_exact.UnixMilli() <= 100 {
+	if time.UnixMilli()-time_exact.UnixMilli() <= 50 {
 		fmt.Println("Post too soon")
 		response := map[string]string{"error": "Post too soon"}
 		w.WriteHeader(http.StatusBadRequest)

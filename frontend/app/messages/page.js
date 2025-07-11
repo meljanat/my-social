@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, act } from "react";
+import React, { useEffect, useState, useRef, act, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "../styles/MessagesPage.module.css";
 import { addToListeners, removeFromListeners } from "../websocket/ws.js";
@@ -86,6 +86,8 @@ export default function MessagesPage() {
   const searchParams = useSearchParams();
   const reqTab = searchParams.get("tab");
   const reqId = searchParams.get("id") || 0;
+  const [isFirstFetch, setisFirstFetch] = useState(false);
+  const [scrollRein, setScrollRein] = useState();
 
   useEffect(() => {
     setActiveTab(reqTab === "groups" ? "groups" : "friends");
@@ -97,21 +99,23 @@ export default function MessagesPage() {
   }, []);
 
   useEffect(() => {
-    if (!reqId) return;
+    if (!reqId || (activeTab != "friends" && activeTab != "groups")) return;
+    setMessages([]);
+    setSelectedUser(null);
+    setScrollRein(null);
     if (activeTab === "friends") handleUserSelect(reqId, activeTab);
     else if (activeTab === "groups") findGroup(reqId, activeTab);
   }, [reqId, activeTab, users, groups]);
 
   useEffect(() => {
-    // const lastMessage = messagesEndRef.current;
-    // if (lastMessage) {
-    //   lastMessage.scrollIntoView({ behavior: "smooth" });
-    // }
+    if (!isFirstFetch) return;
     scrollIntoLastMsg();
-  }, [newMessage, reqId, selectedUser, messages]);
+  }, [isFirstFetch, messages, selectedUser, reqId]);
 
   useEffect(() => {
     const handleMessage = async (msg) => {
+      console.log(msg);
+
       if (msg.type === "message") {
         if (reqId &&
           (reqId == msg.user_id ||
@@ -120,12 +124,13 @@ export default function MessagesPage() {
         ) {
           setMessages((prevMessages) => [...(prevMessages || []), msg]);
         }
+
+        // await fetchMessages(reqId, activeTab, 0);
         if (activeTab === "friends") {
           fetchUsers();
         } else if (activeTab === "groups") {
           fetchGroups();
         }
-        scrollIntoLastMsg();
       } else if (msg.type === "new_connection" || msg.type === "disconnection") {
         fetchUsers();
       }
@@ -151,19 +156,33 @@ export default function MessagesPage() {
     return () => {
       convScroll.removeEventListener("scroll", handleScroll);
     };
-  }, [messages]);
+  }, [messages, isFirstFetch]);
 
-  const handleScroll = () => {
-    if (conversationRef.current.scrollTop === 0 && isFetchingMore) {
-      fetchMessages(selectedUser.user_id || selectedUser.group_id, activeTab, messages.length);
+  useEffect(() => {
+    if (!scrollRein || !conversationRef.current) return;
+    conversationRef.current.scrollTop = scrollRein;
+  }, [scrollRein]);
+
+  useEffect(() => {
+    console.log("reinitialized: ", isFirstFetch);
+  }, [isFirstFetch]);
+
+
+  const handleScroll = async () => {
+    if (conversationRef.current.scrollTop === 0 && isFetchingMore && !isFirstFetch) {
+      const scrollBeforeFetch = conversationRef.current.scrollHeight / ((messages.length / 20));
+      await fetchMessages(selectedUser.user_id || selectedUser.group_id, activeTab, messages.length, scrollBeforeFetch);
     }
   };
 
   const scrollIntoLastMsg = () => {
     const lastMessage = messagesEndRef.current;
     if (lastMessage) {
-      lastMessage.scrollIntoView({ behavior: "smooth" });
+      lastMessage.scrollIntoView();
     }
+    console.log("Scrolling to last message");
+
+    setisFirstFetch(false);
   }
 
   const findGroup = async (group_id, tab) => {
@@ -242,12 +261,12 @@ export default function MessagesPage() {
   };
 
   const handleUserSelect = async (id, tab) => {
-    if (tab === "groups") return;
+    if (tab != "friends") return;
     await getUserChat(id);
     await fetchMessages(id, tab, 0);
   };
 
-  const fetchMessages = async (id, tab, offset = 0) => {
+  const fetchMessages = async (id, tab, offset = 0, scrollPos) => {
     if (!id) return;
 
     let fetchMsgs = tab === "groups"
@@ -255,7 +274,9 @@ export default function MessagesPage() {
       : `chats?id=${id}&offset=${offset}`;
 
     try {
-      if (offset === 0) setMessages([]);
+      if (offset === 0) {
+        setMessages([]);
+      }
       const response = await fetch(`http://localhost:8404/${fetchMsgs}`, {
         method: "GET",
         credentials: "include",
@@ -271,15 +292,46 @@ export default function MessagesPage() {
       }
       if (offset === 0) {
         setMessages(data);
-        scrollIntoLastMsg();
+        setisFirstFetch(true);
       } else {
         setMessages((prevMessages) => [...data, ...prevMessages]);
+        if (scrollPos) {
+          setScrollRein(scrollPos);
+        }
       }
     } catch (error) {
       console.error("Error fetching messages:", error);
       setMessages([]);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  const readMessages = async (id, tab) => {
+    if (!id) return;
+
+    try {
+      const response = await fetch('http://localhost:8404/read_messages', {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: parseInt(tab === "friends" ? id : 0),
+          group_id: parseInt(tab === "groups" ? id : 0),
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to mark messages as read");
+      }
+      if (tab === "friends") {
+        fetchUsers();
+      } else if (tab === "groups") {
+        fetchGroups();
+      }
+    } catch (error) {
+      console.error("Error reading messages:", error);
     }
   }
 
@@ -297,7 +349,8 @@ export default function MessagesPage() {
 
     websocket.send(JSON.stringify(mssg));
     setNewMessage("");
-    scrollIntoLastMsg();
+    readMessages(reqId, activeTab);
+    setisFirstFetch(true);
   };
 
   const toggleEmojiSection = () => {

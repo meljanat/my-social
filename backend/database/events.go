@@ -82,6 +82,7 @@ func GetEventGroup(user_id, group_id, offset int64) ([]structs.Event, error) {
 	}
 	defer rows.Close()
 	var events []structs.Event
+	var ids []int64
 	for rows.Next() {
 		var event structs.Event
 		var date time.Time
@@ -89,6 +90,12 @@ func GetEventGroup(user_id, group_id, offset int64) ([]structs.Event, error) {
 		if err != nil && !strings.Contains(err.Error(), `name "image": converting NULL to string`) {
 			return nil, err
 		}
+
+		if event.EndDate.After(time.Now()) {
+			ids = append(ids, event.ID)
+			continue
+		}
+
 		event.GroupID = group_id
 		event.CreatedAt = TimeAgo(date)
 		isMember, err := IsMemberEvent(user_id, event.ID)
@@ -100,6 +107,13 @@ func GetEventGroup(user_id, group_id, offset int64) ([]structs.Event, error) {
 		}
 		events = append(events, event)
 	}
+
+	for _, id := range ids {
+		if err := DeleteEvent(id); err != nil {
+			return nil, err
+		}
+	}
+
 	return events, nil
 }
 

@@ -19,20 +19,25 @@ export default function EventFormModal({
     group_id: 0,
   });
 
+
   const [imageInputKey, setImageInputKey] = useState(Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [myGroups, setMyGroups] = useState([]);
   useEffect(() => {
-    if (group && !my_groups) {
+    if (group) {
       setEventFormInput((prev) => ({
         ...prev,
         group_id: group.id,
       }));
+
     }
   }, [group, my_groups]);
 
+
+  console.log("group:", group);
+  console.log("---------------------------------------");
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     setEventFormInput({
@@ -43,36 +48,36 @@ export default function EventFormModal({
 
   useEffect(() => {
     // if (!my_groups) {  
-      setIsLoading(true);
-      const getGroups = async () => {
-        try {
-          const response = await fetch(
-            "http://localhost:8404/groups?type=joined&offset=-1",
-            {
-              method: "GET",
-              credentials: "include",
-            }
-          );
-
-          if (!response.ok) {
-            const data = await response.json();
-
-            setError(data.error || "Failed to retreive groups");
-            isLoading(false);
-            return;
+    setIsLoading(true);
+    const getGroups = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8404/groups?type=joined&offset=-1",
+          {
+            method: "GET",
+            credentials: "include",
           }
+        );
 
-          const responseData = await response.json();
-          console.log("Groups data:", responseData);
+        if (!response.ok) {
+          const data = await response.json();
 
-          setMyGroups(responseData || []);
-        } catch (error) {
-          console.error("Error creating event:", error);
-        } finally {
-          setIsSubmitting(false);
+          setError(data.error || "Failed to retreive groups");
+          isLoading(false);
+          return;
         }
-      };
-      getGroups();
+
+        const responseData = await response.json();
+        console.log("Groups data:", responseData);
+
+        setMyGroups(responseData || []);
+      } catch (error) {
+        console.error("Error creating event:", error);
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+    getGroups();
     // }
   }, []);
 
@@ -87,7 +92,7 @@ export default function EventFormModal({
     formData.append("start_date", eventFormInput.start_date);
     formData.append("end_date", eventFormInput.end_date);
     formData.append("location", eventFormInput.location);
-    formData.append("group_id", eventFormInput.group_id);
+    formData.append("group_id", group ? group.group_id : eventFormInput.group_id);
 
     if (eventFormInput.eventImage) {
       formData.append("eventImage", eventFormInput.eventImage);
@@ -111,7 +116,7 @@ export default function EventFormModal({
       const responseData = await response.json();
       console.log(responseData);
       console.log(formData);
-      
+
 
       const newEvent = {
         event_id: responseData.id || Date.now(),

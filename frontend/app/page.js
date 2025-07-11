@@ -17,10 +17,6 @@ export default function Home() {
   const [stories, setStories] = useState([]);
   const [isFetchingMorePosts, setIsFetchingMorePosts] = useState(true);
   const postsRef = useRef(null);
-  const msgsRef = useRef(null);
-  const lastPostsRef = useRef(null);
-  let postsScroll = postsRef.current;
-  // const msgsScroll = msgsRef.current;
 
   useEffect(() => {
     fetchHomeData();
@@ -64,15 +60,15 @@ export default function Home() {
     fetchHomeData(0, 0)
   };
 
-  const handleScroll = () => {
-    if (postsScroll.scrollTop + postsScroll.clientHeight >= postsScroll.scrollHeight - 100) {
-      fetchHomeData(posts.length, 0)
-    }
-  };
-
   useEffect(() => {
-    postsScroll = postsRef.current;
+    const postsScroll = postsRef.current;
     if (!postsScroll || !isFetchingMorePosts) return;
+
+    const handleScroll = () => {
+      if (postsScroll.scrollTop + postsScroll.clientHeight >= postsScroll.scrollHeight - 100) {
+        fetchHomeData(posts.length, 0)
+      }
+    };
 
     postsScroll.addEventListener("scroll", handleScroll);
 

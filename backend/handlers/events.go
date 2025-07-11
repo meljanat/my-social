@@ -128,7 +128,7 @@ func CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	members, err := database.GetGroupMembers(user.ID, event.GroupID, group.TotalMembers)
+	members, err := database.GetGroupMembers(user.ID, event.GroupID, 0)
 	if err != nil {
 		fmt.Println("Error retrieving group members:", err)
 		response := map[string]string{"error": "Failed to retrieve group members"}

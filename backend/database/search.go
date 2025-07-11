@@ -43,20 +43,33 @@ func SearchGroups(query string, offset int64) ([]structs.Group, error) {
 }
 
 func SearchEvents(query string, offset int64) ([]structs.Event, error) {
-	rows, err := DB.Query(`SELECT e.id, e.name, e.image FROM group_events e WHERE e.name LIKE ? LIMIT 5 OFFSET ?`, query+"%", offset)
+	rows, err := DB.Query(`SELECT e.id, e.name, e.start_date, e.end_date, e.image FROM group_events e WHERE e.name LIKE ? LIMIT 5 OFFSET ?`, query+"%", offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	var events []structs.Event
+	var ids []int64
 	for rows.Next() {
 		var event structs.Event
-		err = rows.Scan(&event.ID, &event.Name, &event.Image)
-		if err != nil {
+		var date time.Time
+		err = rows.Scan(&event.ID, &event.Name, &date, &event.EndDate, &event.Image)
+		if err != nil && !strings.Contains(err.Error(), `name "image": converting NULL to string`) {
 			return nil, err
+		}
+		if event.EndDate.After(time.Now()) {
+			ids = append(ids, event.ID)
+			continue
 		}
 		events = append(events, event)
 	}
+
+	for _, id := range ids {
+		if err := DeleteEvent(id); err != nil {
+			return nil, err
+		}
+	}
+
 	return events, nil
 }
 

@@ -1,11 +1,10 @@
 import { useRouter } from "next/navigation";
 import styles from "../styles/SuggestionCard.module.css";
 
-export default function SuggestionCard({ suggestion }) {
+export default function SuggestionCard({ suggestion, onclick }) {
   const router = useRouter();
 
   const handleClick = () => {
-    console.log("suggestion", suggestion.user_id);
     if (suggestion.username) {
       router.push(`/profile?id=${suggestion.user_id}`);
     } else if (suggestion.group_id) {
@@ -15,11 +14,15 @@ export default function SuggestionCard({ suggestion }) {
     } else if (suggestion.event_id) {
       router.push(`/event?id=${suggestion.event_id}`);
     }
+    onclick();
   };
+
+  console.log("SuggestionCard", suggestion);
+
 
   return (
     <div className={styles.suggestionCard} onClick={handleClick}>
-      {suggestion.avatar && (
+      {suggestion.avatar ? (
         <div className={styles.sugAvatar}>
           <img
             src={suggestion.avatar || "/inconnu/avatar.png"}
@@ -27,8 +30,8 @@ export default function SuggestionCard({ suggestion }) {
             className={styles.avatarImage}
           />
         </div>
-      )}
-      {suggestion.image && (
+      ) : null}
+      {suggestion.image && !suggestion.post_id ? (
         <div className={styles.sugAvatar}>
           <img
             src={suggestion.image || "/inconnu/placeholder.png"}
@@ -36,36 +39,28 @@ export default function SuggestionCard({ suggestion }) {
             className={styles.avatarImage}
           />
         </div>
-      )}
+      ) : null}
       <div className={styles.suggestionDetails}>
-        {suggestion.username && (
+        {suggestion.username ? (
           <>
-            <span className={styles.sugName}>@</span>
-            <span className={styles.sugName}>{suggestion.username}</span>
+            <span className={styles.sugName}>@{suggestion.username}</span>
           </>
-        )}
-        {suggestion.group_id && (
+        ) : null}
+        {suggestion.group_id ? (
           <>
-            <div className={styles.sugName}>{suggestion.name}</div>
-            <div className={styles.sugDetails}>Group</div>
+            <div className={styles.sugName}>Group: {suggestion.name}</div>
           </>
-        )}
-        {suggestion.post_id && (
+        ) : null}
+        {suggestion.post_id ? (
           <>
-            <div className={styles.sugName}>{suggestion.title}</div>
-            <span className={styles.sugDetails}>
-              Post . {suggestion.created_at}
-            </span>
+            <div className={styles.sugName}>Post: {suggestion.title}</div>
           </>
-        )}
-        {suggestion.event_id && (
+        ) : null}
+        {suggestion.event_id ? (
           <>
-            <span className={styles.sugName}>{suggestion.name}</span>
-            <span className={styles.sugDetails}>
-              Event . {suggestion.start_date}
-            </span>
+            <span className={styles.sugName}>Event: {suggestion.name}</span>
           </>
-        )}
+        ) : null}
       </div>
     </div>
   );

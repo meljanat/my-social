@@ -358,7 +358,7 @@ func AcceptInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
-
+	
 	type Invitation struct {
 		User  int64 `json:"user_id"`
 		Group int64 `json:"group_id"`
@@ -373,6 +373,7 @@ func AcceptInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+	fmt.Println("hadi l3adia", invitation)
 
 	var userToFollowing structs.User
 	if invitation.User != 0 {
@@ -418,7 +419,7 @@ func AcceptInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if group.AdminID != invitation.User {
-			fmt.Println("User is not the creator of the group")
+			fmt.Println("User is not the creator of the groupjhg")
 			response := map[string]string{"error": "User is not the creator of the group"}
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(response)
@@ -612,6 +613,8 @@ func AcceptOtherInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 		return
 	}
+
+	fmt.Println("hadi l other", invitation)
 
 	_, err = database.GetUserById(invitation.User)
 	if err != nil {

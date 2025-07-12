@@ -225,7 +225,7 @@ export default function GroupPage() {
             group={selectedGroup}
             onClose={() => setShowRemoveGroupModal(false)}
             onRemove={removeGroup}
-            // onLeave={leaveGroup}
+            onLeave={removeGroup}
             action={selectedGroup?.role === "admin" ? "remove" : "leave"}
           />
         </div>
@@ -509,46 +509,56 @@ export default function GroupPage() {
             ) : (
               <>
                 {selectedGroup.role === "member" && (
-                  <button
-                    className={styles.adminActionBtn}
-                    onClick={() => {
-                      setShowUsersToInviteModal(true);
-                      InvitUsers(selectedGroup.group_id);
-                    }}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+                  <>
+                    <button
+                      className={styles.adminActionBtn}
+                      onClick={() => {
+                        setShowUsersToInviteModal(true);
+                        InvitUsers(selectedGroup.group_id);
+                      }}
                     >
-                      <path
-                        d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <circle
-                        cx="8.5"
-                        cy="7"
-                        r="4"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M20 8v6M23 11h-6"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    Invite Users
-                  </button>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <circle
+                          cx="8.5"
+                          cy="7"
+                          r="4"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M20 8v6M23 11h-6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      Invite Users
+                    </button>
+                    <button
+                      className={styles.leaveGroupBtn}
+                      onClick={() => {
+                        setShowRemoveGroupModal(true);
+                      }}
+                    >
+                      Leave Group
+                    </button>
+                  </>
                 )}
                 <>
                   {selectedGroup.role === "invited" && (
@@ -556,10 +566,20 @@ export default function GroupPage() {
                       <button
                         className={` ${styles.acceptBtn}`}
                         onClick={async () => {
-                          await handelAccept(
-                            selectedGroup.invited_by,
-                            selectedGroup.group_id
-                          );
+                          if (
+                            selectedGroup.invited_by === selectedGroup.admin_id
+                          ) {
+                            await handelAccept(
+                              selectedGroup.invited_by,
+                              selectedGroup.group_id
+                            );
+                          } else {
+                            await handelAcceptOtherGroup(
+                              selectedGroup.invited_by,
+                              selectedGroup.group_id,
+                              selectedGroup.owner
+                            );
+                          }
                           fetchGroup(selectedGroup.group_id);
                         }}
                       >

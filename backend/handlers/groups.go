@@ -333,7 +333,7 @@ func GroupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	invited, err := database.CheckInvitation(group.AdminID, user.ID, group_id)
+	invited, err := database.IfInvitation(user.ID, group_id)
 	if err != nil {
 		fmt.Println("Failed to check if user has been invited to join the group", err)
 		response := map[string]string{"error": "Failed to check if user has been invited to join the group"}

@@ -43,11 +43,10 @@ export async function handelAccept(user_id, group_id) {
       credentials: "include",
     });
     if (!response.ok) {
+
       throw new Error("Failed to accept user");
     }
-    const data = await response.json();
 
-    return data;
   } catch (error) {
     console.error("Error accepting user:", error);
   }

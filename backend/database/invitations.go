@@ -112,6 +112,12 @@ func CheckInvitation(invited_id, recipient_id, group_id int64) (bool, error) {
 	return count > 0, err
 }
 
+func IfInvitation(recipient_id, group_id int64) (bool, error) {
+	var count int
+	err := DB.QueryRow("SELECT COUNT(*) FROM invitations WHERE recipient_id = ? AND group_id = ?", recipient_id, group_id).Scan(&count)
+	return count > 0, err
+}
+
 func GetInvitationID(invited_id, recipient_id, group_id int64) (int64, error) {
 	var invitation_id int64
 	err := DB.QueryRow("SELECT id FROM invitations WHERE recipient_id = ? AND invited_id = ? AND group_id = ?", recipient_id, invited_id, group_id).Scan(&invitation_id)

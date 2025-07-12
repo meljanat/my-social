@@ -88,7 +88,7 @@ export default function Navbar() {
   const handleNewMessage = (msg) => {
     if (msg.type === "notifications") setUser((prev) => ({
       ...prev,
-      total_notifications: prev.total_notifications++,
+      total_notifications: prev.total_notifications + 1,
     }));
 
     if (msg.type === "message" && msg.user_id != msg.current_user) setUser((prev) => ({
@@ -366,7 +366,7 @@ export default function Navbar() {
             <img src="./icons/notification.svg" alt="Notifications" />
             {user.total_notifications > 0 ? (
               <span className={styles.badge}>
-                !
+                {user.total_notifications}
               </span>
             ) : (
               <span className={styles.notificationCount}>0</span>
@@ -384,7 +384,7 @@ export default function Navbar() {
               onClick={() => {
                 setUser((prevUser) => ({
                   ...prevUser,
-                  total_notifications: prevUser.total_notifications--,
+                  total_notifications: prevUser.total_notifications - 1,
                 }));
               }}
             />

@@ -9,8 +9,8 @@ import (
 )
 
 func CreateGroup(admin int64, name, description, image, cover, privacy string) (int64, error) {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	result, err := DB.Exec("INSERT INTO groups (name, description, image, cover, admin, privacy) VALUES (?, ?, ?, ?, ?, ?)", name, description, image, cover, admin, privacy)
 	if err != nil {
 		return 0, err
@@ -20,13 +20,9 @@ func CreateGroup(admin int64, name, description, image, cover, privacy string) (
 }
 
 func DeleteGroup(group_id int64) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("DELETE FROM groups WHERE id = ?", group_id)
-	if err != nil {
-		return err
-	}
-	_, err = DB.Exec("DELETE FROM group_members WHERE group_id = ?", group_id)
 	if err != nil {
 		return err
 	}

@@ -8,8 +8,8 @@ import (
 )
 
 func CreateComment(content string, user_id int64, post structs.Post, image string) (int64, error) {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	result, err := DB.Exec("INSERT INTO comments (content, user_id, post_id, image) VALUES (?, ?, ?, ?)", content, user_id, post.ID, image)
 	if err != nil {
 		return 0, err

@@ -7,6 +7,8 @@ export default function InvitationsModal({
   onAccept,
   onReject,
 }) {
+  console.log(invitations);
+
   const hasInvitations = invitations && invitations.length > 0;
   const [invit, setInvit] = useState([]);
 
@@ -54,7 +56,8 @@ export default function InvitationsModal({
                     onClick={() => {
                       onAccept(
                         invitation.user.user_id,
-                        invitation.group.group_id
+                        invitation.group.group_id,
+                        invitation.owner
                       );
                       setInvit(
                         invit.filter(

@@ -361,6 +361,20 @@ func GroupHandler(w http.ResponseWriter, r *http.Request) {
 		group.Role = "requested"
 		group.Action = "Cancel request"
 	} else if invited {
+		group.InvitedBy, err = database.InvitedBy(user.ID, group_id)
+		if err != nil {
+			fmt.Println("Failed to get invited by", err)
+			response := map[string]string{"error": "Failed to get invited by"}
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+		if group.InvitedBy == group.AdminID {
+			group.Owner = true
+		} else {
+			group.Owner = false
+		}
+		
 		group.Role = "invited"
 		group.Action = "Accept invitation"
 	} else {

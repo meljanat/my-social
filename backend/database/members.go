@@ -5,8 +5,8 @@ import (
 )
 
 func JoinGroup(user_id, group_id int64) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("INSERT INTO group_members (user_id, group_id) VALUES (?, ?)", user_id, group_id)
 	if err != nil {
 		return err
@@ -16,9 +16,13 @@ func JoinGroup(user_id, group_id int64) error {
 }
 
 func LeaveGroup(user_id, group_id int64) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("DELETE FROM group_members WHERE user_id = ? AND group_id = ?", user_id, group_id)
+	if err != nil {
+		return err
+	}
+	_, err = DB.Exec("DELETE FROM invitations WHERE invited_id = ? AND group_id = ?", user_id, group_id)
 	if err != nil {
 		return err
 	}

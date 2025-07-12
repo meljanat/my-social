@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS groups (
     description TEXT NOT NULL,
     image TEXT NOT NULL,
     cover TEXT NOT NULL,
-    members INTEGER NOT NULL DEFAULT 0,
+    members INTEGER NOT NULL DEFAULT 1,
     privacy TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (admin) REFERENCES users (id) ON DELETE CASCADE

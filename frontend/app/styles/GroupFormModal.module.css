@@ -30,6 +30,18 @@
   overflow-y: auto; 
 }
 
+
+.errorMessage
+{
+ padding: 12px 16px;
+ border-radius: 8px;
+ /* margin-bottom: 20px; */
+ font-size: 0.9rem;
+ background-color: #FEF2F2;
+ color: #B91C1C;
+ border: 1px solid #FEE2E2;
+}
+
 .modalHeader {
   display: flex;
   justify-content: space-between;

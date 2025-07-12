@@ -6,8 +6,9 @@
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   border: 1px solid #e8ecf7;
-  height: 330px;
+  height: 350px;
   overflow: auto;
+
 } 
 
 .sectionHeader {
@@ -66,15 +67,20 @@
   text-align: center;
   padding: 2rem 1rem;
   color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   font-size: 1rem;
   font-weight: 500;
   background-color: #f8faff;
   border-radius: 12px;
   border: 1px dashed #e0e5f0;
+  height: 100%;
 }
 
 .emptyTitle {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #1e293b;
   margin: 0;
 }

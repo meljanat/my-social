@@ -14,6 +14,7 @@
   display: flex;
   flex-direction: column;
   gap: 60px;
+  height: 100%;
 }
 
 .sectionHeader {
@@ -117,11 +118,16 @@
 
 .emptyState {
   padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   background-color: #f9fafb;
   border-radius: 12px;
   margin: 10px 0;
   border: 1px dashed #d1d5db;
+  height: 100%;
 }
 
 .emptyTitle {
@@ -129,6 +135,7 @@
   font-size: 0.875rem;
   margin: 0 0 8px 0;
   color: #374151;
+  text-align: center;
 }
 
 .emptyDescription {

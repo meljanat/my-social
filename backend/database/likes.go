@@ -5,8 +5,8 @@ import (
 )
 
 func LikePost(user_id int64, post structs.Post) (int64, error) {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	var err error
 	if !post.IsLiked {
 		_, err = DB.Exec("INSERT INTO post_likes (user_id, post_id) VALUES (?, ?)", user_id, post.ID)

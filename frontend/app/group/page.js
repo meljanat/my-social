@@ -10,12 +10,17 @@ import MemberCard from "../components/MemberCard";
 import PostFormModal from "../components/PostFormModal";
 import PostsComponent from "../components/PostsComponent";
 import EventFormModal from "../components/EventFormModal";
-import { handelAccept, handleReject } from "../functions/user";
+import {
+  handelAccept,
+  handleReject,
+  handelAcceptOtherGroup,
+} from "../functions/user";
 import { SearchParamsContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
 
 export default function GroupPage() {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupPosts, setGroupPosts] = useState([]);
+  const [error, setError] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [groupView, setGroupView] = useState("posts");
   const [showPostForm, setShowPostForm] = useState(false);
@@ -45,12 +50,12 @@ export default function GroupPage() {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch group details");
-      }
-
       const data = await response.json();
-      console.log("Group data:", data);
+      console.log("Fetched group data:", data);
+
+      if (!response.ok) {
+        setError(data.error);
+      }
 
       setSelectedGroup(data);
       fetchGroupDetails("posts", data.group_id);
@@ -100,11 +105,10 @@ export default function GroupPage() {
           credentials: "include",
         }
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch group data");
-      }
       const data = await response.json();
-      console.log("Group details data:", data);
+      if (!response.ok) {
+        setError(data.error);
+      }
 
       setSelectedGroup((prev) => ({
         ...prev,
@@ -168,7 +172,9 @@ export default function GroupPage() {
   }
 
   const removeGroup = (groupId) => {
+    handleFollow(0, groupId);
     router.push("/groups");
+    setShowRemoveGroupModal(false);
   };
 
   const addNewPost = () => {
@@ -182,6 +188,10 @@ export default function GroupPage() {
         <p className={styles.loadingText}>Loading...</p>
       </div>
     );
+  }
+
+  if (error) {
+    return <div className={styles.error}>{error}</div>;
   }
 
   if (!selectedGroup) {
@@ -376,6 +386,46 @@ export default function GroupPage() {
           <div className={styles.groupHeaderActions}>
             {selectedGroup.role === "admin" ? (
               <div className={styles.adminActions}>
+                <button
+                  className={styles.adminActionBtn}
+                  onClick={() => {
+                    setShowInvitationsModal(true);
+                    fetchGroupDetails("invitations", selectedGroup.group_id);
+                  }}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <circle
+                      cx="8.5"
+                      cy="7"
+                      r="4"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M20 8v6M23 11h-6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Invitations
+                </button>
 
                 <button
                   className={styles.adminActionBtn}
@@ -418,6 +468,43 @@ export default function GroupPage() {
                   Invite Users
                 </button>
 
+                <button
+                  className={styles.leaveGroupBtn}
+                  onClick={() => {
+                    setShowRemoveGroupModal(true);
+                  }}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M3 6h18"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M10 11v6M14 11v6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Remove Group
+                </button>
               </div>
             ) : (
               <>
@@ -468,11 +555,12 @@ export default function GroupPage() {
                     <>
                       <button
                         className={` ${styles.acceptBtn}`}
-                        onClick={() => {
-                          handleFollow(
-                            selectedGroup.admin_id,
+                        onClick={async () => {
+                          await handelAccept(
+                            selectedGroup.invited_by,
                             selectedGroup.group_id
                           );
+                          fetchGroup(selectedGroup.group_id);
                         }}
                       >
                         Accept Invite
@@ -481,8 +569,8 @@ export default function GroupPage() {
                       <button
                         className={` ${styles.leaveGroupBtn}`}
                         onClick={() => {
-                          handleFollow(
-                            selectedGroup.admin_id,
+                          handleReject(
+                            selectedGroup.invited_by,
                             selectedGroup.group_id
                           );
                         }}
@@ -491,13 +579,46 @@ export default function GroupPage() {
                       </button>
                     </>
                   )}
+                  {selectedGroup.role === "requested" && (
+                    <>
+                      <button
+                        className={` ${styles.leaveGroupBtn}`}
+                        onClick={() => {
+                          handleFollow(
+                            selectedGroup.admin_id,
+                            selectedGroup.group_id
+                          );
+                          // fetchGroup(selectedGroup.group_id);
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  )}
+                  {selectedGroup.role === "guest" && (
+                    <>
+                      <button
+                        className={` ${styles.acceptBtn}`}
+                        onClick={() => {
+                          handleFollow(
+                            selectedGroup.admin_id,
+                            selectedGroup.group_id
+                          );
+                          // fetchGroup(selectedGroup.group_id);
+                        }}
+                      >
+                        Join Group
+                      </button>
+                    </>
+                  )}
                   {selectedGroup.type === "member" && (
                     <button
-                      className={` ${selectedGroup.role === "member" ||
+                      className={` ${
+                        selectedGroup.role === "member" ||
                         activeTab === "pending-groups"
-                        ? styles.leaveGroupBtn
-                        : styles.adminActionBtn
-                        }`}
+                          ? styles.leaveGroupBtn
+                          : styles.adminActionBtn
+                      }`}
                       onClick={() => {
                         handleFollow(
                           selectedGroup.admin_id,
@@ -518,14 +639,15 @@ export default function GroupPage() {
         <InvitationsModal
           invitations={selectedGroup.invitations || []}
           onClose={() => setShowInvitationsModal(false)}
-          onAccept={handelAccept}
+          onAccept={handelAcceptOtherGroup}
           onReject={handleReject}
         />
       )}
       <div className={styles.groupDetailTabs}>
         <button
-          className={`${styles.tabButton} ${groupView === "posts" ? styles.activeTab : ""
-            }`}
+          className={`${styles.tabButton} ${
+            groupView === "posts" ? styles.activeTab : ""
+          }`}
           onClick={() => {
             fetchGroupDetails("posts", selectedGroup.group_id);
             setGroupView("posts");
@@ -534,8 +656,9 @@ export default function GroupPage() {
           Posts
         </button>
         <button
-          className={`${styles.tabButton} ${groupView === "members" ? styles.activeTab : ""
-            }`}
+          className={`${styles.tabButton} ${
+            groupView === "members" ? styles.activeTab : ""
+          }`}
           onClick={() => {
             fetchGroupDetails("members", selectedGroup.group_id);
             setGroupView("members");
@@ -544,8 +667,9 @@ export default function GroupPage() {
           Members
         </button>
         <button
-          className={`${styles.tabButton} ${groupView === "events" ? styles.activeTab : ""
-            }`}
+          className={`${styles.tabButton} ${
+            groupView === "events" ? styles.activeTab : ""
+          }`}
           onClick={() => {
             fetchGroupDetails("events", selectedGroup.group_id);
             setGroupView("events");
@@ -559,9 +683,8 @@ export default function GroupPage() {
         {groupView === "posts" && (
           <div className={styles.groupPostsContainer}>
             {selectedGroup.role === "guest" &&
-              selectedGroup.privacy === "private" ? (
+            selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
-                <img src="/icons/no-posts.svg" alt="No Posts" />
                 <p>You are not allowed to see Posts</p>
               </div>
             ) : (
@@ -603,11 +726,9 @@ export default function GroupPage() {
 
         {groupView === "members" && (
           <div className={styles.groupMembersContainer}>
-            <div className={styles.membersHeader}>
-              <h3>Members ({selectedGroup.members?.length || 0})</h3>
-            </div>
+            <div className={styles.membersHeader}></div>
             {selectedGroup.role === "guest" &&
-              selectedGroup.privacy === "private" ? (
+            selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
                 <p className={styles.emptyTitle}>
                   You are not allowed to see Members
@@ -615,6 +736,8 @@ export default function GroupPage() {
               </div>
             ) : (
               <div className={styles.membersScrollContainer}>
+                <h3>Members ({selectedGroup.members?.length || 0})</h3>
+
                 {selectedGroup.members?.length === 0 ? (
                   <div className={styles.emptyState}>
                     <p className={styles.emptyTitle}>No members available</p>
@@ -634,7 +757,7 @@ export default function GroupPage() {
         {groupView === "events" && (
           <div className={styles.groupEventsContainer}>
             {selectedGroup.role === "guest" &&
-              selectedGroup.privacy === "private" ? (
+            selectedGroup.privacy === "private" ? (
               <div className={styles.emptyState}>
                 <p className={styles.emptyTitle}>
                   You are not allowed to see Events
@@ -646,13 +769,13 @@ export default function GroupPage() {
                   <h3>Upcoming Events</h3>
                   {(selectedGroup.role === "admin" ||
                     selectedGroup.role === "member") && (
-                      <button
-                        className={styles.createEventBtn}
-                        onClick={() => setShowEventForm(true)}
-                      >
-                        Create Event
-                      </button>
-                    )}
+                    <button
+                      className={styles.createEventBtn}
+                      onClick={() => setShowEventForm(true)}
+                    >
+                      Create Event
+                    </button>
+                  )}
                 </div>
 
                 <div className={styles.eventsScrollContainer}>

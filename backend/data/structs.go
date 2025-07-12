@@ -115,6 +115,8 @@ type Group struct {
 	CreatedAt     string `json:"created_at" sqlite:"created_at"`
 	Admin         string `json:"admin" sqlite:"admin"`
 	AdminID       int64  `json:"admin_id" sqlite:"admin_id"`
+	Owner         bool `json:"owner" sqlite:"owner"`
+	InvitedBy     int64  `json:"invited_by" sqlite:"invited_by"`
 	Privacy       string `json:"privacy" sqlite:"privacy"`
 	Role          string `json:"role" sqlite:"role"`
 	Action        string `json:"type" sqlite:"type"`

@@ -56,6 +56,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var invitation_id int64
+	fmt.Println("isInvitation", invitation)
 	if isInvitation {
 		invitation_id, err = database.GetInvitationID(user.ID, invitation.User, invitation.Group)
 		if err != nil {

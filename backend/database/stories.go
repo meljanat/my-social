@@ -8,8 +8,8 @@ import (
 )
 
 func CreateStory(image string, user_id int64) (int64, error) {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	result, err := DB.Exec("INSERT INTO stories (user_id, image) VALUES (?, ?)", user_id, image)
 	if err != nil {
 		return 0, err
@@ -20,8 +20,8 @@ func CreateStory(image string, user_id int64) (int64, error) {
 }
 
 func StoryStatus(story_id int64, followers []int64) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	for _, follower := range followers {
 		_, err := DB.Exec("INSERT INTO stories_status (story_id, user_id, read) VALUES (?, ?, ?)", story_id, follower, false)
 		return err
@@ -79,22 +79,22 @@ func GetStatusStory(stories *[]structs.Story, user_id int64) error {
 }
 
 func InsertStatusStory(story_id int64, user_id int64) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("INSERT INTO stories_status (story_id, user_id, read) VALUES (?, ?, ?)", story_id, user_id, false)
 	return err
 }
 
 func SeenStory(id_story int64, id_user int64) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("UPDATE stories_status SET read = ? WHERE story_id = ? AND user_id = ?", 1, id_story, id_user)
 	return err
 }
 
 func DeleteSt1ory(id_story int64) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("DELETE FROM stories WHERE id = ?", id_story)
 	return err
 }

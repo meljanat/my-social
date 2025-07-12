@@ -23,6 +23,7 @@ export default function PostFormModal({
   const [isLoading, setIsLoading] = useState(true);
   const [showAudienceSelector, setShowAudienceSelector] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState();
 
   useEffect(() => {
     fetchData();
@@ -54,9 +55,8 @@ export default function PostFormModal({
           credentials: "include",
         });
       }
-
+      const data = await response.json();
       if (response.ok) {
-        const data = await response.json();
         console.log("Data from creating post", data);
 
         if (data.Users && Array.isArray(data.Users)) {
@@ -74,7 +74,8 @@ export default function PostFormModal({
           }
         }
       } else {
-        console.error("Failed to fetch data");
+        setError(data.error);
+        return;
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -142,14 +143,11 @@ export default function PostFormModal({
         });
       }
 
-      if (!response.ok) {
-        const data = await response.json();
-        console.error(data);
-        throw new Error(data.error || "Failed to create the post");
-      }
+      
       const data = await response.json();
-      for (let pair of formData.entries()) {
-        console.log(`${pair[0]}:`, pair[1]);
+      if (!response.ok) {
+        setError(data.error);
+        return;
       }
 
       const newPost = {
@@ -401,6 +399,7 @@ export default function PostFormModal({
               </div>
             )}
           </div>
+          {error && <div className={styles.errorMessage}>{error}</div>}
 
           <button
             type="submit"

@@ -18,6 +18,20 @@
   backdrop-filter: blur(5px);
 }
 
+
+.error {
+  background-color: #f8dada;
+  color: #da5353; 
+  border: 1px solid #da5353;
+  border-radius: 8px;
+  padding: 1rem 1rem;
+  text-align: center;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 .groupDetailHeader {
   position: relative;
   border-radius: 20px;

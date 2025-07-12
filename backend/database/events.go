@@ -9,8 +9,8 @@ import (
 )
 
 func CreateEvent(user_id int64, name, description, location string, start, end time.Time, group_id int64, image string) (int64, error) {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	result, err := DB.Exec("INSERT INTO group_events (created_by, group_id, name, description, start_date, end_date, location, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", user_id, group_id, name, description, start, end, location, image)
 	if err != nil {
 		return 0, err
@@ -157,22 +157,22 @@ func GetCountUserEvents(id int64) (int64, error) {
 }
 
 func JoinToEvent(user_id, event_id int64, going string) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("INSERT INTO event_members (user_id, event_id, type) VALUES (?, ?, ?)", user_id, event_id, going)
 	return err
 }
 
 func UpdateEvent(event_id int64, going string) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("UPDATE event_members SET type = ? WHERE event_id = ?", going, event_id)
 	return err
 }
 
 func DeleteEvent(event_id int64) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("DELETE FROM group_events WHERE id = ?", event_id)
 	return err
 }

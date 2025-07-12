@@ -13,6 +13,7 @@ export default function GroupFormModal({ onClose, user, onGroupCreated }) {
   const [imageInputKey, setImageInputKey] = useState(Date.now());
   const [coverInputKey, setCoverInputKey] = useState(Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState();
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -56,8 +57,7 @@ export default function GroupFormModal({ onClose, user, onGroupCreated }) {
 
       if (!response.ok) {
         const data = await response.json();
-        console.error(data);
-        throw new Error(data.error || "Failed to create the group");
+        setError(data.error);
       }
 
       const responseData = await response.json();
@@ -80,7 +80,6 @@ export default function GroupFormModal({ onClose, user, onGroupCreated }) {
 
       onClose();
     } catch (error) {
-      console.error("Error creating group:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -261,7 +260,7 @@ export default function GroupFormModal({ onClose, user, onGroupCreated }) {
               )}
             </div>
           </div>
-
+          {error && <div className={styles.errorMessage}>{error}</div>}
           <button
             type="submit"
             className={styles.submitButton}

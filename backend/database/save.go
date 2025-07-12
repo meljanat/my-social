@@ -7,15 +7,15 @@ import (
 )
 
 func SavePost(user_id, post_id, group_id int64) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("INSERT INTO saves (user_id, post_id, group_id) VALUES (?, ?, ?)", user_id, post_id, group_id)
 	return err
 }
 
 func UnsavePost(user_id, post_id, group_id int64) error {
-			mu.Lock()
-	defer mu.Unlock() 
+	mu.Lock()
+	defer mu.Unlock()
 	_, err := DB.Exec("DELETE FROM saves WHERE user_id = ? AND post_id = ? AND group_id = ?", user_id, post_id, group_id)
 	return err
 }
@@ -67,8 +67,8 @@ func CountSaves(post_id, group_id int64) (int64, error) {
 		return 0, err
 	}
 	if count != count1 {
-				mu.Lock()
-	defer mu.Unlock() 
+		mu.Lock()
+		defer mu.Unlock()
 		_, err = DB.Exec("UPDATE posts SET total_saves = ? WHERE id = ?", count, post_id)
 	}
 	return count, err

@@ -48,12 +48,10 @@ export default function Navbar() {
   useEffect(() => {
     addToListeners("notifications", handleNewMessage);
     addToListeners("message", handleNewMessage);
-    addToListeners("read_messages", handleNewMessage);
 
     return () => {
       removeFromListeners("notifications", handleNewMessage);
       removeFromListeners("message", handleNewMessage);
-      removeFromListeners("read_messages", handleNewMessage);
     };
   }, []);
 
@@ -87,16 +85,15 @@ export default function Navbar() {
     }
   };
 
-
   const handleNewMessage = (msg) => {
     if (msg.type === "notifications") setUser((prev) => ({
       ...prev,
       total_notifications: prev.total_notifications++,
     }));
 
-    if (msg.type === "message") setUser((prev) => ({
+    if (msg.type === "message" && msg.user_id != msg.current_user) setUser((prev) => ({
       ...prev,
-      total_messages: prev.total_messages++,
+      total_messages: 1,
     }));
   };
 
@@ -369,7 +366,7 @@ export default function Navbar() {
             <img src="./icons/notification.svg" alt="Notifications" />
             {user.total_notifications > 0 ? (
               <span className={styles.badge}>
-                {user.total_notifications || 1}
+                !
               </span>
             ) : (
               <span className={styles.notificationCount}>0</span>

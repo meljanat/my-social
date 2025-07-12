@@ -83,10 +83,15 @@ export default function MessagesPage() {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const reqTab = searchParams.get("tab");
-  const reqId = searchParams.get("id") || 0;
+  let reqTab = searchParams.get("tab");
+  let reqId = searchParams.get("id") || 0;
   const [isFirstFetch, setisFirstFetch] = useState(false);
   const [scrollRein, setScrollRein] = useState();
+
+  useEffect(() => {
+    reqId = searchParams.get("id") || 0;
+    reqTab = searchParams.get("tab") || "friends";
+  }, [searchParams])
 
   useEffect(() => {
     setActiveTab(reqTab === "groups" ? "groups" : "friends");
@@ -112,52 +117,6 @@ export default function MessagesPage() {
   }, [isFirstFetch, messages, selectedUser, reqId]);
 
   useEffect(() => {
-    const handleMessage = async (msg) => {
-      if (msg.type === "message") {
-        if (reqId &&
-          (reqId == msg.user_id ||
-            reqId == msg.group_id ||
-            msg.user_id === msg.current_user)
-        ) {
-          msg.message_id = Date.now();
-          setMessages((prevMessages) => [...(prevMessages || []), msg]);
-          setisFirstFetch(true);
-        } else {
-          if (reqTab === "friends") setUsers((prev) =>
-            prev.map(user =>
-              user.user_id === msg.user_id ?
-                { ...user, total_chats_messages: total_chats_messages++ }
-                : user
-            )
-          );
-
-          if (reqTab === "groups") setGroups((prev) =>
-            prev.map(group =>
-              group.group_id === msg.group_id ?
-                { ...group, total_groups_messages: total_groups_messages++ }
-                : group
-            )
-          );
-        }
-      } else if (msg.type === "new_connection") {
-        setUsers((prev) =>
-          prev.map(user =>
-            user.user_id === msg.user_id ?
-              { ...user, online: true }
-              : user
-          )
-        );
-      } else if (msg.type === "disconnection") {
-        setUsers((prev) =>
-          prev.map(user =>
-            user.user_id === msg.user_id ?
-              { ...user, online: false }
-              : user
-          )
-        );
-      }
-    };
-
     addToListeners("message", handleMessage);
     addToListeners("new_connection", handleMessage);
     addToListeners("disconnection", handleMessage);
@@ -167,7 +126,7 @@ export default function MessagesPage() {
       removeFromListeners("new_connection", handleMessage);
       removeFromListeners("disconnection", handleMessage);
     };
-  }, []);
+  }, [reqId, reqTab, users, groups]);
 
   useEffect(() => {
     const convScroll = conversationRef.current;
@@ -184,6 +143,52 @@ export default function MessagesPage() {
     if (!scrollRein || !conversationRef.current) return;
     conversationRef.current.scrollTop = scrollRein;
   }, [scrollRein]);
+
+  const handleMessage = async (msg) => {
+    if (msg.type === "message") {
+      if (reqId &&
+        (reqId == msg.user_id ||
+          reqId == msg.group_id ||
+          msg.user_id === msg.current_user)
+      ) {
+        msg.message_id = Date.now();
+        setMessages((prevMessages) => [...(prevMessages || []), msg]);
+        setisFirstFetch(true);
+      } else {
+        if (reqTab === "friends") setUsers((prev) =>
+          prev.map(user =>
+            user.user_id === msg.user_id ?
+              { ...user, total_messages: user.total_messages + 1 }
+              : user
+          )
+        );
+
+        if (reqTab === "groups") setGroups((prev) =>
+          prev.map(group =>
+            group.group_id === msg.group_id ?
+              { ...group, total_messages: group.total_messages + 1 }
+              : group
+          )
+        );
+      }
+    } else if (msg.type === "new_connection") {
+      setUsers((prev) =>
+        prev.map(user =>
+          user.user_id === msg.user_id ?
+            { ...user, online: true }
+            : user
+        )
+      );
+    } else if (msg.type === "disconnection") {
+      setUsers((prev) =>
+        prev.map(user =>
+          user.user_id === msg.user_id ?
+            { ...user, online: false }
+            : user
+        )
+      );
+    }
+  };
 
   const handleScroll = async () => {
     if (conversationRef.current.scrollTop === 0 && isFetchingMore && !isFirstFetch) {

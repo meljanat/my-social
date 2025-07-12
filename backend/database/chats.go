@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"sync"
 	"time"
 
@@ -118,10 +117,8 @@ func GetCountConversationMessages(sender_id, user_id, group_id int64) (int64, er
 	var err error
 	var rows *sql.Rows
 	if group_id == 0 {
-		fmt.Println("000")
 		rows, err = DB.Query("SELECT messages_not_read FROM messages WHERE sender_id = ? AND receiver_id = ? AND group_id = ? ORDER BY created_at DESC LIMIT 1", sender_id, user_id, group_id)
 	} else {
-		fmt.Println("001")
 		rows, err = DB.Query("SELECT messages_not_read FROM messages WHERE receiver_id = ? AND group_id = ? ORDER BY created_at DESC LIMIT 1", user_id, group_id)
 	}
 	if err != nil {

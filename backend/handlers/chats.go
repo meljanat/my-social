@@ -86,6 +86,7 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Mutex.Lock()
 	err = database.ReadMessages(receiver_id, user.ID, 0)
 	if err != nil {
 		fmt.Println("Failed to mark messages as read", err)
@@ -95,6 +96,7 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	SendWsMessage(user.ID, map[string]interface{}{"type": "read_messages"})
+	Mutex.Unlock()
 
 	chats, err := database.GetConversation(user.ID, receiver_id, offset)
 	if err != nil {

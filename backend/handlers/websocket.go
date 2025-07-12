@@ -66,7 +66,6 @@ func ListenForMessages(conn *websocket.Conn, user_id int64, w http.ResponseWrite
 			fmt.Println("Error reading JSON:", err)
 			break
 		}
-		fmt.Println("Received message:", message)
 
 		msgType := ""
 		if message.Type == "message" {

@@ -5,6 +5,8 @@ import LeftSidebar from "./components/LeftSideBar";
 import ProfileCard from "./components/ProfileCard";
 import TopGroups from "./components/TopGroups";
 import PostComponent from "./components/PostComponent";
+import PostFormModal from "./components/PostFormModal";
+
 
 import "./styles/page.css";
 
@@ -15,6 +17,8 @@ export default function Home() {
   const [posts, setPosts] = useState([]);
   const [stories, setStories] = useState([]);
   const [isFetchingMorePosts, setIsFetchingMorePosts] = useState(true);
+  const [showPostForm, setShowPostForm] = useState(false);
+
   const postsRef = useRef(null);
 
   useEffect(() => {
@@ -57,6 +61,10 @@ export default function Home() {
 
   const addNewPost = () => {
     fetchHomeData(0)
+  };
+
+  const handleCreatePost = () => {
+    setShowPostForm(true);
   };
 
   useEffect(() => {
@@ -116,7 +124,18 @@ export default function Home() {
               />
             </div>
 
+            {/* <div className="center-column" ref={postsRef}>
+              <PostComponent posts={posts} />
+            </div> */}
+
             <div className="center-column" ref={postsRef}>
+              <div className="create-post-button-wrapper">
+                <button className="create-post-button" onClick={handleCreatePost}>
+                  <img src="/icons/create.svg" alt="Create" />
+                  <span>Create Post</span>
+                </button>
+              </div>
+
               <PostComponent posts={posts} />
             </div>
 
@@ -128,6 +147,14 @@ export default function Home() {
               />
               <TopGroups groups={homeData.discover_groups} />
             </div>
+
+            {showPostForm && (
+              <PostFormModal
+                onClose={() => setShowPostForm(false)}
+                user={homeData.user}
+                onPostCreated={addNewPost}
+              />
+            )}
           </div>
         </div>
       </div>

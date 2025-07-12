@@ -64,13 +64,13 @@ export default function ProfileCard({ user, onPostCreated, my_groups }) {
         </div>
 
         <div className={styles.profileActions}>
-          <button
+          {/* <button
             onClick={handleCreatePost}
             className={`${styles.actionBtn} ${styles.primaryButton}`}
           >
             <img src="/icons/create.svg" alt="" />
             <span>Create post</span>
-          </button>
+          </button> */}
           <button
             className={`${styles.actionBtn} ${styles.secondaryButton}`}
             onClick={handleCreateGroup}
@@ -112,3 +112,4 @@ export default function ProfileCard({ user, onPostCreated, my_groups }) {
     </div>
   );
 }
+

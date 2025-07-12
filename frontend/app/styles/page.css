@@ -226,3 +226,33 @@ body {
     box-sizing: border-box;
   }
 }
+
+.create-post-button-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  padding: 1rem;
+  border-bottom: 1px solid #e6e6e6;
+  /* background: linear-gradient(135deg, #667eea 0%, #0300ce 100%); */
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.create-post-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+}
+
+.create-post-button:hover {
+  background: linear-gradient(135deg, #667eea 0%, #0300ce 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
